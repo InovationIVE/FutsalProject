@@ -158,13 +158,101 @@ router.post('/signup', async (req, res) => {
     // 1-10. 응답 (토큰은 쿠키로, 사용자 정보만 JSON으로)
     res.status(201).json({
       message: '회원가입이 완료되었습니다.',
-      accessToken,
-      tokenType: 'Bearer',
       user: newAccount
     });
 
   } catch (error) {
     console.error('회원가입 에러:', error);
+    res.status(500).json({
+      message: '서버 내부 오류가 발생했습니다.'
+    });
+  }
+});
+
+/**
+ * 2. 로그인 API
+ * POST /auth/login
+ */
+router.post('/login', async (req, res) => {
+  try {
+    const { userId, password } = req.body;
+
+    // 2-1. 입력값 존재 여부 확인
+    if (!userId || !password) {
+      return res.status(400).json({
+        message: 'userId와 password는 필수 입력값입니다.'
+      });
+    }
+
+    // 2-2. 사용자 존재 여부 확인
+    const account = await userPrisma.account.findUnique({
+      where: { userId: userId },
+      select: {
+        accountId: true,
+        userId: true,
+        email: true,
+        password: true,
+        cash: true,
+        createdAt: true
+      }
+    });
+
+    if (!account) {
+      return res.status(401).json({
+        message: '존재하지 않는 userId입니다.'
+      });
+    }
+
+    // 2-3. 비밀번호 검증 (bcrypt.compare 사용)
+    const isPasswordValid = await bcrypt.compare(password, account.password);
+    
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        message: '비밀번호가 일치하지 않습니다.'
+      });
+    }
+
+    // 2-4. JWT 토큰 생성
+    const { accessToken, refreshToken } = generateTokens(account.accountId);
+
+    // 2-5. 기존 Refresh Token 업데이트 (upsert 사용, 있으면 값 업데이트, 없으면 생성)
+    await userPrisma.refreshToken.upsert({
+      where: { accountId: account.accountId },
+      update: { 
+        token: refreshToken,
+        createdAt: new Date() // 토큰 갱신 시간 업데이트
+      },
+      create: {
+        accountId: account.accountId,
+        token: refreshToken
+      }
+    });
+
+    // 2-6. httpOnly 쿠키로 토큰 설정
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,           // XSS 방지 (JavaScript 접근 차단)
+      secure: process.env.NODE_ENV === 'production', // HTTPS에서만 (프로덕션)
+      sameSite: 'strict',       // CSRF 방지
+      maxAge: 15 * 60 * 1000   // 15분 (Access Token 수명과 동일)
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,           // XSS 방지
+      secure: process.env.NODE_ENV === 'production', // HTTPS에서만 (프로덕션)
+      sameSite: 'strict',       // CSRF 방지
+      maxAge: 60 * 60 * 1000   // 1시간 (Refresh Token 수명과 동일)
+    });
+
+    // 2-7. 응답 (토큰은 쿠키로, 사용자 정보만 JSON으로)
+    const { password: _, ...userInfo } = account;
+    
+    res.status(200).json({
+      message: '로그인이 완료되었습니다.',
+      user: userInfo
+    });
+
+  } catch (error) {
+    console.error('로그인 에러:', error);
     res.status(500).json({
       message: '서버 내부 오류가 발생했습니다.'
     });
