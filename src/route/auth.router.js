@@ -131,34 +131,16 @@ router.post('/signup', async (req, res) => {
       }
     });
 
-    // 1-7. JWT 토큰 생성
-    const { accessToken, refreshToken } = generateTokens(newAccount.accountId);
-
-    // 1-8. Refresh Token을 DB에 저장
-    await userPrisma.refreshToken.create({
-      data: {
-        accountId: newAccount.accountId,
-        token: refreshToken
-      }
-    });
-
-    // 1-9. httpOnly 쿠키로 토큰 설정
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,           // XSS 방지 (JavaScript 접근 차단)
-      sameSite: 'strict',       // CSRF 방지 (다른 사이트에서 쿠키 접근해 요청 보내는 것 방지)
-      maxAge: 15 * 60 * 1000   // 15분 (Access Token 수명과 동일)
-    });
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,         
-      sameSite: 'strict',      
-      maxAge: 60 * 60 * 1000   // 1시간 (Refresh Token 수명과 동일)
-    });
-
-    // 1-10. 응답 (토큰은 쿠키로, 사용자 정보만 JSON으로)
+    // 1-7. 회원가입 완료 응답 (토큰 발급 없이)
     res.status(201).json({
-      message: '회원가입이 완료되었습니다.',
-      user: newAccount
+      message: '회원가입이 완료되었습니다. 로그인을 진행해주세요.',
+      user: {
+        accountId: newAccount.accountId,
+        userId: newAccount.userId,
+        email: newAccount.email,
+        cash: newAccount.cash,
+        createdAt: newAccount.createdAt
+      }
     });
 
   } catch (error) {
@@ -318,4 +300,7 @@ const authMiddleware = async (req, res, next) => {
     }
   };
 
+
+// authMiddleware를 다른 파일에서도 사용할 수 있도록 export
+export { authMiddleware };
 export default router;
