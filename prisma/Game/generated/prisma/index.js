@@ -163,7 +163,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\ygm\\Desktop\\FutsalProject\\prisma\\Game\\generated\\prisma",
+      "value": "C:\\My_JS_Project\\FutsalProject\\prisma\\Game\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -177,7 +177,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\ygm\\Desktop\\FutsalProject\\prisma\\Game\\schema.prisma",
+    "sourceFilePath": "C:\\My_JS_Project\\FutsalProject\\prisma\\Game\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -191,7 +191,6 @@ const config = {
     "db"
   ],
   "activeProvider": "mysql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {

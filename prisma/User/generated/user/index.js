@@ -160,7 +160,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\ygm\\Desktop\\FutsalProject\\prisma\\User\\generated\\user",
+      "value": "C:\\My_JS_Project\\FutsalProject\\prisma\\User\\generated\\user",
       "fromEnvVar": null
     },
     "config": {
@@ -174,7 +174,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\ygm\\Desktop\\FutsalProject\\prisma\\User\\schema.prisma",
+    "sourceFilePath": "C:\\My_JS_Project\\FutsalProject\\prisma\\User\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -188,7 +188,6 @@ const config = {
     "db"
   ],
   "activeProvider": "mysql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
