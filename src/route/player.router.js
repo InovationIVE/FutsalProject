@@ -45,7 +45,7 @@ router.get('/admin/players/:playerId', async (req, res) => {
         defense : true,
         profileImage : true,
         rarity : true,
-        probability : true,
+
         createdAt : true,
         updatedAt : true
       }
@@ -62,7 +62,7 @@ router.get('/admin/players/:playerId', async (req, res) => {
 /** 선수 등록 **/
 router.post('/admin/players', async (req, res) => {
   try {
-    const {soccerPlayerId, name, speed, attack, defense, profileImage, rarity, probability} = req.body;
+    const {soccerPlayerId, name, speed, attack, defense, profileImage, rarity} = req.body;
     const isPlayerExist = await gamePrisma.player.findUnique({
       where: { playerId : Number(playerId) }
     });
@@ -78,8 +78,7 @@ router.post('/admin/players', async (req, res) => {
         attack,
         defense,
         profileImage,
-        rarity,
-        probability
+        rarity
       }
     });
 
@@ -95,7 +94,7 @@ router.post('/admin/players', async (req, res) => {
 router.patch('/admin/players/:playerId', async (req, res) => {
   try {
     const { playerId } = req.params;
-    const {soccerPlayerId, name, speed, attack, defense, rarity, probability } = req.body;
+    const {soccerPlayerId, name, speed, attack, defense, rarity} = req.body;
     
     /** 보류 **/
     const isPlayerExist = await gamePrisma.player.findUnique({
@@ -114,8 +113,7 @@ router.patch('/admin/players/:playerId', async (req, res) => {
         attack,
         defense,
         profileImage,
-        rarity,
-        probability
+        rarity
       }
     });
 
