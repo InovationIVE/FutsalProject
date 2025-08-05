@@ -1,6 +1,8 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import gachaRouter from './route/gacha.router.js';
+
 
 dotenv.config();
 
@@ -9,6 +11,8 @@ const PORT = 3018;
 
 app.use(express.json());
 app.use(cookieParser());
+app.use('/api', gachaRouter);
+
 
 
 app.listen(PORT, () => {
