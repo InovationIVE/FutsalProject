@@ -11,7 +11,7 @@ router.use(authMiddleware);
 router.get('/players', myPlayersList);
 
 //내 선수 상세 조회
-router.get('/players/:ownedplayersId', myPlayer)
+router.get('/players/:ownedPlayerId', myPlayer)
 
 
 export default router;

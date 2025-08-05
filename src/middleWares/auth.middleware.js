@@ -11,10 +11,10 @@ export default async function (req, res, next) {
     const token = accessToken;
 
     // 2. 서버에서 발급한 JWT가 맞는지 검증합니다.
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY);
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     const accountId = decodedToken.accountId;
 
-    const user = await userPrisma.accounts.findFirst({
+    const user = await userPrisma.account.findFirst({
       where: { accountId: accountId },
     });
 
