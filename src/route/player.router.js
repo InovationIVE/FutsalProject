@@ -6,19 +6,15 @@ const router = express.Router();
 /** 전체 선수 목록 조회 **/
 router.get('/admin/players', async (req, res) => {
   try {
-    const players = await gamePrisma.players.findMany({
+    const players = await gamePrisma.player.findMany({
       select: {
-        playerId: false,
+
         soccerPlayerId : true,
         name : true,
-        speed : false,
-        attack : false,
-        defense : false,
+ 
         profileImage : true,
         rarity : true,
-        probability : false,
-        createdAt : false,
-        updatedAt : false
+
       }
     });
 
@@ -32,7 +28,7 @@ router.get('/admin/players', async (req, res) => {
 
 
 /** 특정 선수 정보 조회 **/
-router.get('admin/players/:playerId', async (req, res) => {
+router.get('/admin/players/:playerId', async (req, res) => {
   try {
     const { playerId } = req.params;
 
@@ -64,9 +60,9 @@ router.get('admin/players/:playerId', async (req, res) => {
 });
 
 /** 선수 등록 **/
-router.post('admin/players', async (req, res) => {
+router.post('/admin/players', async (req, res) => {
   try {
-    const {SoccerPlayerId, name, speed, attack, defense, profileImage, rarity, probabilty} = req.body;
+    const {soccerPlayerId, name, speed, attack, defense, profileImage, rarity, probability} = req.body;
     const isPlayerExist = await gamePrisma.player.findUnique({
       where: { playerId : Number(playerId) }
     });
@@ -76,14 +72,14 @@ router.post('admin/players', async (req, res) => {
 
     const playerData = await gamePrisma.player.create({
       data: {
-        SoccerPlayerId,
+        soccerPlayerId,
         name,
         speed,
         attack,
         defense,
         profileImage,
         rarity,
-        probabilty
+        probability
       }
     });
 
@@ -96,7 +92,7 @@ router.post('admin/players', async (req, res) => {
 });
 
 /** 선수 수정 **/
-router.patch('admin/players/:playersId', async (req, res) => {
+router.patch('/admin/players/:playerId', async (req, res) => {
   try {
     const { playerId } = req.params;
     const {soccerPlayerId, name, speed, attack, defense, rarity, probability } = req.body;
@@ -135,7 +131,7 @@ router.patch('admin/players/:playersId', async (req, res) => {
 });
 
 /** 선수 삭제 **/
-router.delete('admin/players/:playersId', async (req, res) => {
+router.delete('/admin/players/:playerId', async (req, res) => {
   try {
     const { playerId } = req.params;
 
@@ -145,6 +141,10 @@ router.delete('admin/players/:playersId', async (req, res) => {
     if (!isPlayerExist) {
       res.status(404).json({ error: '해당 선수 데이터가 존재하지 않습니다' });
     } 
+
+    await gamePrisma.player.delete({
+      where: { playerId : Number(playerId) }
+    });
 
     res.status(200).json({ 
       // data: {playerData} ,
