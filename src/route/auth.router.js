@@ -300,6 +300,42 @@ const authMiddleware = async (req, res, next) => {
     }
   };
 
+  /**
+ * 4. 로그아웃 API
+ * POST /auth/logout
+ */
+router.post('/logout', authMiddleware, async (req, res) => {
+  try {
+    const { accountId } = req.user;
+
+    // 4-1. DB에서 Refresh Token 삭제
+    await userPrisma.refreshToken.deleteMany({
+      where: { accountId: accountId }
+    });
+
+    // 4-2. 쿠키에서 토큰들 삭제
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      sameSite: 'strict'
+    });
+
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      sameSite: 'strict'
+    });
+
+    // 4-3. 성공 응답
+    res.status(200).json({
+      message: '로그아웃이 완료되었습니다.'
+    });
+
+  } catch (error) {
+    console.error('로그아웃 에러:', error);
+    res.status(500).json({
+      message: '서버 내부 오류가 발생했습니다.'
+    });
+  }
+});
 
 // authMiddleware를 다른 파일에서도 사용할 수 있도록 export
 export { authMiddleware };
