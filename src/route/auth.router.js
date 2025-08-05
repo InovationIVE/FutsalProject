@@ -142,7 +142,20 @@ router.post('/signup', async (req, res) => {
       }
     });
 
-    // 1-9. 응답 (비밀번호 제외)
+    // 1-9. httpOnly 쿠키로 토큰 설정
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,           // XSS 방지 (JavaScript 접근 차단)
+      sameSite: 'strict',       // CSRF 방지 (다른 사이트에서 쿠키 접근해 요청 보내는 것 방지)
+      maxAge: 15 * 60 * 1000   // 15분 (Access Token 수명과 동일)
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,         
+      sameSite: 'strict',      
+      maxAge: 60 * 60 * 1000   // 1시간 (Refresh Token 수명과 동일)
+    });
+
+    // 1-10. 응답 (토큰은 쿠키로, 사용자 정보만 JSON으로)
     res.status(201).json({
       message: '회원가입이 완료되었습니다.',
       accessToken,
