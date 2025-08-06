@@ -12,7 +12,15 @@ const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const USER_ID_REGEX = /^[a-zA-Z0-9_]{4,20}$/; // 4-20자, 영문+숫자+언더스코어
 const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/; // 8자 이상, 영문+숫자+특수문자
 
-/**
+// 토큰 만료 시간 상수
+const TOKEN_EXPIRY = {
+  ACCESS_TOKEN: '15m',           // Access Token 수명, JWT토큰 시간 설정시 사용
+  REFRESH_TOKEN: '1h',           // Refresh Token 수명  
+  ACCESS_TOKEN_MS: 15 * 60 * 1000,   // 15분 (밀리초), DB 토큰 시간 설정시 사용
+  REFRESH_TOKEN_MS: 60 * 60 * 1000   // 1시간 (밀리초)
+};
+
+/*
  * JWT 토큰 생성 함수
  * 
  * 입력: accountId (사용자 계정 ID)
@@ -24,7 +32,7 @@ const generateTokens = (accountId) => {
     process.env.ACCESS_TOKEN_SECRET, 
     { 
         header: { alg: 'HS256', typ: 'JWT' },
-        expiresIn: '15m' }
+        expiresIn: TOKEN_EXPIRY.ACCESS_TOKEN }
   );
   
   const refreshToken = jwt.sign(
@@ -32,7 +40,7 @@ const generateTokens = (accountId) => {
     process.env.REFRESH_TOKEN_SECRET, 
     { 
         header: { alg: 'HS256', typ: 'JWT' },
-        expiresIn: '1h' }
+        expiresIn: TOKEN_EXPIRY.REFRESH_TOKEN }
   );
   
   return { accessToken, refreshToken };
@@ -74,7 +82,7 @@ const validateAndRefreshTokens = async (refreshToken) => {
     // 만료 확인 (expiresAt 우선, 없으면 createdAt 기준)
     const isExpired = storedToken.expiresAt 
       ? new Date() > new Date(storedToken.expiresAt)
-      : Date.now() - new Date(storedToken.createdAt).getTime() > 60 * 60 * 1000;
+      : Date.now() - new Date(storedToken.createdAt).getTime() > TOKEN_EXPIRY.REFRESH_TOKEN_MS;
       
     if (isExpired) {
       await userPrisma.refreshToken.delete({ where: { accountId: decoded.accountId } });
@@ -87,7 +95,7 @@ const validateAndRefreshTokens = async (refreshToken) => {
       where: { accountId: decoded.accountId },
       data: { 
         token: newTokens.refreshToken,
-        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        expiresAt: new Date(Date.now() + TOKEN_EXPIRY.REFRESH_TOKEN_MS),
         createdAt: new Date()
       }
     });
@@ -110,14 +118,14 @@ const setTokenCookies = (res, accessToken, refreshToken) => {
     httpOnly: true,           // XSS 방지 (JavaScript 접근 차단)
     secure: process.env.NODE_ENV === 'production', // HTTPS에서만 (프로덕션)
     sameSite: 'strict',       // CSRF 방지
-    maxAge: 15 * 60 * 1000   // 15분 (Access Token 수명과 동일)
+    maxAge: TOKEN_EXPIRY.ACCESS_TOKEN_MS
   });
 
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,           // XSS 방지
     secure: process.env.NODE_ENV === 'production', // HTTPS에서만 (프로덕션)
     sameSite: 'strict',       // CSRF 방지
-    maxAge: 60 * 60 * 1000   // 1시간 (Refresh Token 수명과 동일)
+    maxAge: TOKEN_EXPIRY.REFRESH_TOKEN_MS
   });
 };
 
@@ -331,7 +339,7 @@ router.post('/login', async (req, res) => {
     const { accessToken, refreshToken } = generateTokens(account.accountId);
 
     // 2-5. 기존 Refresh Token 업데이트 (upsert 사용, 있으면 값 업데이트, 없으면 생성)
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1시간 후
+    const expiresAt = new Date(Date.now() + TOKEN_EXPIRY.REFRESH_TOKEN_MS);
     
     await userPrisma.refreshToken.upsert({
       where: { accountId: account.accountId },
