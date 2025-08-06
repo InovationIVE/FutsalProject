@@ -13,9 +13,10 @@ const USER_ID_REGEX = /^[a-zA-Z0-9_]{4,20}$/; // 4-20자, 영문+숫자+언더�
 const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/; // 8자 이상, 영문+숫자+특수문자
 
 /**
- * JWT 토큰 생성 유틸리티, 
- *  input: accountId
- *  output: accessToken, refreshToken
+ * JWT 토큰 생성 함수
+ * 
+ * 입력: accountId (사용자 계정 ID)
+ * 출력: { accessToken, refreshToken }
  */
 const generateTokens = (accountId) => {
   const accessToken = jwt.sign(
@@ -38,7 +39,11 @@ const generateTokens = (accountId) => {
 };
 
 /**
- * 입력값 regex 검증 유틸리티
+ * 입력값 형식 검증용 정규표현식
+ * 
+ * - email: 이메일 형식 확인 (예: test@example.com)
+ * - userId: 4-20자 영문/숫자/언더스코어만 허용
+ * - password: 8자 이상, 영문+숫자+특수문자 포함 필수
  */
 const validateInput = {
   email: (email) => EMAIL_REGEX.test(email),
@@ -47,8 +52,132 @@ const validateInput = {
 };
 
 /**
- * 1. 회원가입 API
- * POST /auth/signup
+ * Refresh Token으로 새 access/refresh 토큰 발급, refresh 토큰은 db에 저장장
+ * 
+ * 입력: refreshToken (갱신용 토큰 문자열)
+ * 출력: { success: true/false, tokens: {accessToken, refreshToken}, accountId: 번호, error: 에러메시지 }
+ */
+const validateAndRefreshTokens = async (refreshToken) => {
+  try {
+    // JWT 검증 및 DB 확인
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const storedToken = await userPrisma.refreshToken.findUnique({
+      where: { accountId: decoded.accountId },
+      select: { token: true, expiresAt: true, createdAt: true }
+    });
+    
+    // 토큰 유효성 검사
+    if (!storedToken || storedToken.token !== refreshToken) {
+      return { success: false };
+    }
+    
+    // 만료 확인 (expiresAt 우선, 없으면 createdAt 기준)
+    const isExpired = storedToken.expiresAt 
+      ? new Date() > new Date(storedToken.expiresAt)
+      : Date.now() - new Date(storedToken.createdAt).getTime() > 60 * 60 * 1000;
+      
+    if (isExpired) {
+      await userPrisma.refreshToken.delete({ where: { accountId: decoded.accountId } });
+      return { success: false };
+    }
+    
+    // 새 토큰 발급 및 DB 업데이트
+    const newTokens = generateTokens(decoded.accountId);
+    await userPrisma.refreshToken.update({
+      where: { accountId: decoded.accountId },
+      data: { 
+        token: newTokens.refreshToken,
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        createdAt: new Date()
+      }
+    });
+    
+    return { success: true, tokens: newTokens, accountId: decoded.accountId };
+    
+  } catch (error) {
+    return { success: false };
+  }
+};
+
+/**
+ * 토큰을 안전한 쿠키로 클라이언트에 저장하는 함수 
+
+ * 입력: res (응답 객체), accessToken, refreshToken
+ * 보안: httpOnly(JS 접근 차단), secure(HTTPS만), sameSite(CSRF 방지)
+ */
+const setTokenCookies = (res, accessToken, refreshToken) => {
+  res.cookie('accessToken', accessToken, {
+    httpOnly: true,           // XSS 방지 (JavaScript 접근 차단)
+    secure: process.env.NODE_ENV === 'production', // HTTPS에서만 (프로덕션)
+    sameSite: 'strict',       // CSRF 방지
+    maxAge: 15 * 60 * 1000   // 15분 (Access Token 수명과 동일)
+  });
+
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,           // XSS 방지
+    secure: process.env.NODE_ENV === 'production', // HTTPS에서만 (프로덕션)
+    sameSite: 'strict',       // CSRF 방지
+    maxAge: 60 * 60 * 1000   // 1시간 (Refresh Token 수명과 동일)
+  });
+};
+
+
+/**
+ * 인증 미들웨어 - Access Token 검증 또는 자동 갱신
+ */
+const authMiddleware = async (req, res, next) => {
+   try {
+     const accessToken = req.cookies.accessToken;
+     const refreshToken = req.cookies.refreshToken;
+     
+     // Access Token이 유효한 경우 - 바로 통과
+     if (accessToken) {
+       const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+       const account = await userPrisma.account.findUnique({
+         where: { accountId: decoded.accountId },
+         select: { accountId: true, userId: true, email: true, cash: true, createdAt: true }
+       });
+       
+       if (account) {
+         req.user = account;
+         return next();
+       }
+     }
+     
+     // Access Token이 없거나 문제가 있는 경우 - Refresh Token으로 갱신
+     if (!refreshToken) {
+       return res.status(401).json({ message: '인증이 만료되었습니다. 다시 로그인해주세요.' });
+     }
+     
+     const refreshResult = await validateAndRefreshTokens(refreshToken);
+     if (!refreshResult.success) {
+       return res.status(401).json({ message: '인증이 만료되었습니다. 다시 로그인해주세요.' });
+     }
+     
+     // 갱신 성공 - 새 토큰 설정 및 사용자 정보 조회
+     setTokenCookies(res, refreshResult.tokens.accessToken, refreshResult.tokens.refreshToken);
+     
+     const account = await userPrisma.account.findUnique({
+       where: { accountId: refreshResult.accountId },
+       select: { accountId: true, userId: true, email: true, cash: true, createdAt: true }
+     });
+     
+     if (!account) {
+       return res.status(401).json({ message: '유효하지 않은 토큰입니다. 계정을 찾을 수 없습니다.' });
+     }
+     
+     req.user = account;
+     return next();
+     
+   } catch (error) {
+     console.error('인증 미들웨어 오류:', error);
+     return res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
+   }
+ };
+
+
+/**
+ * 회원가입 API
  */
 router.post('/signup', async (req, res) => {
   try {
@@ -151,9 +280,13 @@ router.post('/signup', async (req, res) => {
   }
 });
 
+
+
 /**
- * 2. 로그인 API
- * POST /auth/login
+ * 로그인 API
+ * 
+ * 입력: { userId, password }
+ * 출력: 200 (성공) / 400 (입력 오류) / 401 (인증 실패) / 500 (서버 오류)
  */
 router.post('/login', async (req, res) => {
   try {
@@ -198,32 +331,24 @@ router.post('/login', async (req, res) => {
     const { accessToken, refreshToken } = generateTokens(account.accountId);
 
     // 2-5. 기존 Refresh Token 업데이트 (upsert 사용, 있으면 값 업데이트, 없으면 생성)
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1시간 후
+    
     await userPrisma.refreshToken.upsert({
       where: { accountId: account.accountId },
       update: { 
         token: refreshToken,
+        expiresAt: expiresAt,
         createdAt: new Date() // 토큰 갱신 시간 업데이트
       },
       create: {
         accountId: account.accountId,
-        token: refreshToken
+        token: refreshToken,
+        expiresAt: expiresAt
       }
     });
 
     // 2-6. httpOnly 쿠키로 토큰 설정
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,           // XSS 방지 (JavaScript 접근 차단)
-      secure: process.env.NODE_ENV === 'production', // HTTPS에서만 (프로덕션)
-      sameSite: 'strict',       // CSRF 방지
-      maxAge: 15 * 60 * 1000   // 15분 (Access Token 수명과 동일)
-    });
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,           // XSS 방지
-      secure: process.env.NODE_ENV === 'production', // HTTPS에서만 (프로덕션)
-      sameSite: 'strict',       // CSRF 방지
-      maxAge: 60 * 60 * 1000   // 1시간 (Refresh Token 수명과 동일)
-    });
+    setTokenCookies(res, accessToken, refreshToken);
 
     // 2-7. 응답 (토큰은 쿠키로, 사용자 정보만 JSON으로)
     const { password: _, ...userInfo } = account;
@@ -241,68 +366,9 @@ router.post('/login', async (req, res) => {
   }
 });
 /**
- * 3. JWT 토큰 검증 미들웨어 (쿠키 방식)
- * 쿠키에서 accessToken을 읽어 검증하고 req.user에 사용자 정보 (accountId, userId, email, cash, createdAt) 추가
- */
-const authMiddleware = async (req, res, next) => {
-    try {
-      // 3-1. 쿠키에서 accessToken 확인
-      const token = req.cookies.accessToken;
-  
-      if (!token) {
-        return res.status(401).json({
-          message: '로그인이 필요합니다. 접근 토큰이 없습니다.'
-        });
-      }
-  
-      // 3-2. JWT 토큰 검증
-      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-      
-      // 3-3. 사용자 정보 조회 및 req 객체에 추가
-      const account = await userPrisma.account.findUnique({
-        where: { accountId: decoded.accountId },
-        select: {
-          accountId: true,
-          userId: true,
-          email: true,
-          cash: true,
-          createdAt: true
-        }
-      });
-  
-      if (!account) {
-        return res.status(401).json({
-          message: '유효하지 않은 토큰입니다. 계정을 찾을 수 없습니다.'
-        });
-      }
-  
-      // 3-4. 요청 객체에 사용자 정보 추가
-      req.user = account;
-      next();
-  
-    } catch (error) {
-      if (error.name === 'TokenExpiredError') {
-        return res.status(401).json({
-          message: '토큰이 만료되었습니다. 다시 로그인해주세요.'
-        });
-      }
-      
-      if (error.name === 'JsonWebTokenError') {
-        return res.status(401).json({
-          message: '유효하지 않은 토큰입니다.'
-        });
-      }
-  
-      console.error('토큰 검증 에러:', error);
-      return res.status(500).json({
-        message: '서버 내부 오류가 발생했습니다.'
-      });
-    }
-  };
 
-  /**
- * 4. 로그아웃 API
- * POST /auth/logout
+/**
+ * 로그아웃 API
  */
 router.post('/logout', authMiddleware, async (req, res) => {
   try {
@@ -337,6 +403,6 @@ router.post('/logout', authMiddleware, async (req, res) => {
   }
 });
 
-// authMiddleware를 다른 파일에서도 사용할 수 있도록 export
+
 export { authMiddleware };
 export default router;
