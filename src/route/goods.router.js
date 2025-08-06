@@ -10,15 +10,15 @@ import {
 
 const router = express.Router();
 
-//상품 등록 API router(관리자)
+/**상품 등록 API router(관리자)**/
 router.post('/admin/goods', verifyToken, isAdmin, registGoods);
 
-//상품 삭제 API router(관리자)
+/**상품 삭제 API router(관리자)**/
 router.delete('/admin/goods/:goodsId', verifyToken, isAdmin, deleteGoods);
 
-//상품 수정 API router(관리자)
+/**상품 수정 API router(관리자)**/
 router.patch('/admin/goods/:goodsId', verifyToken, isAdmin, updateGoods);
 
-//상품 목록 조회  API router
+/**상품 목록 조회  API router**/
 router.get('/goods', getGoods);
 export default router;
