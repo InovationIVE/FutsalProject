@@ -2,6 +2,11 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import gachaRouter from './route/gacha.router.js';
+import ErrorHandlingMiddleware from './middleWares/error-handling.middleware.js';
+import logMiddleware from './middleWares/log.middleware.js';
+import ownedPlayersRouter from './routes/ownedPlayers.router.js';
+import authRouter from './routes/auth.router.js';
+
 
 
 dotenv.config();
@@ -11,7 +16,14 @@ const PORT = 3018;
 
 app.use(express.json());
 app.use(cookieParser());
-app.use('/api', gachaRouter);
+app.use(logMiddleware);
+
+
+app.use('/api', [ownedPlayersRouter, gachaRouter]);
+app.use('/auth', [authRouter]);
+app.use(ErrorHandlingMiddleware);
+
+
 
 
 
