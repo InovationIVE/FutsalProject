@@ -24,7 +24,7 @@ export const registGoods = async (req, res) => {
       cashAmount: newGoods.cashAmount.toString() /**문자열로 cashAmount반환**/,
     };
     /**성공응답**/
-    res.status(201).json(response);
+    return res.status(201).json(response);
   } catch (error) {
     console.error('상품 등록 오류:', error);
 
@@ -33,7 +33,7 @@ export const registGoods = async (req, res) => {
       return res.status(409).json({ message: '상품명이 존재합니다.' });
     }
     /**그 외 서버 오류**/
-    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+    return res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
 
@@ -66,13 +66,13 @@ export const deleteGoods = async (req, res) => {
   } catch (error) {
     /**그 외 서버 오류**/
     console.error('상품 삭제 오류:', error);
-    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+    return res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
 
 /**상품 수정 API controller**/
 export const updateGoods = async (req, res) => {
-  const goodsId = parseInt(req.params.id, 10);
+  const goodsId = parseInt(req.params.goodsId, 10);
   const { name, cashAmount } = req.body;
 
   /**오류 표기 : goodsId가 유효하지 않을 경우 400반환**/
@@ -125,7 +125,7 @@ export const updateGoods = async (req, res) => {
 export const getGoods = async (req, res) => {
   try {
     /**상품 목록 조회**/
-    const goods = await gamePrisma.goods.findMany({
+    const goodsList = await gamePrisma.goods.findMany({
       select: {
         goodsId: true,
         name: true,
@@ -134,12 +134,12 @@ export const getGoods = async (req, res) => {
     });
 
     /**조회 결과가 없을 경우 404반환**/
-    if (goods.length === 0) {
+    if (goodsList.length === 0) {
       return res.status(404).json({ message: '등록된 상품이 없습니다.' });
     }
 
     /**클라이언트 응답 형식**/
-    const response = goods.map((goodsItem) => ({
+    const response = goodsList.map((goodsItem) => ({
       id: goodsItem.goodsId,
       name: goodsItem.name,
       cashAmount: goodsItem.cashAmount.toString() /**문자열로 반환**/,
