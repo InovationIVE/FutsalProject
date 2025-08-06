@@ -146,7 +146,7 @@ exports.Prisma.GachaScalarFieldEnum = {
   bronze: 'bronze',
   silver: 'silver',
   gold: 'gold',
-  paltinum: 'paltinum',
+  platinum: 'platinum',
   diamond: 'diamond',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

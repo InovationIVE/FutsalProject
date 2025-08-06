@@ -2939,7 +2939,7 @@ export namespace Prisma {
     bronze: number | null
     silver: number | null
     gold: number | null
-    paltinum: number | null
+    platinum: number | null
     diamond: number | null
   }
 
@@ -2949,7 +2949,7 @@ export namespace Prisma {
     bronze: number | null
     silver: number | null
     gold: number | null
-    paltinum: number | null
+    platinum: number | null
     diamond: number | null
   }
 
@@ -2960,7 +2960,7 @@ export namespace Prisma {
     bronze: number | null
     silver: number | null
     gold: number | null
-    paltinum: number | null
+    platinum: number | null
     diamond: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2973,7 +2973,7 @@ export namespace Prisma {
     bronze: number | null
     silver: number | null
     gold: number | null
-    paltinum: number | null
+    platinum: number | null
     diamond: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2986,7 +2986,7 @@ export namespace Prisma {
     bronze: number
     silver: number
     gold: number
-    paltinum: number
+    platinum: number
     diamond: number
     createdAt: number
     updatedAt: number
@@ -3000,7 +3000,7 @@ export namespace Prisma {
     bronze?: true
     silver?: true
     gold?: true
-    paltinum?: true
+    platinum?: true
     diamond?: true
   }
 
@@ -3010,7 +3010,7 @@ export namespace Prisma {
     bronze?: true
     silver?: true
     gold?: true
-    paltinum?: true
+    platinum?: true
     diamond?: true
   }
 
@@ -3021,7 +3021,7 @@ export namespace Prisma {
     bronze?: true
     silver?: true
     gold?: true
-    paltinum?: true
+    platinum?: true
     diamond?: true
     createdAt?: true
     updatedAt?: true
@@ -3034,7 +3034,7 @@ export namespace Prisma {
     bronze?: true
     silver?: true
     gold?: true
-    paltinum?: true
+    platinum?: true
     diamond?: true
     createdAt?: true
     updatedAt?: true
@@ -3047,7 +3047,7 @@ export namespace Prisma {
     bronze?: true
     silver?: true
     gold?: true
-    paltinum?: true
+    platinum?: true
     diamond?: true
     createdAt?: true
     updatedAt?: true
@@ -3147,7 +3147,7 @@ export namespace Prisma {
     bronze: number
     silver: number
     gold: number
-    paltinum: number
+    platinum: number
     diamond: number
     createdAt: Date
     updatedAt: Date
@@ -3179,7 +3179,7 @@ export namespace Prisma {
     bronze?: boolean
     silver?: boolean
     gold?: boolean
-    paltinum?: boolean
+    platinum?: boolean
     diamond?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3194,13 +3194,13 @@ export namespace Prisma {
     bronze?: boolean
     silver?: boolean
     gold?: boolean
-    paltinum?: boolean
+    platinum?: boolean
     diamond?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type GachaOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"gachaId" | "cardName" | "price" | "bronze" | "silver" | "gold" | "paltinum" | "diamond" | "createdAt" | "updatedAt", ExtArgs["result"]["gacha"]>
+  export type GachaOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"gachaId" | "cardName" | "price" | "bronze" | "silver" | "gold" | "platinum" | "diamond" | "createdAt" | "updatedAt", ExtArgs["result"]["gacha"]>
 
   export type $GachaPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Gacha"
@@ -3212,7 +3212,7 @@ export namespace Prisma {
       bronze: number
       silver: number
       gold: number
-      paltinum: number
+      platinum: number
       diamond: number
       createdAt: Date
       updatedAt: Date
@@ -3591,7 +3591,7 @@ export namespace Prisma {
     readonly bronze: FieldRef<"Gacha", 'Int'>
     readonly silver: FieldRef<"Gacha", 'Int'>
     readonly gold: FieldRef<"Gacha", 'Int'>
-    readonly paltinum: FieldRef<"Gacha", 'Int'>
+    readonly platinum: FieldRef<"Gacha", 'Int'>
     readonly diamond: FieldRef<"Gacha", 'Int'>
     readonly createdAt: FieldRef<"Gacha", 'DateTime'>
     readonly updatedAt: FieldRef<"Gacha", 'DateTime'>
@@ -3962,7 +3962,7 @@ export namespace Prisma {
     bronze: 'bronze',
     silver: 'silver',
     gold: 'gold',
-    paltinum: 'paltinum',
+    platinum: 'platinum',
     diamond: 'diamond',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -4182,7 +4182,7 @@ export namespace Prisma {
     bronze?: IntFilter<"Gacha"> | number
     silver?: IntFilter<"Gacha"> | number
     gold?: IntFilter<"Gacha"> | number
-    paltinum?: IntFilter<"Gacha"> | number
+    platinum?: IntFilter<"Gacha"> | number
     diamond?: IntFilter<"Gacha"> | number
     createdAt?: DateTimeFilter<"Gacha"> | Date | string
     updatedAt?: DateTimeFilter<"Gacha"> | Date | string
@@ -4195,7 +4195,7 @@ export namespace Prisma {
     bronze?: SortOrder
     silver?: SortOrder
     gold?: SortOrder
-    paltinum?: SortOrder
+    platinum?: SortOrder
     diamond?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -4212,7 +4212,7 @@ export namespace Prisma {
     bronze?: IntFilter<"Gacha"> | number
     silver?: IntFilter<"Gacha"> | number
     gold?: IntFilter<"Gacha"> | number
-    paltinum?: IntFilter<"Gacha"> | number
+    platinum?: IntFilter<"Gacha"> | number
     diamond?: IntFilter<"Gacha"> | number
     createdAt?: DateTimeFilter<"Gacha"> | Date | string
     updatedAt?: DateTimeFilter<"Gacha"> | Date | string
@@ -4225,7 +4225,7 @@ export namespace Prisma {
     bronze?: SortOrder
     silver?: SortOrder
     gold?: SortOrder
-    paltinum?: SortOrder
+    platinum?: SortOrder
     diamond?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -4246,7 +4246,7 @@ export namespace Prisma {
     bronze?: IntWithAggregatesFilter<"Gacha"> | number
     silver?: IntWithAggregatesFilter<"Gacha"> | number
     gold?: IntWithAggregatesFilter<"Gacha"> | number
-    paltinum?: IntWithAggregatesFilter<"Gacha"> | number
+    platinum?: IntWithAggregatesFilter<"Gacha"> | number
     diamond?: IntWithAggregatesFilter<"Gacha"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Gacha"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Gacha"> | Date | string
@@ -4385,7 +4385,7 @@ export namespace Prisma {
     bronze: number
     silver: number
     gold: number
-    paltinum: number
+    platinum: number
     diamond: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -4398,7 +4398,7 @@ export namespace Prisma {
     bronze: number
     silver: number
     gold: number
-    paltinum: number
+    platinum: number
     diamond: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -4410,7 +4410,7 @@ export namespace Prisma {
     bronze?: IntFieldUpdateOperationsInput | number
     silver?: IntFieldUpdateOperationsInput | number
     gold?: IntFieldUpdateOperationsInput | number
-    paltinum?: IntFieldUpdateOperationsInput | number
+    platinum?: IntFieldUpdateOperationsInput | number
     diamond?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4423,7 +4423,7 @@ export namespace Prisma {
     bronze?: IntFieldUpdateOperationsInput | number
     silver?: IntFieldUpdateOperationsInput | number
     gold?: IntFieldUpdateOperationsInput | number
-    paltinum?: IntFieldUpdateOperationsInput | number
+    platinum?: IntFieldUpdateOperationsInput | number
     diamond?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4436,7 +4436,7 @@ export namespace Prisma {
     bronze: number
     silver: number
     gold: number
-    paltinum: number
+    platinum: number
     diamond: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -4448,7 +4448,7 @@ export namespace Prisma {
     bronze?: IntFieldUpdateOperationsInput | number
     silver?: IntFieldUpdateOperationsInput | number
     gold?: IntFieldUpdateOperationsInput | number
-    paltinum?: IntFieldUpdateOperationsInput | number
+    platinum?: IntFieldUpdateOperationsInput | number
     diamond?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4461,7 +4461,7 @@ export namespace Prisma {
     bronze?: IntFieldUpdateOperationsInput | number
     silver?: IntFieldUpdateOperationsInput | number
     gold?: IntFieldUpdateOperationsInput | number
-    paltinum?: IntFieldUpdateOperationsInput | number
+    platinum?: IntFieldUpdateOperationsInput | number
     diamond?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4696,7 +4696,7 @@ export namespace Prisma {
     bronze?: SortOrder
     silver?: SortOrder
     gold?: SortOrder
-    paltinum?: SortOrder
+    platinum?: SortOrder
     diamond?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -4708,7 +4708,7 @@ export namespace Prisma {
     bronze?: SortOrder
     silver?: SortOrder
     gold?: SortOrder
-    paltinum?: SortOrder
+    platinum?: SortOrder
     diamond?: SortOrder
   }
 
@@ -4719,7 +4719,7 @@ export namespace Prisma {
     bronze?: SortOrder
     silver?: SortOrder
     gold?: SortOrder
-    paltinum?: SortOrder
+    platinum?: SortOrder
     diamond?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -4732,7 +4732,7 @@ export namespace Prisma {
     bronze?: SortOrder
     silver?: SortOrder
     gold?: SortOrder
-    paltinum?: SortOrder
+    platinum?: SortOrder
     diamond?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -4744,7 +4744,7 @@ export namespace Prisma {
     bronze?: SortOrder
     silver?: SortOrder
     gold?: SortOrder
-    paltinum?: SortOrder
+    platinum?: SortOrder
     diamond?: SortOrder
   }
 

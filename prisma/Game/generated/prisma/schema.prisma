@@ -44,7 +44,7 @@ model Gacha {
   bronze    Int
   silver    Int
   gold      Int
-  paltinum  Int
+  platinum  Int
   diamond   Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
