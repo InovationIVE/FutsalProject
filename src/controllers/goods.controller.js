@@ -95,3 +95,31 @@ export const updateGoods = async (req, res) => {
     return res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
+
+//상품 목록 조회 API
+export const getGoods = async (req, res) => {
+  try {
+    const goods = await gamePrisma.goods.findMany({
+      select: {
+        goodsId: true,
+        name: true,
+        cashAmount: true,
+      },
+    });
+
+    if (goods.length === 0) {
+      return res.status(404).json({ message: '등록된 상품이 없습니다.' });
+    }
+
+    const response = goods.map((goodsItem) => ({
+      id: goodsItem.goodsId,
+      name: goodsItem.name,
+      cashAmount: goodsItem.cashAmount.toString(),
+    }));
+
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error('상품 목록 조회 오류', error);
+    return res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+  }
+};
