@@ -1,7 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import PlayerRouter from './route/player.router.js';
+import PlayerRouter from './routes/player.router.js';
 
 dotenv.config();
 

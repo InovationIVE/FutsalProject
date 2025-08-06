@@ -1,5 +1,3 @@
-//import { PrismaClient as UserPrismaClient } from '../../../prisma/User/generated/user';
-//import { PrismaClient as GamePrismaClient } from '../../../prisma/Game/generated/prisma';
 import { PrismaClient as UserPrismaClient } from '../../../prisma/User/generated/user/index.js';
 import { PrismaClient as GamePrismaClient } from '../../../prisma/Game/generated/prisma/index.js';
 
