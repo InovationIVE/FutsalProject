@@ -18,6 +18,7 @@ const PORT = 3018;
 app.use(express.json());
 app.use(cookieParser());
 app.use(logMiddleware);
+app.use(authMiddleware);
 
 
 app.use('/api', [gachaRouter]);
