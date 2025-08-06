@@ -127,6 +127,7 @@ exports.Prisma.PlayerScalarFieldEnum = {
   speed: 'speed',
   attack: 'attack',
   defence: 'defence',
+  price: 'price',
   profileImage: 'profileImage',
   rarity: 'rarity',
   createdAt: 'createdAt',
