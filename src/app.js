@@ -11,7 +11,7 @@ const PORT = 3018;
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/api', [PlayerRouter])
+app.use('/api', [PlayerRouter]);
 
 
 app.listen(PORT, () => {

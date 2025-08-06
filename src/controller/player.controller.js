@@ -1,5 +1,5 @@
-//import { PrismaClient as GamePrismaClient } from '../../../prisma/Game/generated/prisma/index.js';import prisma from '../'
-import { gamePrisma } from '../utils/prisma';
+//import { PrismaClient as GamePrismaClient } from '../../../prisma/Game/generated/prisma/index.js';
+import { gamePrisma } from '../utils/prisma/index.js';
 
 export const getAllPlayers = async (req, res) => {
   try {
@@ -58,7 +58,7 @@ export const createPlayer = async (req, res) => {
     try {
     const {soccerPlayerId, name, speed, attack, defense, profileImage, rarity} = req.body;
     const isPlayerExist = await gamePrisma.player.findUnique({
-      where: { playerId : Number(playerId) }
+      where: { soccerPlayerId : soccerPlayerId }
     });
     if (isPlayerExist) {
       res.status(409).json({ error: '해당 선수 데이터가 이미 존재합니다' });
@@ -76,7 +76,7 @@ export const createPlayer = async (req, res) => {
       }
     });
 
-    res.status(201).json({ data: {newPlayer} })
+    res.status(201).json({ playerData })
 
   } catch (error) {
     console.error('Error fetching Player data:', error);
@@ -87,7 +87,7 @@ export const createPlayer = async (req, res) => {
 export const updatePlayer = async (req, res) => {
   try {
     const { playerId } = req.params;
-    const {soccerPlayerId, name, speed, attack, defense, rarity} = req.body;
+    const {soccerPlayerId, name, speed, attack, defense, profileImage ,rarity} = req.body;
     
     /** 보류 **/
     const isPlayerExist = await gamePrisma.player.findUnique({

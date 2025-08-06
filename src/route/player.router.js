@@ -18,3 +18,5 @@ router.patch('/admin/players/:playerId', updatePlayer);
 
 /** 선수 삭제 **/
 router.delete('/admin/players/:playerId', deletePlayer);
+
+export default router;
