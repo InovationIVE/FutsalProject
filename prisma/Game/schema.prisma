@@ -1,12 +1,8 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
+  
   provider = "prisma-client-js"
   output   = "../Game/generated/prisma"
+
 }
 
 datasource db {
@@ -15,36 +11,40 @@ datasource db {
 }
 
 model Player {
-  playerId             Int             @id @default(autoincrement())
-  soccerPlayerId String          @unique
+  playerId       Int      @id @default(autoincrement())
+  soccerPlayerId String   @unique
   name           String
   speed          Int
   attack         Int
   defence        Int
   profileImage   String?
   rarity         String
-  
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@map("Player")
 }
 
-
 model Goods {
-  goodsId          Int     @id @default(autoincrement())
-  name        String  @unique
-  cashAmount  Int     @map("cash_amount")
-  
+  goodsId    Int    @id @default(autoincrement())
+  name       String @unique
+  cashAmount Int    @map("cash_amount")
+
   @@map("Goods")
 }
 
 model Gacha {
-  gachaId         Int      @id @default(autoincrement())
-  cardName   String   @unique
-  price      Int
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+
+  gachaId   Int      @id @default(autoincrement())
+  cardName  String   @unique
+  price     Int
+  bronze    Int
+  silver    Int
+  gold      Int
+  diamond   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  platinum  Int
 
   @@map("Gacha")
 }

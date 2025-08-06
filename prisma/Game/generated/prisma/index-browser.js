@@ -127,6 +127,7 @@ exports.Prisma.PlayerScalarFieldEnum = {
   speed: 'speed',
   attack: 'attack',
   defence: 'defence',
+  price: 'price',
   profileImage: 'profileImage',
   rarity: 'rarity',
   createdAt: 'createdAt',
@@ -143,6 +144,11 @@ exports.Prisma.GachaScalarFieldEnum = {
   gachaId: 'gachaId',
   cardName: 'cardName',
   price: 'price',
+  bronze: 'bronze',
+  silver: 'silver',
+  gold: 'gold',
+  platinum: 'platinum',
+  diamond: 'diamond',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
