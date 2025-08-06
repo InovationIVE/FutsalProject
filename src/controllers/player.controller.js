@@ -1,5 +1,5 @@
 //import { PrismaClient as GamePrismaClient } from '../../../prisma/Game/generated/prisma/index.js';
-import { gamePrisma } from '../utils/prisma/index.js';
+import gamePrisma from '../utils/prisma/index.js';
 
 export const getAllPlayers = async (req, res) => {
   try {
