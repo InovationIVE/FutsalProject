@@ -143,7 +143,7 @@ const authMiddleware = async (req, res, next) => {
        const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
        const account = await userPrisma.account.findUnique({
          where: { accountId: decoded.accountId },
-         select: { accountId: true, userId: true, email: true, cash: true, createdAt: true }
+         select: { accountId: true, userId: true, email: true, cash: true, role: true, createdAt: true }
        });
        
        if (account) {
@@ -167,7 +167,7 @@ const authMiddleware = async (req, res, next) => {
      
      const account = await userPrisma.account.findUnique({
        where: { accountId: refreshResult.accountId },
-       select: { accountId: true, userId: true, email: true, cash: true, createdAt: true }
+       select: { accountId: true, userId: true, email: true, cash: true, role: true, createdAt: true }
      });
      
      if (!account) {
@@ -182,6 +182,24 @@ const authMiddleware = async (req, res, next) => {
      return res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
    }
  };
+
+/**
+ * 관리자 권한이 필요한 API용 미들웨어
+ * authMiddleware 이후에 사용해야 함
+ */
+const requireAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: '인증이 필요합니다.' });
+  }
+  
+  if (req.user.role !== 'ADMIN') {
+    return res.status(403).json({ 
+      message: '관리자 권한이 필요합니다.' 
+    });
+  }
+  
+  next();
+};
 
 
 /**
@@ -316,6 +334,7 @@ router.post('/login', async (req, res) => {
         email: true,
         password: true,
         cash: true,
+        role: true,
         createdAt: true
       }
     });
@@ -412,5 +431,6 @@ router.post('/logout', authMiddleware, async (req, res) => {
 });
 
 
-export { authMiddleware };
+// 미들웨어들을 다른 라우터에서도 사용할 수 있도록 export
+export { authMiddleware, requireAdmin };
 export default router;
