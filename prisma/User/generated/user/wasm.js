@@ -127,7 +127,8 @@ exports.Prisma.AccountScalarFieldEnum = {
   password: 'password',
   cash: 'cash',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  role: 'role'
 };
 
 exports.Prisma.OwnedPlayerScalarFieldEnum = {
@@ -151,7 +152,8 @@ exports.Prisma.RefreshTokenScalarFieldEnum = {
   refreshTokenId: 'refreshTokenId',
   accountId: 'accountId',
   token: 'token',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -162,7 +164,13 @@ exports.Prisma.SortOrder = {
 exports.Prisma.AccountOrderByRelevanceFieldEnum = {
   email: 'email',
   userId: 'userId',
-  password: 'password'
+  password: 'password',
+  role: 'role'
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
 };
 
 exports.Prisma.RefreshTokenOrderByRelevanceFieldEnum = {

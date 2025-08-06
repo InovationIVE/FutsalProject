@@ -1123,13 +1123,13 @@ export namespace Prisma {
    */
 
   export type AccountCountOutputType = {
-    squads: number
     ownedPlayers: number
+    squads: number
   }
 
   export type AccountCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    squads?: boolean | AccountCountOutputTypeCountSquadsArgs
     ownedPlayers?: boolean | AccountCountOutputTypeCountOwnedPlayersArgs
+    squads?: boolean | AccountCountOutputTypeCountSquadsArgs
   }
 
   // Custom InputTypes
@@ -1146,15 +1146,15 @@ export namespace Prisma {
   /**
    * AccountCountOutputType without action
    */
-  export type AccountCountOutputTypeCountSquadsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: SquadWhereInput
+  export type AccountCountOutputTypeCountOwnedPlayersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OwnedPlayerWhereInput
   }
 
   /**
    * AccountCountOutputType without action
    */
-  export type AccountCountOutputTypeCountOwnedPlayersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: OwnedPlayerWhereInput
+  export type AccountCountOutputTypeCountSquadsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SquadWhereInput
   }
 
 
@@ -1223,6 +1223,7 @@ export namespace Prisma {
     cash: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    role: string | null
   }
 
   export type AccountMaxAggregateOutputType = {
@@ -1233,6 +1234,7 @@ export namespace Prisma {
     cash: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    role: string | null
   }
 
   export type AccountCountAggregateOutputType = {
@@ -1243,6 +1245,7 @@ export namespace Prisma {
     cash: number
     createdAt: number
     updatedAt: number
+    role: number
     _all: number
   }
 
@@ -1265,6 +1268,7 @@ export namespace Prisma {
     cash?: true
     createdAt?: true
     updatedAt?: true
+    role?: true
   }
 
   export type AccountMaxAggregateInputType = {
@@ -1275,6 +1279,7 @@ export namespace Prisma {
     cash?: true
     createdAt?: true
     updatedAt?: true
+    role?: true
   }
 
   export type AccountCountAggregateInputType = {
@@ -1285,6 +1290,7 @@ export namespace Prisma {
     cash?: true
     createdAt?: true
     updatedAt?: true
+    role?: true
     _all?: true
   }
 
@@ -1382,6 +1388,7 @@ export namespace Prisma {
     cash: number
     createdAt: Date
     updatedAt: Date
+    role: string
     _count: AccountCountAggregateOutputType | null
     _avg: AccountAvgAggregateOutputType | null
     _sum: AccountSumAggregateOutputType | null
@@ -1411,9 +1418,10 @@ export namespace Prisma {
     cash?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    role?: boolean
+    ownedPlayers?: boolean | Account$ownedPlayersArgs<ExtArgs>
     refreshToken?: boolean | Account$refreshTokenArgs<ExtArgs>
     squads?: boolean | Account$squadsArgs<ExtArgs>
-    ownedPlayers?: boolean | Account$ownedPlayersArgs<ExtArgs>
     _count?: boolean | AccountCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["account"]>
 
@@ -1427,22 +1435,23 @@ export namespace Prisma {
     cash?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    role?: boolean
   }
 
-  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"accountId" | "email" | "userId" | "password" | "cash" | "createdAt" | "updatedAt", ExtArgs["result"]["account"]>
+  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"accountId" | "email" | "userId" | "password" | "cash" | "createdAt" | "updatedAt" | "role", ExtArgs["result"]["account"]>
   export type AccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    ownedPlayers?: boolean | Account$ownedPlayersArgs<ExtArgs>
     refreshToken?: boolean | Account$refreshTokenArgs<ExtArgs>
     squads?: boolean | Account$squadsArgs<ExtArgs>
-    ownedPlayers?: boolean | Account$ownedPlayersArgs<ExtArgs>
     _count?: boolean | AccountCountOutputTypeDefaultArgs<ExtArgs>
   }
 
   export type $AccountPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Account"
     objects: {
+      ownedPlayers: Prisma.$OwnedPlayerPayload<ExtArgs>[]
       refreshToken: Prisma.$RefreshTokenPayload<ExtArgs> | null
       squads: Prisma.$SquadPayload<ExtArgs>[]
-      ownedPlayers: Prisma.$OwnedPlayerPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       accountId: number
@@ -1452,6 +1461,7 @@ export namespace Prisma {
       cash: number
       createdAt: Date
       updatedAt: Date
+      role: string
     }, ExtArgs["result"]["account"]>
     composites: {}
   }
@@ -1792,9 +1802,9 @@ export namespace Prisma {
    */
   export interface Prisma__AccountClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    ownedPlayers<T extends Account$ownedPlayersArgs<ExtArgs> = {}>(args?: Subset<T, Account$ownedPlayersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OwnedPlayerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     refreshToken<T extends Account$refreshTokenArgs<ExtArgs> = {}>(args?: Subset<T, Account$refreshTokenArgs<ExtArgs>>): Prisma__RefreshTokenClient<$Result.GetResult<Prisma.$RefreshTokenPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     squads<T extends Account$squadsArgs<ExtArgs> = {}>(args?: Subset<T, Account$squadsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SquadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    ownedPlayers<T extends Account$ownedPlayersArgs<ExtArgs> = {}>(args?: Subset<T, Account$ownedPlayersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OwnedPlayerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1831,6 +1841,7 @@ export namespace Prisma {
     readonly cash: FieldRef<"Account", 'Int'>
     readonly createdAt: FieldRef<"Account", 'DateTime'>
     readonly updatedAt: FieldRef<"Account", 'DateTime'>
+    readonly role: FieldRef<"Account", 'String'>
   }
     
 
@@ -2174,6 +2185,30 @@ export namespace Prisma {
   }
 
   /**
+   * Account.ownedPlayers
+   */
+  export type Account$ownedPlayersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OwnedPlayer
+     */
+    select?: OwnedPlayerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OwnedPlayer
+     */
+    omit?: OwnedPlayerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OwnedPlayerInclude<ExtArgs> | null
+    where?: OwnedPlayerWhereInput
+    orderBy?: OwnedPlayerOrderByWithRelationInput | OwnedPlayerOrderByWithRelationInput[]
+    cursor?: OwnedPlayerWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OwnedPlayerScalarFieldEnum | OwnedPlayerScalarFieldEnum[]
+  }
+
+  /**
    * Account.refreshToken
    */
   export type Account$refreshTokenArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2214,30 +2249,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: SquadScalarFieldEnum | SquadScalarFieldEnum[]
-  }
-
-  /**
-   * Account.ownedPlayers
-   */
-  export type Account$ownedPlayersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the OwnedPlayer
-     */
-    select?: OwnedPlayerSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the OwnedPlayer
-     */
-    omit?: OwnedPlayerOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: OwnedPlayerInclude<ExtArgs> | null
-    where?: OwnedPlayerWhereInput
-    orderBy?: OwnedPlayerOrderByWithRelationInput | OwnedPlayerOrderByWithRelationInput[]
-    cursor?: OwnedPlayerWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: OwnedPlayerScalarFieldEnum | OwnedPlayerScalarFieldEnum[]
   }
 
   /**
@@ -4277,6 +4288,7 @@ export namespace Prisma {
     accountId: number | null
     token: string | null
     createdAt: Date | null
+    expiresAt: Date | null
   }
 
   export type RefreshTokenMaxAggregateOutputType = {
@@ -4284,6 +4296,7 @@ export namespace Prisma {
     accountId: number | null
     token: string | null
     createdAt: Date | null
+    expiresAt: Date | null
   }
 
   export type RefreshTokenCountAggregateOutputType = {
@@ -4291,6 +4304,7 @@ export namespace Prisma {
     accountId: number
     token: number
     createdAt: number
+    expiresAt: number
     _all: number
   }
 
@@ -4310,6 +4324,7 @@ export namespace Prisma {
     accountId?: true
     token?: true
     createdAt?: true
+    expiresAt?: true
   }
 
   export type RefreshTokenMaxAggregateInputType = {
@@ -4317,6 +4332,7 @@ export namespace Prisma {
     accountId?: true
     token?: true
     createdAt?: true
+    expiresAt?: true
   }
 
   export type RefreshTokenCountAggregateInputType = {
@@ -4324,6 +4340,7 @@ export namespace Prisma {
     accountId?: true
     token?: true
     createdAt?: true
+    expiresAt?: true
     _all?: true
   }
 
@@ -4418,6 +4435,7 @@ export namespace Prisma {
     accountId: number
     token: string
     createdAt: Date
+    expiresAt: Date | null
     _count: RefreshTokenCountAggregateOutputType | null
     _avg: RefreshTokenAvgAggregateOutputType | null
     _sum: RefreshTokenSumAggregateOutputType | null
@@ -4444,6 +4462,7 @@ export namespace Prisma {
     accountId?: boolean
     token?: boolean
     createdAt?: boolean
+    expiresAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["refreshToken"]>
 
@@ -4454,9 +4473,10 @@ export namespace Prisma {
     accountId?: boolean
     token?: boolean
     createdAt?: boolean
+    expiresAt?: boolean
   }
 
-  export type RefreshTokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"refreshTokenId" | "accountId" | "token" | "createdAt", ExtArgs["result"]["refreshToken"]>
+  export type RefreshTokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"refreshTokenId" | "accountId" | "token" | "createdAt" | "expiresAt", ExtArgs["result"]["refreshToken"]>
   export type RefreshTokenInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }
@@ -4471,6 +4491,7 @@ export namespace Prisma {
       accountId: number
       token: string
       createdAt: Date
+      expiresAt: Date | null
     }, ExtArgs["result"]["refreshToken"]>
     composites: {}
   }
@@ -4845,6 +4866,7 @@ export namespace Prisma {
     readonly accountId: FieldRef<"RefreshToken", 'Int'>
     readonly token: FieldRef<"RefreshToken", 'String'>
     readonly createdAt: FieldRef<"RefreshToken", 'DateTime'>
+    readonly expiresAt: FieldRef<"RefreshToken", 'DateTime'>
   }
     
 
@@ -5227,7 +5249,8 @@ export namespace Prisma {
     password: 'password',
     cash: 'cash',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    role: 'role'
   };
 
   export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
@@ -5260,7 +5283,8 @@ export namespace Prisma {
     refreshTokenId: 'refreshTokenId',
     accountId: 'accountId',
     token: 'token',
-    createdAt: 'createdAt'
+    createdAt: 'createdAt',
+    expiresAt: 'expiresAt'
   };
 
   export type RefreshTokenScalarFieldEnum = (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum]
@@ -5277,10 +5301,19 @@ export namespace Prisma {
   export const AccountOrderByRelevanceFieldEnum: {
     email: 'email',
     userId: 'userId',
-    password: 'password'
+    password: 'password',
+    role: 'role'
   };
 
   export type AccountOrderByRelevanceFieldEnum = (typeof AccountOrderByRelevanceFieldEnum)[keyof typeof AccountOrderByRelevanceFieldEnum]
+
+
+  export const NullsOrder: {
+    first: 'first',
+    last: 'last'
+  };
+
+  export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
   export const RefreshTokenOrderByRelevanceFieldEnum: {
@@ -5337,9 +5370,10 @@ export namespace Prisma {
     cash?: IntFilter<"Account"> | number
     createdAt?: DateTimeFilter<"Account"> | Date | string
     updatedAt?: DateTimeFilter<"Account"> | Date | string
+    role?: StringFilter<"Account"> | string
+    ownedPlayers?: OwnedPlayerListRelationFilter
     refreshToken?: XOR<RefreshTokenNullableScalarRelationFilter, RefreshTokenWhereInput> | null
     squads?: SquadListRelationFilter
-    ownedPlayers?: OwnedPlayerListRelationFilter
   }
 
   export type AccountOrderByWithRelationInput = {
@@ -5350,9 +5384,10 @@ export namespace Prisma {
     cash?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    role?: SortOrder
+    ownedPlayers?: OwnedPlayerOrderByRelationAggregateInput
     refreshToken?: RefreshTokenOrderByWithRelationInput
     squads?: SquadOrderByRelationAggregateInput
-    ownedPlayers?: OwnedPlayerOrderByRelationAggregateInput
     _relevance?: AccountOrderByRelevanceInput
   }
 
@@ -5367,9 +5402,10 @@ export namespace Prisma {
     cash?: IntFilter<"Account"> | number
     createdAt?: DateTimeFilter<"Account"> | Date | string
     updatedAt?: DateTimeFilter<"Account"> | Date | string
+    role?: StringFilter<"Account"> | string
+    ownedPlayers?: OwnedPlayerListRelationFilter
     refreshToken?: XOR<RefreshTokenNullableScalarRelationFilter, RefreshTokenWhereInput> | null
     squads?: SquadListRelationFilter
-    ownedPlayers?: OwnedPlayerListRelationFilter
   }, "accountId" | "email" | "userId">
 
   export type AccountOrderByWithAggregationInput = {
@@ -5380,6 +5416,7 @@ export namespace Prisma {
     cash?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    role?: SortOrder
     _count?: AccountCountOrderByAggregateInput
     _avg?: AccountAvgOrderByAggregateInput
     _max?: AccountMaxOrderByAggregateInput
@@ -5398,6 +5435,7 @@ export namespace Prisma {
     cash?: IntWithAggregatesFilter<"Account"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Account"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Account"> | Date | string
+    role?: StringWithAggregatesFilter<"Account"> | string
   }
 
   export type OwnedPlayerWhereInput = {
@@ -5533,6 +5571,7 @@ export namespace Prisma {
     accountId?: IntFilter<"RefreshToken"> | number
     token?: StringFilter<"RefreshToken"> | string
     createdAt?: DateTimeFilter<"RefreshToken"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"RefreshToken"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
   }
 
@@ -5541,6 +5580,7 @@ export namespace Prisma {
     accountId?: SortOrder
     token?: SortOrder
     createdAt?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
     account?: AccountOrderByWithRelationInput
     _relevance?: RefreshTokenOrderByRelevanceInput
   }
@@ -5553,6 +5593,7 @@ export namespace Prisma {
     NOT?: RefreshTokenWhereInput | RefreshTokenWhereInput[]
     token?: StringFilter<"RefreshToken"> | string
     createdAt?: DateTimeFilter<"RefreshToken"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"RefreshToken"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
   }, "refreshTokenId" | "accountId">
 
@@ -5561,6 +5602,7 @@ export namespace Prisma {
     accountId?: SortOrder
     token?: SortOrder
     createdAt?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
     _count?: RefreshTokenCountOrderByAggregateInput
     _avg?: RefreshTokenAvgOrderByAggregateInput
     _max?: RefreshTokenMaxOrderByAggregateInput
@@ -5576,6 +5618,7 @@ export namespace Prisma {
     accountId?: IntWithAggregatesFilter<"RefreshToken"> | number
     token?: StringWithAggregatesFilter<"RefreshToken"> | string
     createdAt?: DateTimeWithAggregatesFilter<"RefreshToken"> | Date | string
+    expiresAt?: DateTimeNullableWithAggregatesFilter<"RefreshToken"> | Date | string | null
   }
 
   export type AccountCreateInput = {
@@ -5585,9 +5628,10 @@ export namespace Prisma {
     cash: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: string
+    ownedPlayers?: OwnedPlayerCreateNestedManyWithoutAccountInput
     refreshToken?: RefreshTokenCreateNestedOneWithoutAccountInput
     squads?: SquadCreateNestedManyWithoutAccountInput
-    ownedPlayers?: OwnedPlayerCreateNestedManyWithoutAccountInput
   }
 
   export type AccountUncheckedCreateInput = {
@@ -5598,9 +5642,10 @@ export namespace Prisma {
     cash: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: string
+    ownedPlayers?: OwnedPlayerUncheckedCreateNestedManyWithoutAccountInput
     refreshToken?: RefreshTokenUncheckedCreateNestedOneWithoutAccountInput
     squads?: SquadUncheckedCreateNestedManyWithoutAccountInput
-    ownedPlayers?: OwnedPlayerUncheckedCreateNestedManyWithoutAccountInput
   }
 
   export type AccountUpdateInput = {
@@ -5610,9 +5655,10 @@ export namespace Prisma {
     cash?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: StringFieldUpdateOperationsInput | string
+    ownedPlayers?: OwnedPlayerUpdateManyWithoutAccountNestedInput
     refreshToken?: RefreshTokenUpdateOneWithoutAccountNestedInput
     squads?: SquadUpdateManyWithoutAccountNestedInput
-    ownedPlayers?: OwnedPlayerUpdateManyWithoutAccountNestedInput
   }
 
   export type AccountUncheckedUpdateInput = {
@@ -5623,9 +5669,10 @@ export namespace Prisma {
     cash?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: StringFieldUpdateOperationsInput | string
+    ownedPlayers?: OwnedPlayerUncheckedUpdateManyWithoutAccountNestedInput
     refreshToken?: RefreshTokenUncheckedUpdateOneWithoutAccountNestedInput
     squads?: SquadUncheckedUpdateManyWithoutAccountNestedInput
-    ownedPlayers?: OwnedPlayerUncheckedUpdateManyWithoutAccountNestedInput
   }
 
   export type AccountCreateManyInput = {
@@ -5636,6 +5683,7 @@ export namespace Prisma {
     cash: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: string
   }
 
   export type AccountUpdateManyMutationInput = {
@@ -5645,6 +5693,7 @@ export namespace Prisma {
     cash?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: StringFieldUpdateOperationsInput | string
   }
 
   export type AccountUncheckedUpdateManyInput = {
@@ -5655,6 +5704,7 @@ export namespace Prisma {
     cash?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: StringFieldUpdateOperationsInput | string
   }
 
   export type OwnedPlayerCreateInput = {
@@ -5774,6 +5824,7 @@ export namespace Prisma {
   export type RefreshTokenCreateInput = {
     token: string
     createdAt?: Date | string
+    expiresAt?: Date | string | null
     account: AccountCreateNestedOneWithoutRefreshTokenInput
   }
 
@@ -5782,11 +5833,13 @@ export namespace Prisma {
     accountId: number
     token: string
     createdAt?: Date | string
+    expiresAt?: Date | string | null
   }
 
   export type RefreshTokenUpdateInput = {
     token?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutRefreshTokenNestedInput
   }
 
@@ -5795,6 +5848,7 @@ export namespace Prisma {
     accountId?: IntFieldUpdateOperationsInput | number
     token?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type RefreshTokenCreateManyInput = {
@@ -5802,11 +5856,13 @@ export namespace Prisma {
     accountId: number
     token: string
     createdAt?: Date | string
+    expiresAt?: Date | string | null
   }
 
   export type RefreshTokenUpdateManyMutationInput = {
     token?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type RefreshTokenUncheckedUpdateManyInput = {
@@ -5814,6 +5870,7 @@ export namespace Prisma {
     accountId?: IntFieldUpdateOperationsInput | number
     token?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -5853,6 +5910,12 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type OwnedPlayerListRelationFilter = {
+    every?: OwnedPlayerWhereInput
+    some?: OwnedPlayerWhereInput
+    none?: OwnedPlayerWhereInput
+  }
+
   export type RefreshTokenNullableScalarRelationFilter = {
     is?: RefreshTokenWhereInput | null
     isNot?: RefreshTokenWhereInput | null
@@ -5864,17 +5927,11 @@ export namespace Prisma {
     none?: SquadWhereInput
   }
 
-  export type OwnedPlayerListRelationFilter = {
-    every?: OwnedPlayerWhereInput
-    some?: OwnedPlayerWhereInput
-    none?: OwnedPlayerWhereInput
-  }
-
-  export type SquadOrderByRelationAggregateInput = {
+  export type OwnedPlayerOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
-  export type OwnedPlayerOrderByRelationAggregateInput = {
+  export type SquadOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -5892,6 +5949,7 @@ export namespace Prisma {
     cash?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    role?: SortOrder
   }
 
   export type AccountAvgOrderByAggregateInput = {
@@ -5907,6 +5965,7 @@ export namespace Prisma {
     cash?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    role?: SortOrder
   }
 
   export type AccountMinOrderByAggregateInput = {
@@ -5917,6 +5976,7 @@ export namespace Prisma {
     cash?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    role?: SortOrder
   }
 
   export type AccountSumOrderByAggregateInput = {
@@ -6059,6 +6119,22 @@ export namespace Prisma {
     ownedPlayerId?: SortOrder
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type SortOrderInput = {
+    sort: SortOrder
+    nulls?: NullsOrder
+  }
+
   export type RefreshTokenOrderByRelevanceInput = {
     fields: RefreshTokenOrderByRelevanceFieldEnum | RefreshTokenOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -6070,6 +6146,7 @@ export namespace Prisma {
     accountId?: SortOrder
     token?: SortOrder
     createdAt?: SortOrder
+    expiresAt?: SortOrder
   }
 
   export type RefreshTokenAvgOrderByAggregateInput = {
@@ -6082,6 +6159,7 @@ export namespace Prisma {
     accountId?: SortOrder
     token?: SortOrder
     createdAt?: SortOrder
+    expiresAt?: SortOrder
   }
 
   export type RefreshTokenMinOrderByAggregateInput = {
@@ -6089,11 +6167,33 @@ export namespace Prisma {
     accountId?: SortOrder
     token?: SortOrder
     createdAt?: SortOrder
+    expiresAt?: SortOrder
   }
 
   export type RefreshTokenSumOrderByAggregateInput = {
     refreshTokenId?: SortOrder
     accountId?: SortOrder
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type OwnedPlayerCreateNestedManyWithoutAccountInput = {
+    create?: XOR<OwnedPlayerCreateWithoutAccountInput, OwnedPlayerUncheckedCreateWithoutAccountInput> | OwnedPlayerCreateWithoutAccountInput[] | OwnedPlayerUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: OwnedPlayerCreateOrConnectWithoutAccountInput | OwnedPlayerCreateOrConnectWithoutAccountInput[]
+    createMany?: OwnedPlayerCreateManyAccountInputEnvelope
+    connect?: OwnedPlayerWhereUniqueInput | OwnedPlayerWhereUniqueInput[]
   }
 
   export type RefreshTokenCreateNestedOneWithoutAccountInput = {
@@ -6109,7 +6209,7 @@ export namespace Prisma {
     connect?: SquadWhereUniqueInput | SquadWhereUniqueInput[]
   }
 
-  export type OwnedPlayerCreateNestedManyWithoutAccountInput = {
+  export type OwnedPlayerUncheckedCreateNestedManyWithoutAccountInput = {
     create?: XOR<OwnedPlayerCreateWithoutAccountInput, OwnedPlayerUncheckedCreateWithoutAccountInput> | OwnedPlayerCreateWithoutAccountInput[] | OwnedPlayerUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: OwnedPlayerCreateOrConnectWithoutAccountInput | OwnedPlayerCreateOrConnectWithoutAccountInput[]
     createMany?: OwnedPlayerCreateManyAccountInputEnvelope
@@ -6129,13 +6229,6 @@ export namespace Prisma {
     connect?: SquadWhereUniqueInput | SquadWhereUniqueInput[]
   }
 
-  export type OwnedPlayerUncheckedCreateNestedManyWithoutAccountInput = {
-    create?: XOR<OwnedPlayerCreateWithoutAccountInput, OwnedPlayerUncheckedCreateWithoutAccountInput> | OwnedPlayerCreateWithoutAccountInput[] | OwnedPlayerUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: OwnedPlayerCreateOrConnectWithoutAccountInput | OwnedPlayerCreateOrConnectWithoutAccountInput[]
-    createMany?: OwnedPlayerCreateManyAccountInputEnvelope
-    connect?: OwnedPlayerWhereUniqueInput | OwnedPlayerWhereUniqueInput[]
-  }
-
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -6150,6 +6243,20 @@ export namespace Prisma {
 
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
+  }
+
+  export type OwnedPlayerUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<OwnedPlayerCreateWithoutAccountInput, OwnedPlayerUncheckedCreateWithoutAccountInput> | OwnedPlayerCreateWithoutAccountInput[] | OwnedPlayerUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: OwnedPlayerCreateOrConnectWithoutAccountInput | OwnedPlayerCreateOrConnectWithoutAccountInput[]
+    upsert?: OwnedPlayerUpsertWithWhereUniqueWithoutAccountInput | OwnedPlayerUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: OwnedPlayerCreateManyAccountInputEnvelope
+    set?: OwnedPlayerWhereUniqueInput | OwnedPlayerWhereUniqueInput[]
+    disconnect?: OwnedPlayerWhereUniqueInput | OwnedPlayerWhereUniqueInput[]
+    delete?: OwnedPlayerWhereUniqueInput | OwnedPlayerWhereUniqueInput[]
+    connect?: OwnedPlayerWhereUniqueInput | OwnedPlayerWhereUniqueInput[]
+    update?: OwnedPlayerUpdateWithWhereUniqueWithoutAccountInput | OwnedPlayerUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: OwnedPlayerUpdateManyWithWhereWithoutAccountInput | OwnedPlayerUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: OwnedPlayerScalarWhereInput | OwnedPlayerScalarWhereInput[]
   }
 
   export type RefreshTokenUpdateOneWithoutAccountNestedInput = {
@@ -6176,7 +6283,7 @@ export namespace Prisma {
     deleteMany?: SquadScalarWhereInput | SquadScalarWhereInput[]
   }
 
-  export type OwnedPlayerUpdateManyWithoutAccountNestedInput = {
+  export type OwnedPlayerUncheckedUpdateManyWithoutAccountNestedInput = {
     create?: XOR<OwnedPlayerCreateWithoutAccountInput, OwnedPlayerUncheckedCreateWithoutAccountInput> | OwnedPlayerCreateWithoutAccountInput[] | OwnedPlayerUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: OwnedPlayerCreateOrConnectWithoutAccountInput | OwnedPlayerCreateOrConnectWithoutAccountInput[]
     upsert?: OwnedPlayerUpsertWithWhereUniqueWithoutAccountInput | OwnedPlayerUpsertWithWhereUniqueWithoutAccountInput[]
@@ -6212,20 +6319,6 @@ export namespace Prisma {
     update?: SquadUpdateWithWhereUniqueWithoutAccountInput | SquadUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: SquadUpdateManyWithWhereWithoutAccountInput | SquadUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: SquadScalarWhereInput | SquadScalarWhereInput[]
-  }
-
-  export type OwnedPlayerUncheckedUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<OwnedPlayerCreateWithoutAccountInput, OwnedPlayerUncheckedCreateWithoutAccountInput> | OwnedPlayerCreateWithoutAccountInput[] | OwnedPlayerUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: OwnedPlayerCreateOrConnectWithoutAccountInput | OwnedPlayerCreateOrConnectWithoutAccountInput[]
-    upsert?: OwnedPlayerUpsertWithWhereUniqueWithoutAccountInput | OwnedPlayerUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: OwnedPlayerCreateManyAccountInputEnvelope
-    set?: OwnedPlayerWhereUniqueInput | OwnedPlayerWhereUniqueInput[]
-    disconnect?: OwnedPlayerWhereUniqueInput | OwnedPlayerWhereUniqueInput[]
-    delete?: OwnedPlayerWhereUniqueInput | OwnedPlayerWhereUniqueInput[]
-    connect?: OwnedPlayerWhereUniqueInput | OwnedPlayerWhereUniqueInput[]
-    update?: OwnedPlayerUpdateWithWhereUniqueWithoutAccountInput | OwnedPlayerUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: OwnedPlayerUpdateManyWithWhereWithoutAccountInput | OwnedPlayerUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: OwnedPlayerScalarWhereInput | OwnedPlayerScalarWhereInput[]
   }
 
   export type AccountCreateNestedOneWithoutOwnedPlayersInput = {
@@ -6316,6 +6409,10 @@ export namespace Prisma {
     create?: XOR<AccountCreateWithoutRefreshTokenInput, AccountUncheckedCreateWithoutRefreshTokenInput>
     connectOrCreate?: AccountCreateOrConnectWithoutRefreshTokenInput
     connect?: AccountWhereUniqueInput
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
   }
 
   export type AccountUpdateOneRequiredWithoutRefreshTokenNestedInput = {
@@ -6422,15 +6519,80 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type OwnedPlayerCreateWithoutAccountInput = {
+    playerId: number
+    count: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    squads?: SquadCreateNestedManyWithoutOwnedPlayerInput
+  }
+
+  export type OwnedPlayerUncheckedCreateWithoutAccountInput = {
+    ownedPlayerId?: number
+    playerId: number
+    count: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    squads?: SquadUncheckedCreateNestedManyWithoutOwnedPlayerInput
+  }
+
+  export type OwnedPlayerCreateOrConnectWithoutAccountInput = {
+    where: OwnedPlayerWhereUniqueInput
+    create: XOR<OwnedPlayerCreateWithoutAccountInput, OwnedPlayerUncheckedCreateWithoutAccountInput>
+  }
+
+  export type OwnedPlayerCreateManyAccountInputEnvelope = {
+    data: OwnedPlayerCreateManyAccountInput | OwnedPlayerCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
   export type RefreshTokenCreateWithoutAccountInput = {
     token: string
     createdAt?: Date | string
+    expiresAt?: Date | string | null
   }
 
   export type RefreshTokenUncheckedCreateWithoutAccountInput = {
     refreshTokenId?: number
     token: string
     createdAt?: Date | string
+    expiresAt?: Date | string | null
   }
 
   export type RefreshTokenCreateOrConnectWithoutAccountInput = {
@@ -6461,31 +6623,32 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type OwnedPlayerCreateWithoutAccountInput = {
-    playerId: number
-    count: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    squads?: SquadCreateNestedManyWithoutOwnedPlayerInput
-  }
-
-  export type OwnedPlayerUncheckedCreateWithoutAccountInput = {
-    ownedPlayerId?: number
-    playerId: number
-    count: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    squads?: SquadUncheckedCreateNestedManyWithoutOwnedPlayerInput
-  }
-
-  export type OwnedPlayerCreateOrConnectWithoutAccountInput = {
+  export type OwnedPlayerUpsertWithWhereUniqueWithoutAccountInput = {
     where: OwnedPlayerWhereUniqueInput
+    update: XOR<OwnedPlayerUpdateWithoutAccountInput, OwnedPlayerUncheckedUpdateWithoutAccountInput>
     create: XOR<OwnedPlayerCreateWithoutAccountInput, OwnedPlayerUncheckedCreateWithoutAccountInput>
   }
 
-  export type OwnedPlayerCreateManyAccountInputEnvelope = {
-    data: OwnedPlayerCreateManyAccountInput | OwnedPlayerCreateManyAccountInput[]
-    skipDuplicates?: boolean
+  export type OwnedPlayerUpdateWithWhereUniqueWithoutAccountInput = {
+    where: OwnedPlayerWhereUniqueInput
+    data: XOR<OwnedPlayerUpdateWithoutAccountInput, OwnedPlayerUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type OwnedPlayerUpdateManyWithWhereWithoutAccountInput = {
+    where: OwnedPlayerScalarWhereInput
+    data: XOR<OwnedPlayerUpdateManyMutationInput, OwnedPlayerUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type OwnedPlayerScalarWhereInput = {
+    AND?: OwnedPlayerScalarWhereInput | OwnedPlayerScalarWhereInput[]
+    OR?: OwnedPlayerScalarWhereInput[]
+    NOT?: OwnedPlayerScalarWhereInput | OwnedPlayerScalarWhereInput[]
+    ownedPlayerId?: IntFilter<"OwnedPlayer"> | number
+    accountId?: IntFilter<"OwnedPlayer"> | number
+    playerId?: IntFilter<"OwnedPlayer"> | number
+    count?: IntFilter<"OwnedPlayer"> | number
+    createdAt?: DateTimeFilter<"OwnedPlayer"> | Date | string
+    updatedAt?: DateTimeFilter<"OwnedPlayer"> | Date | string
   }
 
   export type RefreshTokenUpsertWithoutAccountInput = {
@@ -6502,12 +6665,14 @@ export namespace Prisma {
   export type RefreshTokenUpdateWithoutAccountInput = {
     token?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type RefreshTokenUncheckedUpdateWithoutAccountInput = {
     refreshTokenId?: IntFieldUpdateOperationsInput | number
     token?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type SquadUpsertWithWhereUniqueWithoutAccountInput = {
@@ -6537,34 +6702,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Squad"> | Date | string
   }
 
-  export type OwnedPlayerUpsertWithWhereUniqueWithoutAccountInput = {
-    where: OwnedPlayerWhereUniqueInput
-    update: XOR<OwnedPlayerUpdateWithoutAccountInput, OwnedPlayerUncheckedUpdateWithoutAccountInput>
-    create: XOR<OwnedPlayerCreateWithoutAccountInput, OwnedPlayerUncheckedCreateWithoutAccountInput>
-  }
-
-  export type OwnedPlayerUpdateWithWhereUniqueWithoutAccountInput = {
-    where: OwnedPlayerWhereUniqueInput
-    data: XOR<OwnedPlayerUpdateWithoutAccountInput, OwnedPlayerUncheckedUpdateWithoutAccountInput>
-  }
-
-  export type OwnedPlayerUpdateManyWithWhereWithoutAccountInput = {
-    where: OwnedPlayerScalarWhereInput
-    data: XOR<OwnedPlayerUpdateManyMutationInput, OwnedPlayerUncheckedUpdateManyWithoutAccountInput>
-  }
-
-  export type OwnedPlayerScalarWhereInput = {
-    AND?: OwnedPlayerScalarWhereInput | OwnedPlayerScalarWhereInput[]
-    OR?: OwnedPlayerScalarWhereInput[]
-    NOT?: OwnedPlayerScalarWhereInput | OwnedPlayerScalarWhereInput[]
-    ownedPlayerId?: IntFilter<"OwnedPlayer"> | number
-    accountId?: IntFilter<"OwnedPlayer"> | number
-    playerId?: IntFilter<"OwnedPlayer"> | number
-    count?: IntFilter<"OwnedPlayer"> | number
-    createdAt?: DateTimeFilter<"OwnedPlayer"> | Date | string
-    updatedAt?: DateTimeFilter<"OwnedPlayer"> | Date | string
-  }
-
   export type AccountCreateWithoutOwnedPlayersInput = {
     email: string
     userId: string
@@ -6572,6 +6709,7 @@ export namespace Prisma {
     cash: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: string
     refreshToken?: RefreshTokenCreateNestedOneWithoutAccountInput
     squads?: SquadCreateNestedManyWithoutAccountInput
   }
@@ -6584,6 +6722,7 @@ export namespace Prisma {
     cash: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: string
     refreshToken?: RefreshTokenUncheckedCreateNestedOneWithoutAccountInput
     squads?: SquadUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -6634,6 +6773,7 @@ export namespace Prisma {
     cash?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: StringFieldUpdateOperationsInput | string
     refreshToken?: RefreshTokenUpdateOneWithoutAccountNestedInput
     squads?: SquadUpdateManyWithoutAccountNestedInput
   }
@@ -6646,6 +6786,7 @@ export namespace Prisma {
     cash?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: StringFieldUpdateOperationsInput | string
     refreshToken?: RefreshTokenUncheckedUpdateOneWithoutAccountNestedInput
     squads?: SquadUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -6673,8 +6814,9 @@ export namespace Prisma {
     cash: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    refreshToken?: RefreshTokenCreateNestedOneWithoutAccountInput
+    role?: string
     ownedPlayers?: OwnedPlayerCreateNestedManyWithoutAccountInput
+    refreshToken?: RefreshTokenCreateNestedOneWithoutAccountInput
   }
 
   export type AccountUncheckedCreateWithoutSquadsInput = {
@@ -6685,8 +6827,9 @@ export namespace Prisma {
     cash: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    refreshToken?: RefreshTokenUncheckedCreateNestedOneWithoutAccountInput
+    role?: string
     ownedPlayers?: OwnedPlayerUncheckedCreateNestedManyWithoutAccountInput
+    refreshToken?: RefreshTokenUncheckedCreateNestedOneWithoutAccountInput
   }
 
   export type AccountCreateOrConnectWithoutSquadsInput = {
@@ -6734,8 +6877,9 @@ export namespace Prisma {
     cash?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    refreshToken?: RefreshTokenUpdateOneWithoutAccountNestedInput
+    role?: StringFieldUpdateOperationsInput | string
     ownedPlayers?: OwnedPlayerUpdateManyWithoutAccountNestedInput
+    refreshToken?: RefreshTokenUpdateOneWithoutAccountNestedInput
   }
 
   export type AccountUncheckedUpdateWithoutSquadsInput = {
@@ -6746,8 +6890,9 @@ export namespace Prisma {
     cash?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    refreshToken?: RefreshTokenUncheckedUpdateOneWithoutAccountNestedInput
+    role?: StringFieldUpdateOperationsInput | string
     ownedPlayers?: OwnedPlayerUncheckedUpdateManyWithoutAccountNestedInput
+    refreshToken?: RefreshTokenUncheckedUpdateOneWithoutAccountNestedInput
   }
 
   export type OwnedPlayerUpsertWithoutSquadsInput = {
@@ -6785,8 +6930,9 @@ export namespace Prisma {
     cash: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    squads?: SquadCreateNestedManyWithoutAccountInput
+    role?: string
     ownedPlayers?: OwnedPlayerCreateNestedManyWithoutAccountInput
+    squads?: SquadCreateNestedManyWithoutAccountInput
   }
 
   export type AccountUncheckedCreateWithoutRefreshTokenInput = {
@@ -6797,8 +6943,9 @@ export namespace Prisma {
     cash: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    squads?: SquadUncheckedCreateNestedManyWithoutAccountInput
+    role?: string
     ownedPlayers?: OwnedPlayerUncheckedCreateNestedManyWithoutAccountInput
+    squads?: SquadUncheckedCreateNestedManyWithoutAccountInput
   }
 
   export type AccountCreateOrConnectWithoutRefreshTokenInput = {
@@ -6824,8 +6971,9 @@ export namespace Prisma {
     cash?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    squads?: SquadUpdateManyWithoutAccountNestedInput
+    role?: StringFieldUpdateOperationsInput | string
     ownedPlayers?: OwnedPlayerUpdateManyWithoutAccountNestedInput
+    squads?: SquadUpdateManyWithoutAccountNestedInput
   }
 
   export type AccountUncheckedUpdateWithoutRefreshTokenInput = {
@@ -6836,15 +6984,9 @@ export namespace Prisma {
     cash?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    squads?: SquadUncheckedUpdateManyWithoutAccountNestedInput
+    role?: StringFieldUpdateOperationsInput | string
     ownedPlayers?: OwnedPlayerUncheckedUpdateManyWithoutAccountNestedInput
-  }
-
-  export type SquadCreateManyAccountInput = {
-    squadId?: number
-    ownedPlayerId: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
+    squads?: SquadUncheckedUpdateManyWithoutAccountNestedInput
   }
 
   export type OwnedPlayerCreateManyAccountInput = {
@@ -6855,24 +6997,11 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
-  export type SquadUpdateWithoutAccountInput = {
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ownedPlayer?: OwnedPlayerUpdateOneRequiredWithoutSquadsNestedInput
-  }
-
-  export type SquadUncheckedUpdateWithoutAccountInput = {
-    squadId?: IntFieldUpdateOperationsInput | number
-    ownedPlayerId?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type SquadUncheckedUpdateManyWithoutAccountInput = {
-    squadId?: IntFieldUpdateOperationsInput | number
-    ownedPlayerId?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  export type SquadCreateManyAccountInput = {
+    squadId?: number
+    ownedPlayerId: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type OwnedPlayerUpdateWithoutAccountInput = {
@@ -6896,6 +7025,26 @@ export namespace Prisma {
     ownedPlayerId?: IntFieldUpdateOperationsInput | number
     playerId?: IntFieldUpdateOperationsInput | number
     count?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SquadUpdateWithoutAccountInput = {
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ownedPlayer?: OwnedPlayerUpdateOneRequiredWithoutSquadsNestedInput
+  }
+
+  export type SquadUncheckedUpdateWithoutAccountInput = {
+    squadId?: IntFieldUpdateOperationsInput | number
+    ownedPlayerId?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SquadUncheckedUpdateManyWithoutAccountInput = {
+    squadId?: IntFieldUpdateOperationsInput | number
+    ownedPlayerId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
