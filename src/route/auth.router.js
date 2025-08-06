@@ -14,9 +14,9 @@ const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{
 
 // 토큰 만료 시간 상수
 const TOKEN_EXPIRY = {
-  ACCESS_TOKEN: '15m',           // Access Token 수명, JWT토큰 시간 설정시 사용
+  ACCESS_TOKEN: '1m',           // Access Token 수명, JWT토큰 시간 설정시 사용
   REFRESH_TOKEN: '1h',           // Refresh Token 수명  
-  ACCESS_TOKEN_MS: 15 * 60 * 1000,   // 15분 (밀리초), DB 토큰 시간 설정시 사용
+  ACCESS_TOKEN_MS: 1 * 60 * 1000,   // 1분 (밀리초), DB 토큰 시간 설정시 사용
   REFRESH_TOKEN_MS: 60 * 60 * 1000   // 1시간 (밀리초)
 };
 
