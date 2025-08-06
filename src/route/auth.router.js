@@ -14,9 +14,9 @@ const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{
 
 // 토큰 만료 시간 상수
 const TOKEN_EXPIRY = {
-  ACCESS_TOKEN: '15m',           // Access Token 수명, JWT토큰 시간 설정시 사용
+  ACCESS_TOKEN: '1m',           // Access Token 수명, JWT토큰 시간 설정시 사용
   REFRESH_TOKEN: '1h',           // Refresh Token 수명  
-  ACCESS_TOKEN_MS: 15 * 60 * 1000,   // 15분 (밀리초), DB 토큰 시간 설정시 사용
+  ACCESS_TOKEN_MS: 1 * 60 * 1000,   // 1분 (밀리초), DB 토큰 시간 설정시 사용
   REFRESH_TOKEN_MS: 60 * 60 * 1000   // 1시간 (밀리초)
 };
 
@@ -143,7 +143,7 @@ const authMiddleware = async (req, res, next) => {
        const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
        const account = await userPrisma.account.findUnique({
          where: { accountId: decoded.accountId },
-         select: { accountId: true, userId: true, email: true, cash: true, createdAt: true }
+         select: { accountId: true, userId: true, email: true, cash: true, role: true, createdAt: true }
        });
        
        if (account) {
@@ -167,7 +167,7 @@ const authMiddleware = async (req, res, next) => {
      
      const account = await userPrisma.account.findUnique({
        where: { accountId: refreshResult.accountId },
-       select: { accountId: true, userId: true, email: true, cash: true, createdAt: true }
+       select: { accountId: true, userId: true, email: true, cash: true, role: true, createdAt: true }
      });
      
      if (!account) {
@@ -182,6 +182,24 @@ const authMiddleware = async (req, res, next) => {
      return res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
    }
  };
+
+/**
+ * 관리자 권한이 필요한 API용 미들웨어
+ * authMiddleware 이후에 사용해야 함
+ */
+const requireAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: '인증이 필요합니다.' });
+  }
+  
+  if (req.user.role !== 'ADMIN') {
+    return res.status(403).json({ 
+      message: '관리자 권한이 필요합니다.' 
+    });
+  }
+  
+  next();
+};
 
 
 /**
@@ -316,6 +334,7 @@ router.post('/login', async (req, res) => {
         email: true,
         password: true,
         cash: true,
+        role: true,
         createdAt: true
       }
     });
@@ -412,5 +431,6 @@ router.post('/logout', authMiddleware, async (req, res) => {
 });
 
 
-export { authMiddleware };
+// 미들웨어들을 다른 라우터에서도 사용할 수 있도록 export
+export { authMiddleware, requireAdmin };
 export default router;
