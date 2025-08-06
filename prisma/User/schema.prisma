@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../User/generated/user"
@@ -15,59 +9,55 @@ datasource db {
 }
 
 model Account {
-  accountId           Int             @id @default(autoincrement())
-  refreshToken  RefreshToken?  @relation("refreshToken")
-  email        String          @unique
-  userId       String          @unique
+  accountId    Int           @id @default(autoincrement())
+  email        String        @unique
+  userId       String        @unique
   password     String
   cash         Int
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-
-  squads       Squad[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   ownedPlayers OwnedPlayer[]
+  refreshToken RefreshToken? @relation("refreshToken")
+  squads       Squad[]
 
   @@map("Account")
 }
 
-
-
-
-
 model OwnedPlayer {
-  ownedPlayerId             Int       @id @default(autoincrement())
-  accountId      Int
-  playerId       Int
-  count          Int
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  ownedPlayerId Int      @id @default(autoincrement())
+  accountId     Int
+  playerId      Int
+  count         Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  account       Account  @relation(fields: [accountId], references: [accountId])
+  squads        Squad[]
 
-  account        Account  @relation(fields: [accountId], references: [accountId])
-  squads         Squad[]
-
+  @@index([accountId], map: "OwnedPlayers_accountId_fkey")
   @@map("OwnedPlayers")
 }
 
 model Squad {
-  squadId             Int          @id @default(autoincrement())
-  accountId      Int
-  ownedPlayerId  Int
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  squadId       Int         @id @default(autoincrement())
+  accountId     Int
+  ownedPlayerId Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  account       Account     @relation(fields: [accountId], references: [accountId])
+  ownedPlayer   OwnedPlayer @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
 
-  account        Account       @relation(fields: [accountId], references: [accountId])
-  ownedPlayer    OwnedPlayer   @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
-
+  @@index([accountId], map: "Squad_accountId_fkey")
+  @@index([ownedPlayerId], map: "Squad_ownedPlayerId_fkey")
   @@map("Squad")
 }
 
 model RefreshToken {
-  refreshTokenId        Int      @id @default(autoincrement())
-  accountId             Int     @unique
-  token                 String
-  createdAt             DateTime @default(now())
-
- account Account @relation("refreshToken", fields: [accountId], references: [accountId])
+  refreshTokenId Int       @id @default(autoincrement())
+  accountId      Int       @unique
+  token          String
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+  account        Account   @relation("refreshToken", fields: [accountId], references: [accountId])
 
   @@map("Refreshtoken")
 }
