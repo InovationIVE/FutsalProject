@@ -134,9 +134,15 @@ const setTokenCookies = (res, accessToken, refreshToken) => {
  * 인증 미들웨어 - Access Token 검증 또는 자동 갱신
  */
 const authMiddleware = async (req, res, next) => {
+
+  const excludedRoutes = ['/auth/login'];
+
+  if (excludedRoutes.includes(req.path)) {
+    return next(); // 그냥 통과시킴 (미들웨어 로직 무시)
+  }
    try {
      const accessToken = req.cookies.accessToken;
-     const refreshToken = req.cookies.refreshToken;
+     const refreshToken= req.cookies.refreshToken;
      
      // Access Token이 유효한 경우 - 바로 통과
      if (accessToken) {

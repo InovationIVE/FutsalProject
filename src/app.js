@@ -5,7 +5,7 @@ import ErrorHandlingMiddleware from './middleWares/error-handling.middleware.js'
 import logMiddleware from './middleWares/log.middleware.js';
 import ownedPlayersRouter from './routes/ownedPlayers.router.js';
 import authRouter from './routes/auth.router.js';
-
+import { authMiddleware } from './routes/auth.router.js';
 
 
 dotenv.config();
@@ -16,6 +16,7 @@ const PORT = 3018;
 app.use(express.json());
 app.use(cookieParser());
 app.use(logMiddleware);
+app.use(authMiddleware);
 
 
 app.use('/api', [ownedPlayersRouter]);
