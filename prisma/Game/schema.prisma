@@ -1,6 +1,7 @@
 generator client {
   provider = "prisma-client-js"
   output   = "../Game/generated/prisma"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
@@ -15,10 +16,13 @@ model Player {
   speed          Int
   attack         Int
   defence        Int
+  price          Int 
   profileImage   String?
   rarity         String
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   @@map("Player")
 }
@@ -42,6 +46,16 @@ model Gacha {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   platinum  Int
+  gachaId         Int      @id @default(autoincrement())
+  cardName   String   @unique
+  price      Int
+  bronze     Int
+  silver     Int
+  gold       Int
+  paltinum   Int
+  diamond    Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@map("Gacha")
 }
