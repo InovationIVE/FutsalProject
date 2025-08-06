@@ -37,7 +37,7 @@ export const getThePlayer = async (req, res) => {
         name : true,
         speed : true,
         attack : true,
-        defense : true,
+        defence : true,
         profileImage : true,
         rarity : true,
 
@@ -56,7 +56,7 @@ export const getThePlayer = async (req, res) => {
 
 export const createPlayer = async (req, res) => {
     try {
-    const {soccerPlayerId, name, speed, attack, defense, profileImage, rarity} = req.body;
+    const {soccerPlayerId, name, speed, attack, defence, profileImage, rarity} = req.body;
     const isPlayerExist = await gamePrisma.player.findUnique({
       where: { soccerPlayerId : soccerPlayerId }
     });
@@ -70,7 +70,7 @@ export const createPlayer = async (req, res) => {
         name,
         speed,
         attack,
-        defense,
+        defence,
         profileImage,
         rarity
       }
@@ -87,7 +87,7 @@ export const createPlayer = async (req, res) => {
 export const updatePlayer = async (req, res) => {
   try {
     const { playerId } = req.params;
-    const {soccerPlayerId, name, speed, attack, defense, profileImage ,rarity} = req.body;
+    const {soccerPlayerId, name, speed, attack, defence, profileImage ,rarity} = req.body;
     
     /** 보류 **/
     const isPlayerExist = await gamePrisma.player.findUnique({
@@ -104,7 +104,7 @@ export const updatePlayer = async (req, res) => {
         name,
         speed,
         attack,
-        defense,
+        defence,
         profileImage,
         rarity
       }

@@ -129,7 +129,6 @@ exports.Prisma.PlayerScalarFieldEnum = {
   defence: 'defence',
   profileImage: 'profileImage',
   rarity: 'rarity',
-  probability: 'probability',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

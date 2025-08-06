@@ -15,17 +15,17 @@ datasource db {
 }
 
 model Player {
-  playerId       Int      @id @default(autoincrement())
-  soccerPlayerId String   @unique
+  playerId       Int     @id @default(autoincrement())
+  soccerPlayerId String  @unique
   name           String
   speed          Int
   attack         Int
   defence        Int
   profileImage   String?
   rarity         String
-  probability    Float
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("Player")
 }

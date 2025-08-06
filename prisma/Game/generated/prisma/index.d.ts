@@ -1057,7 +1057,6 @@ export namespace Prisma {
     speed: number | null
     attack: number | null
     defence: number | null
-    probability: number | null
   }
 
   export type PlayerSumAggregateOutputType = {
@@ -1065,7 +1064,6 @@ export namespace Prisma {
     speed: number | null
     attack: number | null
     defence: number | null
-    probability: number | null
   }
 
   export type PlayerMinAggregateOutputType = {
@@ -1077,7 +1075,6 @@ export namespace Prisma {
     defence: number | null
     profileImage: string | null
     rarity: string | null
-    probability: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1091,7 +1088,6 @@ export namespace Prisma {
     defence: number | null
     profileImage: string | null
     rarity: string | null
-    probability: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1105,7 +1101,6 @@ export namespace Prisma {
     defence: number
     profileImage: number
     rarity: number
-    probability: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -1117,7 +1112,6 @@ export namespace Prisma {
     speed?: true
     attack?: true
     defence?: true
-    probability?: true
   }
 
   export type PlayerSumAggregateInputType = {
@@ -1125,7 +1119,6 @@ export namespace Prisma {
     speed?: true
     attack?: true
     defence?: true
-    probability?: true
   }
 
   export type PlayerMinAggregateInputType = {
@@ -1137,7 +1130,6 @@ export namespace Prisma {
     defence?: true
     profileImage?: true
     rarity?: true
-    probability?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1151,7 +1143,6 @@ export namespace Prisma {
     defence?: true
     profileImage?: true
     rarity?: true
-    probability?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1165,7 +1156,6 @@ export namespace Prisma {
     defence?: true
     profileImage?: true
     rarity?: true
-    probability?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -1266,7 +1256,6 @@ export namespace Prisma {
     defence: number
     profileImage: string | null
     rarity: string
-    probability: number
     createdAt: Date
     updatedAt: Date
     _count: PlayerCountAggregateOutputType | null
@@ -1299,7 +1288,6 @@ export namespace Prisma {
     defence?: boolean
     profileImage?: boolean
     rarity?: boolean
-    probability?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["player"]>
@@ -1315,12 +1303,11 @@ export namespace Prisma {
     defence?: boolean
     profileImage?: boolean
     rarity?: boolean
-    probability?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type PlayerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"playerId" | "soccerPlayerId" | "name" | "speed" | "attack" | "defence" | "profileImage" | "rarity" | "probability" | "createdAt" | "updatedAt", ExtArgs["result"]["player"]>
+  export type PlayerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"playerId" | "soccerPlayerId" | "name" | "speed" | "attack" | "defence" | "profileImage" | "rarity" | "createdAt" | "updatedAt", ExtArgs["result"]["player"]>
 
   export type $PlayerPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Player"
@@ -1334,7 +1321,6 @@ export namespace Prisma {
       defence: number
       profileImage: string | null
       rarity: string
-      probability: number
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["player"]>
@@ -1714,7 +1700,6 @@ export namespace Prisma {
     readonly defence: FieldRef<"Player", 'Int'>
     readonly profileImage: FieldRef<"Player", 'String'>
     readonly rarity: FieldRef<"Player", 'String'>
-    readonly probability: FieldRef<"Player", 'Float'>
     readonly createdAt: FieldRef<"Player", 'DateTime'>
     readonly updatedAt: FieldRef<"Player", 'DateTime'>
   }
@@ -3879,7 +3864,6 @@ export namespace Prisma {
     defence: 'defence',
     profileImage: 'profileImage',
     rarity: 'rarity',
-    probability: 'probability',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -3967,16 +3951,16 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Float'
+   * Reference to a field of type 'DateTime'
    */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+  export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
     
 
 
   /**
-   * Reference to a field of type 'DateTime'
+   * Reference to a field of type 'Float'
    */
-  export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
     
   /**
    * Deep Input Types
@@ -3995,7 +3979,6 @@ export namespace Prisma {
     defence?: IntFilter<"Player"> | number
     profileImage?: StringNullableFilter<"Player"> | string | null
     rarity?: StringFilter<"Player"> | string
-    probability?: FloatFilter<"Player"> | number
     createdAt?: DateTimeFilter<"Player"> | Date | string
     updatedAt?: DateTimeFilter<"Player"> | Date | string
   }
@@ -4009,7 +3992,6 @@ export namespace Prisma {
     defence?: SortOrder
     profileImage?: SortOrderInput | SortOrder
     rarity?: SortOrder
-    probability?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _relevance?: PlayerOrderByRelevanceInput
@@ -4027,7 +4009,6 @@ export namespace Prisma {
     defence?: IntFilter<"Player"> | number
     profileImage?: StringNullableFilter<"Player"> | string | null
     rarity?: StringFilter<"Player"> | string
-    probability?: FloatFilter<"Player"> | number
     createdAt?: DateTimeFilter<"Player"> | Date | string
     updatedAt?: DateTimeFilter<"Player"> | Date | string
   }, "playerId" | "soccerPlayerId">
@@ -4041,7 +4022,6 @@ export namespace Prisma {
     defence?: SortOrder
     profileImage?: SortOrderInput | SortOrder
     rarity?: SortOrder
-    probability?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: PlayerCountOrderByAggregateInput
@@ -4063,7 +4043,6 @@ export namespace Prisma {
     defence?: IntWithAggregatesFilter<"Player"> | number
     profileImage?: StringNullableWithAggregatesFilter<"Player"> | string | null
     rarity?: StringWithAggregatesFilter<"Player"> | string
-    probability?: FloatWithAggregatesFilter<"Player"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Player"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Player"> | Date | string
   }
@@ -4176,7 +4155,6 @@ export namespace Prisma {
     defence: number
     profileImage?: string | null
     rarity: string
-    probability: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -4190,7 +4168,6 @@ export namespace Prisma {
     defence: number
     profileImage?: string | null
     rarity: string
-    probability: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -4203,7 +4180,6 @@ export namespace Prisma {
     defence?: IntFieldUpdateOperationsInput | number
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     rarity?: StringFieldUpdateOperationsInput | string
-    probability?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -4217,7 +4193,6 @@ export namespace Prisma {
     defence?: IntFieldUpdateOperationsInput | number
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     rarity?: StringFieldUpdateOperationsInput | string
-    probability?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -4231,7 +4206,6 @@ export namespace Prisma {
     defence: number
     profileImage?: string | null
     rarity: string
-    probability: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -4244,7 +4218,6 @@ export namespace Prisma {
     defence?: IntFieldUpdateOperationsInput | number
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     rarity?: StringFieldUpdateOperationsInput | string
-    probability?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -4258,7 +4231,6 @@ export namespace Prisma {
     defence?: IntFieldUpdateOperationsInput | number
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     rarity?: StringFieldUpdateOperationsInput | string
-    probability?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -4396,17 +4368,6 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type FloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[]
@@ -4438,7 +4399,6 @@ export namespace Prisma {
     defence?: SortOrder
     profileImage?: SortOrder
     rarity?: SortOrder
-    probability?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -4448,7 +4408,6 @@ export namespace Prisma {
     speed?: SortOrder
     attack?: SortOrder
     defence?: SortOrder
-    probability?: SortOrder
   }
 
   export type PlayerMaxOrderByAggregateInput = {
@@ -4460,7 +4419,6 @@ export namespace Prisma {
     defence?: SortOrder
     profileImage?: SortOrder
     rarity?: SortOrder
-    probability?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -4474,7 +4432,6 @@ export namespace Prisma {
     defence?: SortOrder
     profileImage?: SortOrder
     rarity?: SortOrder
-    probability?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -4484,7 +4441,6 @@ export namespace Prisma {
     speed?: SortOrder
     attack?: SortOrder
     defence?: SortOrder
-    probability?: SortOrder
   }
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
@@ -4537,22 +4493,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
-  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedFloatFilter<$PrismaModel>
-    _min?: NestedFloatFilter<$PrismaModel>
-    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -4659,14 +4599,6 @@ export namespace Prisma {
     set?: string | null
   }
 
-  export type FloatFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
@@ -4712,17 +4644,6 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type NestedFloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[]
@@ -4748,6 +4669,17 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
   }
 
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
@@ -4795,22 +4727,6 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedFloatFilter<$PrismaModel>
-    _min?: NestedFloatFilter<$PrismaModel>
-    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
