@@ -1,11 +1,11 @@
 import express from 'express';
 import { GachaController } from '../controllers/gacha.controller.js';
-import { authMiddleware, requireAdmin } from './auth.router.js';
+import { requireAdmin } from './auth.router.js';
 
 const router = express.Router();
 
 /* 가챠 카드 등록 */
-router.post('/admin/gacha', authMiddleware ,requireAdmin ,GachaController.CreateGachaCard);
+router.post('/admin/gacha', requireAdmin ,GachaController.CreateGachaCard);
 
 /* 가챠 카드 조회 */
 router.get('/gacha', requireAdmin , GachaController.GetGachaCards);
