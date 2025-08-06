@@ -7,6 +7,7 @@
 generator client {
   provider = "prisma-client-js"
   output   = "../Game/generated/prisma"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
@@ -21,6 +22,7 @@ model Player {
   speed          Int
   attack         Int
   defence        Int
+  price          Int 
   profileImage   String?
   rarity         String
   createdAt      DateTime        @default(now())
