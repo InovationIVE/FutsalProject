@@ -1,6 +1,6 @@
 import { gamePrisma } from '../utils/prisma/index.js';
 
-//상품 등록 API controller
+/**상품 등록 API controller**/
 export const registGoods = async (req, res) => {
   const { name, cashAmount } = req.body;
 
@@ -30,7 +30,7 @@ export const registGoods = async (req, res) => {
   }
 };
 
-//상품 삭제 API controller
+/**상품 삭제 API controller**/
 export const deleteGoods = async (req, res) => {
   const goodsId = parseInt(req.params.goodsId, 10);
 
@@ -56,7 +56,7 @@ export const deleteGoods = async (req, res) => {
   }
 };
 
-//상품 수정 API controller
+/**상품 수정 API controller**/
 export const updateGoods = async (req, res) => {
   const goodsId = parseInt(req.params.id, 10);
   const { name, cashAmount } = req.body;
@@ -96,7 +96,7 @@ export const updateGoods = async (req, res) => {
   }
 };
 
-//상품 목록 조회 API
+/**상품 목록 조회 API**/
 export const getGoods = async (req, res) => {
   try {
     const goods = await gamePrisma.goods.findMany({
