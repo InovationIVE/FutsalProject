@@ -1,8 +1,5 @@
 import { gamePrisma, userPrisma } from '../utils/prisma/index.js';
 
-
-
-
 //스쿼드 등록, 수정 API
 export const Squad = async (req, res, next) => {
   try {
@@ -93,7 +90,6 @@ export const Squad = async (req, res, next) => {
   }
 };
 
-
 //스쿼드 조회 API
 export const getSquad = async (req, res, next) => {
   try {
@@ -124,9 +120,7 @@ export const getSquad = async (req, res, next) => {
     }
 
     // 3. OwnedPlayer로부터 playerId 목록 추출
-    const playerIds = squad.squadMembers.map(
-      (member) => member.ownedPlayer.playerId
-    );
+    const playerIds = squad.squadMembers.map((member) => member.ownedPlayer.playerId);
 
     // 4. GameDB에서 선수 정보 조회
     const players = await gamePrisma.player.findMany({
@@ -137,9 +131,7 @@ export const getSquad = async (req, res, next) => {
 
     // 5. 선수 정보를 매핑하여 응답 구성
     const squadDetail = squad.squadMembers.map((member) => {
-      const player = players.find(
-        (p) => p.playerId === member.ownedPlayer.playerId
-      );
+      const player = players.find((p) => p.playerId === member.ownedPlayer.playerId);
 
       return {
         squadMemberId: member.squadMemberId,
@@ -147,7 +139,7 @@ export const getSquad = async (req, res, next) => {
         playerId: player.playerId,
         playerName: player.name,
         playerRarity: player.rarity,
-        playerPrifileImage: player.profileImage
+        playerPrifileImage: player.profileImage,
       };
     });
 
@@ -159,7 +151,6 @@ export const getSquad = async (req, res, next) => {
         members: squadDetail,
       },
     });
-
   } catch (error) {
     next(error);
   }

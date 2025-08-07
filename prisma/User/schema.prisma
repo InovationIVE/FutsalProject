@@ -9,35 +9,36 @@ datasource db {
 }
 
 model Account {
-  accountId    Int           @id @default(autoincrement())
-  email        String        @unique
-  userId       String        @unique
+  accountId    Int            @id @default(autoincrement())
+  email        String         @unique
+  userId       String         @unique
   password     String
   cash         Int
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  role         String        @default("USER")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  role         String         @default("USER")
   ownedPlayers OwnedPlayers[]
-  refreshToken RefreshToken? @relation("refreshToken")
+  refreshToken RefreshToken?  @relation("refreshToken")
   squad        Squad?
 
   @@map("Account")
 }
 
-model SquadMembers  {
-  id          Int         @id @default(autoincrement())
-  squadId     Int
+model SquadMembers {
+  id            Int          @id @default(autoincrement())
+  squadId       Int
   ownedPlayerId Int
 
   squad       Squad       @relation(fields: [squadId], references: [squadId], onDelete: Cascade)
   ownedPlayer OwnedPlayers @relation(fields: [ownedPlayerId], references: [ownedPlayerId], onDelete: Cascade)
 
   @@unique([squadId, ownedPlayerId])
+  @@index([ownedPlayerId], map: "squadMembers_ownedPlayerId_fkey")
   @@map("squadMembers")
 }
 
 model OwnedPlayers {
-  ownedPlayerId Int      @id @default(autoincrement())
+  ownedPlayerId Int            @id @default(autoincrement())
   accountId     Int
   playerId      Int
   count         Int
