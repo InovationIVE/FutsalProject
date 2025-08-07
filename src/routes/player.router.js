@@ -1,6 +1,6 @@
 import express from 'express';
 import { PlayerController } from '../controllers/player.controller.js';
-import { requireAdmin } from './auto.router.js';
+import { requireAdmin } from './auth.router.js';
 
 const router = express.Router();
 
