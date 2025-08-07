@@ -51,11 +51,11 @@ export class PlayerModel {
     });
   }
 
-  static async existsBySoccerId(soccerPlayerId) {
-    return await gamePrisma.player.findUnique({
-      where: { soccerPlayerId }
-    });
-  }
+  // static async existsBySoccerId(soccerPlayerId) {
+  //   return await gamePrisma.player.findUnique({
+  //     where: { soccerPlayerId }
+  //   });
+  // }
 
    static async isCorrectRarity(rarity) {
      const rarity_list = [N, R, SR, SSR, SSSR];

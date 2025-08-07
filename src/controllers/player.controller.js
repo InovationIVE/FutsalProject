@@ -1,7 +1,7 @@
 import { PlayerModel } from '../entity/Player.js';
 
 export class PlayerController{
-  static async getAllPlayers(req, res) {
+  static async getAllPlayers(req, res, next) {
     try {
       const players = await PlayerModel.getAll();
       res.status(200).json({ data: players });
@@ -11,7 +11,7 @@ export class PlayerController{
     }
   };
 
-  static async getThePlayer(req, res) {
+  static async getThePlayer(req, res, next) {
     try {
       const { playerId } = req.params;
       const player = await PlayerModel.getSome(playerId);
@@ -25,7 +25,7 @@ export class PlayerController{
     }
   };
 
-  static async createPlayer (req, res) {
+  static async createPlayer (req, res, next) {
     try {
       const { soccerPlayerId, name, speed, attack, defence, profileImage, rarity } = req.body;
 
@@ -44,7 +44,7 @@ export class PlayerController{
     }
   };
 
-  static async updatePlayer (req, res) {
+  static async updatePlayer (req, res, next) {
     try {
       const { playerId } = req.params;
       const { soccerPlayerId, name, speed, attack, defence, profileImage, rarity } = req.body;
@@ -73,7 +73,7 @@ export class PlayerController{
     }
   };
 
-  static async deletePlayer (req, res) {
+  static async deletePlayer (req, res, next) {
     try {
       const { playerId } = req.params;
 
