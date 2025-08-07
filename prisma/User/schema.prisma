@@ -25,38 +25,38 @@ model Account {
 }
 
 model SquadMembers  {
-  id          Int         @id @default(autoincrement())
-  squadId     Int
-  ownedPlayerId Int
+  id             Int           @id @default(autoincrement())
+  squadId        Int
+  ownedPlayerId  Int
 
-  squad       Squad       @relation(fields: [squadId], references: [squadId])
-  ownedPlayer OwnedPlayer @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
+  squad          Squad         @relation(fields: [squadId], references: [squadId])
+  ownedPlayer    OwnedPlayers  @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
 
   @@unique([squadId, ownedPlayerId])
   @@map("squadMembers")
 }
 
 model OwnedPlayers {
-  ownedPlayerId Int      @id @default(autoincrement())
+  ownedPlayerId Int            @id @default(autoincrement())
   accountId     Int
   playerId      Int
   count         Int 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  account       Account  @relation(fields: [accountId], references: [accountId])
-  squadMembers  squadMembers[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  account       Account        @relation(fields: [accountId], references: [accountId])
+  squadMembers  SquadMembers[]
 
   @@index([accountId], map: "OwnedPlayers_accountId_fkey")
   @@map("OwnedPlayers")
 }
 
 model Squad {
-  squadId       Int         @id @default(autoincrement())
-  accountId     Int         @unique
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  account       Account     @relation(fields: [accountId], references: [accountId])
-  squadMembers  squadMembers[]
+  squadId       Int            @id @default(autoincrement())
+  accountId     Int            @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  account       Account        @relation(fields: [accountId], references: [accountId])
+  squadMembers  SquadMembers[]
 
   @@map("Squad")
 }
