@@ -20,7 +20,7 @@ router.get('/admin/gacha/:gachaId', requireAdmin ,GachaController.GetGachaCardDe
 router.delete('/admin/gacha/:gachaId', requireAdmin ,GachaController.RemonveGachaCard);
 
 /* 가챠 뽑기 */
-router.post('/gacha/draw/:accountId', GachaController.DrawGachaCard);
+router.post('/gacha/draw', GachaController.DrawGachaCard);
 
 
 export default router;
