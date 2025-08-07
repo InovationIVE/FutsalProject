@@ -9,7 +9,7 @@ export class PlayerModel {
     this.attack = data.attack;
     this.defence = data.defence;
     this.profileImage = data.profileImage;
-    this.rarity = data.rarity;
+    //this.rarity = data.rarity;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
   }
@@ -37,6 +37,7 @@ export class PlayerModel {
         defence: true,
         profileImage: true,
         rarity: true,
+        price: true,
         createdAt: true,
         updatedAt: true
       }
@@ -55,6 +56,11 @@ export class PlayerModel {
       where: { soccerPlayerId }
     });
   }
+
+  //  static async isCorrectRarity(rarity) {
+  //    const rarity_list = [N, R, SR, SSR, SSSR];
+  //    if( !rarity in rarity_list){}
+  //  }
 
   static async create(data) {
     const created = await gamePrisma.player.create({ data });
