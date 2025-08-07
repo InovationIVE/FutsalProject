@@ -273,6 +273,12 @@ const login = async (req, res) => {
     // 2-7. 응답 (토큰은 쿠키로, 사용자 정보만 JSON으로)
     const { password: _, ...userInfo } = account;
     
+    // 2-6. 마지막 로그인 시간 업데이트
+    await userPrisma.account.update({
+      where: { accountId: account.accountId },
+      data: { lastLoginAt: new Date() }
+    });
+
     res.status(200).json({
       message: '로그인이 완료되었습니다.',
       user: userInfo
