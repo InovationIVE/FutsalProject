@@ -6,7 +6,7 @@ import {
   updateGoods,
   getGoods,
 } from '../controllers/goods.controller.js';
-import { authMiddleware, requireAdmin } from './auth.router.js';
+import { authMiddleware, requireAdmin } from '../middleWares/auth.middleware.js';
 
 const router = express.Router();
 
