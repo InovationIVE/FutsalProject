@@ -14,26 +14,34 @@ export const registGoods = async (req, res, next) => {
   }
   try {
     //1.2 상품 등록
-    const newGoods = await gamePrisma.goods.create({
-      data: {
-        name,
-        cashAmount,
-      },
-    });
+    const result = await gamePrisma.$transaction(
+      async (tx) => {
+        const newGoods = await gamePrisma.goods.create({
+          data: {
+            name,
+            cashAmount,
+          },
+        });
 
-    //1.3 성공응답
-    return res.status(201).json({
-      id: newGoods.goodsId,
-      name: newGoods.name,
-      cashAmount: newGoods.cashAmount.toString(), //문자열로 cashAmount반환
-    });
+        //1.3 성공응답
+        return {
+          id: newGoods.goodsId,
+          name: newGoods.name,
+          cashAmount: newGoods.cashAmount.toString(), //문자열로 cashAmount반환
+        };
+      },
+      {
+        isolationLevel: GamePrisma.TransactionIsolationLevel.ReadCommitted,
+      },
+    );
+    return res.status(201).json(result);
   } catch (error) {
     //1.4 고유 제약 조건 위반시 오류 메세지
     if (error.code === 'P2002') {
       return res.status(409).json({ message: '상품명이 존재합니다.' });
     }
     //1.5그 외 서버 오류
-    next(err);
+    next(error);
   }
 };
 
@@ -48,33 +56,37 @@ export const deleteGoods = async (req, res, next) => {
     return res.status(400).json({ message: '상품ID가 유효하지 않습니다.' });
   }
   try {
-    //2.2 상품 존재여부 확인
-    const isExistGoods = await gamePrisma.goods.findUnique({
-      where: { goodsId },
-    });
+    const result = await gamePrisma.$transaction(
+      async (tx) => {
+        //2.2 상품 존재여부 확인
+        const isExistGoods = await gamePrisma.goods.findUnique({ where: { goodsId } });
 
-    //2.3 존재하지 않을 경우 404반환
-    if (!isExistGoods) {
-      return res.status(404).json({ message: '상품을 찾을 수 없습니다.' });
-    }
+        //2.3 존재하지 않을 경우 404반환
+        if (!isExistGoods) {
+          return res.status(404).json({ message: '상품을 찾을 수 없습니다.' });
+        }
 
-    //2.4 상품 삭제
-    const deleted = await gamePrisma.goods.delete({
-      where: { goodsId: parseInt(goodsId) },
-    });
+        //2.4 상품 삭제
+        const deleted = await gamePrisma.goods.delete({
+          where: { goodsId: parseInt(goodsId) },
+        });
 
-    //2.5 성공응답
-    res.status(200).json({
-      message: '상품이 삭제되었습니다.',
-      deleted: {
-        id: deleted.goodsId,
-        name: deleted.name,
-        cashAmount: deleted.cashAmount.toString(),
+        //2.5 성공응답
+        return {
+          message: '상품이 삭제되었습니다.',
+          deleted: {
+            id: deleted.goodsId,
+            name: deleted.name,
+            cashAmount: deleted.cashAmount.toString(),
+          },
+        };
       },
-    });
+      { isolationLevel: GamePrisma.TransactionIsolationLevel.ReadCommitted },
+    );
+    res.status(200).json(result);
   } catch (error) {
     //2.6 그 외 서버 오류
-    next(err);
+    next(error);
   }
 };
 
@@ -96,32 +108,38 @@ export const updateGoods = async (req, res, next) => {
     return res.status(400).json({ message: '수정할 name 또는 cashAmount 값을 입력해 주세요.' });
   }
   try {
-    //3.3 상품 존재 여부 확인
-    const isExistGoods = await gamePrisma.goods.findUnique({
-      where: { goodsId },
-    });
-    if (!isExistGoods) {
-      return res.status(404).json({ message: '상품을 찾을 수 없습니다.' });
-    }
+    const result = await gamePrisma.$transaction(
+      async (tx) => {
+        //3.3 상품 존재 여부 확인
+        const isExistGoods = await tx.goods.findUnique({
+          where: { goodsId },
+        });
+        if (!isExistGoods) {
+          return res.status(404).json({ message: '상품을 찾을 수 없습니다.' });
+        }
 
-    //3.4 상품 정보 업데이트(입력된 필드만 변경)
-    const updated = await gamePrisma.goods.update({
-      where: { goodsId: parseInt(goodsId) },
-      data: {
-        ...(name && { name }), //name이 있을 경우 업데이트
-        ...(cashAmount && { cashAmount }), //cashAmount가 있을 경우 업데이트
-      },
-    });
+        //3.4 상품 정보 업데이트(입력된 필드만 변경)
+        const updated = await tx.goods.update({
+          where: { goodsId: parseInt(goodsId) },
+          data: {
+            ...(name && { name }), //name이 있을 경우 업데이트
+            ...(cashAmount && { cashAmount }), //cashAmount가 있을 경우 업데이트
+          },
+        });
 
-    //3.5 성공 응답
-    return res.status(200).json({
-      message: '상품 수정이 완료되었습니다.',
-      updateGoods: {
-        id: updated.goodsId,
-        name: updated.name,
-        cashAmount: updated.cashAmount.toString(),
+        //3.5 성공 응답
+        return {
+          message: '상품 수정이 완료되었습니다.',
+          updateGoods: {
+            id: updated.goodsId,
+            name: updated.name,
+            cashAmount: updated.cashAmount.toString(),
+          },
+        };
       },
-    });
+      { isolationLevel: GamePrisma.TransactionIsolationLevel.ReadCommitted },
+    );
+    res.status(200).json(result);
   } catch (error) {
     //3.6 고유 제약 조건 위반 시 409 반환
     if (error.code === 'P2002') {
@@ -154,6 +172,6 @@ export const getGoods = async (req, res, next) => {
     }));
     return res.status(200).json(formattedGoodsList);
   } catch (error) {
-    next(err);
+    next(error);
   }
 };
