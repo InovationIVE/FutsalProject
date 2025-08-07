@@ -1,7 +1,6 @@
 generator client {
-  provider        = "prisma-client-js"
-  output          = "../Game/generated/prisma"
-  previewFeatures = ["interactiveTransactions"]
+  provider = "prisma-client-js"
+  output   = "../Game/generated/prisma"
 }
 
 datasource db {
