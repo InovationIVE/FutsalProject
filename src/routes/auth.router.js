@@ -437,6 +437,100 @@ router.post('/logout', authMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * 비밀번호 수정 API
+ */
+router.patch('/:accountId/password', async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+    const urlAccountId = parseInt(req.params.accountId);
+
+    // 1. 현재 비밀번호 확인
+    const account = await userPrisma.account.findUnique({
+      where: { accountId: urlAccountId },
+      select: { password: true }
+    });
+    
+    if (!account) {
+      return res.status(404).json({
+        message: '계정을 찾을 수 없습니다.'
+      });
+    }
+    
+    // 2. 권한 확인 (본인만 수정 가능)
+    if (req.user.accountId !== urlAccountId) {
+      return res.status(403).json({ 
+        message: '본인의 비밀번호만 수정할 수 있습니다.' 
+      });
+    }
+    
+    // 3. 입력값 존재 여부 확인
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      return res.status(400).json({
+        message: 'currentPassword, newPassword, confirmNewPassword는 필수 입력값입니다.'
+      });
+    }
+    
+    // 4. 새 비밀번호 형식 검증
+    if (!validateInput.password(newPassword)) {
+      return res.status(400).json({
+        message: '새 비밀번호는 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.'
+      });
+    }
+    
+    // 5. 새 비밀번호 확인 검증
+    if (newPassword !== confirmNewPassword) {
+      return res.status(400).json({
+        message: '새 비밀번호와 새 비밀번호 확인이 일치하지 않습니다.'
+      });
+    }
+    
+    
+    // 6. 현재 비밀번호 확인
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, account.password);
+    if (!isCurrentPasswordValid) {
+      return res.status(401).json({
+        message: '현재 비밀번호가 일치하지 않습니다.'
+      });
+    }
+    
+    // 7. 새 비밀번호 해싱 및 업데이트
+    const saltRounds = 12;
+    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+    
+    await userPrisma.account.update({
+      where: { accountId: urlAccountId },
+      data: { password: hashedNewPassword }
+    });
+    
+    // 8. 보안을 위해 기존 Refresh Token 삭제 
+    await userPrisma.refreshToken.deleteMany({
+      where: { accountId: urlAccountId }
+    });
+    
+    // 9. 쿠키에서 토큰들 삭제
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      sameSite: 'strict'
+    });
+    
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      sameSite: 'strict'
+    });
+    
+    // 10. 성공 응답
+    res.status(200).json({
+      message: '비밀번호가 성공적으로 변경되었습니다. 보안을 위해 다시 로그인해주세요.'
+    });
+
+  } catch (error) {
+    console.error('비밀번호 변경 에러:', error);
+    res.status(500).json({
+      message: '서버 내부 오류가 발생했습니다.'
+    });
+  }
+});
 
 // 미들웨어들을 다른 라우터에서도 사용할 수 있도록 export
 export { authMiddleware, requireAdmin };
