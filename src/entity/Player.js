@@ -9,7 +9,7 @@ export class PlayerModel {
     this.attack = data.attack;
     this.defence = data.defence;
     this.profileImage = data.profileImage;
-    //this.rarity = data.rarity;
+    this.rarity = data.rarity;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
   }
