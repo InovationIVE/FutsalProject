@@ -9,30 +9,31 @@ datasource db {
 }
 
 model Account {
-  accountId    Int           @id @default(autoincrement())
-  email        String        @unique
-  userId       String        @unique
+  accountId    Int            @id @default(autoincrement())
+  email        String         @unique
+  userId       String         @unique
   password     String
   cash         Int
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  role         String        @default("USER")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  role         String         @default("USER")
   ownedPlayers OwnedPlayers[]
-  refreshToken RefreshToken? @relation("refreshToken")
-  squad        Squad?        
+  refreshToken RefreshToken?  @relation("refreshToken")
+  squad        Squad?
 
   @@map("Account")
 }
 
-model SquadMembers  {
-  id             Int           @id @default(autoincrement())
-  squadId        Int
-  ownedPlayerId  Int
+model SquadMembers {
+  id            Int          @id @default(autoincrement())
+  squadId       Int
+  ownedPlayerId Int
 
-  squad          Squad         @relation(fields: [squadId], references: [squadId])
-  ownedPlayer    OwnedPlayers  @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
+  squad       Squad       @relation(fields: [squadId], references: [squadId], onDelete: Cascade)
+  ownedPlayer OwnedPlayers @relation(fields: [ownedPlayerId], references: [ownedPlayerId], onDelete: Cascade)
 
   @@unique([squadId, ownedPlayerId])
+  @@index([ownedPlayerId], map: "squadMembers_ownedPlayerId_fkey")
   @@map("squadMembers")
 }
 
@@ -40,10 +41,10 @@ model OwnedPlayers {
   ownedPlayerId Int            @id @default(autoincrement())
   accountId     Int
   playerId      Int
-  count         Int 
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  account       Account        @relation(fields: [accountId], references: [accountId])
+  count         Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  account       Account  @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
   squadMembers  SquadMembers[]
 
   @@index([accountId], map: "OwnedPlayers_accountId_fkey")
@@ -51,11 +52,11 @@ model OwnedPlayers {
 }
 
 model Squad {
-  squadId       Int            @id @default(autoincrement())
-  accountId     Int            @unique
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  account       Account        @relation(fields: [accountId], references: [accountId])
+  squadId       Int         @id @default(autoincrement())
+  accountId     Int         @unique
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  account       Account     @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
   squadMembers  SquadMembers[]
 
   @@map("Squad")
@@ -67,7 +68,7 @@ model RefreshToken {
   token          String
   createdAt      DateTime  @default(now())
   expiresAt      DateTime?
-  account        Account   @relation("refreshToken", fields: [accountId], references: [accountId])
+  account        Account   @relation("refreshToken", fields: [accountId], references: [accountId], onDelete: Cascade)
 
   @@map("Refreshtoken")
 }

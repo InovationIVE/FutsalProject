@@ -9,7 +9,7 @@ import authRouter from './routes/auth.router.js';
 import goodsRouter from './routes/goods.router.js';
 import PlayerRouter from './routes/player.router.js';
 import squadRouter from './routes/squad.router.js';
-import { authMiddleware } from './routes/auth.router.js';
+import { authMiddleware } from './middleWares/auth.middleware.js';
 
 dotenv.config();
 
