@@ -1,10 +1,11 @@
 import { gamePrisma, userPrisma } from '../utils/prisma/index.js';
 
 //스쿼드 등록, 수정 API
-export const Squad = async (req, res, next) => {
-  try {
-    const { accountId } = req.user;
-    const { ownedPlayerIds } = req.body;
+export class SquadController {
+  static async createOrUpdateSquad(req, res, next) {
+    try {
+      const { accountId } = req.user;
+      const { ownedPlayerIds } = req.body;
 
     // 유효성 검사
     if (!Array.isArray(ownedPlayerIds)) {
@@ -91,7 +92,7 @@ export const Squad = async (req, res, next) => {
 };
 
 //스쿼드 조회 API
-export const getSquad = async (req, res, next) => {
+static async getSquad(req, res, next) {
   try {
     const { accountId } = req.user;
 
@@ -154,4 +155,5 @@ export const getSquad = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
+}
+  }
