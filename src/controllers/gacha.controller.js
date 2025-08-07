@@ -166,7 +166,7 @@ export class GachaController {
       });
 
       // 이미 보유한 플레이어 데이터 조회
-      const ownedPlayers = await userPrisma.ownedPlayer.findMany({
+      const ownedPlayers = await userPrisma.ownedPlayers.findMany({
         where: { accountId: accountId },
         select: { playerId: true, ownedPlayerId: true },
       });
@@ -209,7 +209,7 @@ export class GachaController {
       await userPrisma.$transaction(async (tx) => {
         for (const [ownedPlayerId, count] of updates) {
           // 보유 플레이어의 개수를 증가시키는 업데이트
-          await tx.ownedPlayer.update({
+          await tx.ownedPlayers.update({
             where: { ownedPlayerId },
             data: { count: { increment: count } },
           });
@@ -217,7 +217,7 @@ export class GachaController {
 
         // 새로 획득한 플레이어를 생성
         for (const [playerId, count] of creates) {
-          await tx.ownedPlayer.create({
+          await tx.ownedPlayers.create({
             data: { accountId: accountId, playerId, count },
           });
         }
