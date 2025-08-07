@@ -11,10 +11,6 @@ import PlayerRouter from './routes/player.router.js';
 import squadRouter from './routes/squad.router.js';
 import { authMiddleware } from './routes/auth.router.js';
 
-
-
-
-
 dotenv.config();
 
 const app = express();
@@ -25,20 +21,10 @@ app.use(cookieParser());
 app.use(logMiddleware);
 app.use(authMiddleware);
 
-
-<<<<<<< HEAD
-app.use('/api', [gachaRouter, goodsRouter, ownedPlayersRouter, squadRouter]);
-=======
-app.use('/api', [gachaRouter, goodsRouter, PlayerRouter, squadRouter, ownedPlayersRouter ]);
->>>>>>> 1280e391a76c6c79df276d0c57255cb1bd5f94a1
+app.use('/api', [gachaRouter, goodsRouter, PlayerRouter, squadRouter, ownedPlayersRouter]);
 app.use('/auth', [authRouter]);
 
-
 app.use(ErrorHandlingMiddleware);
-
-
-
-
 
 app.listen(PORT, () => {
   console.log(PORT, '포트로 서버가 열렸어요!');
