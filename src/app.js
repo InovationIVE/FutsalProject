@@ -26,8 +26,8 @@ app.use(logMiddleware);
 app.use(authMiddleware);
 
 
-app.use('/api', [gachaRouter, goodsRouter, PlayerRouter, squadRouter]);
-app.use('/auth', [authRouter, ownedPlayersRouter]);
+app.use('/api', [gachaRouter, goodsRouter, PlayerRouter, squadRouter, ownedPlayersRouter ]);
+app.use('/auth', [authRouter]);
 
 
 app.use(ErrorHandlingMiddleware);
