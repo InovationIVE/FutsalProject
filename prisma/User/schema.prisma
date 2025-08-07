@@ -17,14 +17,26 @@ model Account {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   role         String        @default("USER")
-  ownedPlayers OwnedPlayer[] @relation("AccountOwnedPlayers", onDelete: Cascade)
-  refreshToken RefreshToken? @relation("refreshToken", onDelete: Cascade)
-  squads       Squad[]       @relation("AccountSquads", onDelete: Cascade)
+  ownedPlayers OwnedPlayers[]
+  refreshToken RefreshToken? @relation("refreshToken")
+  squad        Squad?
 
   @@map("Account")
 }
 
-model OwnedPlayer {
+model SquadMembers  {
+  id          Int         @id @default(autoincrement())
+  squadId     Int
+  ownedPlayerId Int
+
+  squad       Squad       @relation(fields: [squadId], references: [squadId], onDelete: Cascade)
+  ownedPlayer OwnedPlayers @relation(fields: [ownedPlayerId], references: [ownedPlayerId], onDelete: Cascade)
+
+  @@unique([squadId, ownedPlayerId])
+  @@map("squadMembers")
+}
+
+model OwnedPlayers {
   ownedPlayerId Int      @id @default(autoincrement())
   accountId     Int
   playerId      Int
@@ -32,7 +44,7 @@ model OwnedPlayer {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   account       Account  @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
-  squads        Squad[]  @relation("AccountSquads", onDelete: Cascade)
+  squadMembers  SquadMembers[]
 
   @@index([accountId], map: "OwnedPlayers_accountId_fkey")
   @@map("OwnedPlayers")
@@ -40,15 +52,12 @@ model OwnedPlayer {
 
 model Squad {
   squadId       Int         @id @default(autoincrement())
-  accountId     Int
-  ownedPlayerId Int
+  accountId     Int         @unique
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   account       Account     @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
-  ownedPlayer   OwnedPlayer @relation(fields: [ownedPlayerId], references: [ownedPlayerId], onDelete: Cascade)
+  squadMembers  SquadMembers[]
 
-  @@index([accountId], map: "Squad_accountId_fkey")
-  @@index([ownedPlayerId], map: "Squad_ownedPlayerId_fkey")
   @@map("Squad")
 }
 
