@@ -8,7 +8,9 @@ import ownedPlayersRouter from './routes/ownedPlayers.router.js';
 import authRouter from './routes/auth.router.js';
 import goodsRouter from './routes/goods.router.js';
 import PlayerRouter from './routes/player.router.js';
+import squadRouter from './routes/squad.router.js';
 import { authMiddleware } from './routes/auth.router.js';
+
 
 
 
@@ -23,8 +25,10 @@ app.use(cookieParser());
 app.use(logMiddleware);
 app.use(authMiddleware);
 
-app.use('/api', [gachaRouter, goodsRouter, PlayerRouter]);
+
+app.use('/api', [gachaRouter, goodsRouter, PlayerRouter, squadRouter]);
 app.use('/auth', [authRouter, ownedPlayersRouter]);
+
 
 app.use(ErrorHandlingMiddleware);
 

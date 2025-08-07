@@ -3,6 +3,7 @@ import { myPlayersList } from '../controllers/ownedPlayers.controller.js';
 import { myPlayer } from '../controllers/ownedPlayers.controller.js';
 import { playerSale } from '../controllers/ownedPlayers.controller.js';
 
+
 const router = express.Router();
 
 
