@@ -127,7 +127,7 @@ const setTokenCookies = (res, accessToken, refreshToken) => {
  */
 const authMiddleware = async (req, res, next) => {
   // 로그인 요청은 인증 미들웨어 적용 안함
- const excludedRoutes = ['/auth/login', '/auth/signup'];
+  const excludedRoutes = ['/auth/login', '/auth/signup'];
   if (excludedRoutes.includes(req.path)) {
     return next();
   }

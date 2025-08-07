@@ -1,17 +1,55 @@
-.toolbar {
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
-    background-color: #f0f0f0;
-    border-bottom: 5px solid #000000;
+/* 모든 씬을 기본적으로 숨김 */
+.scene {
+    display: none;
+    padding: 20px;
+    border: 1px solid #ccc;
+    margin-top: 20px;
 }
 
-.toolbar .button {
-    margin: 10px;
-    margin-right: 10;
-    padding: 10px 20px;
-    background-color: #ffffff;
-    border: 2px solid #000000;
-    border-radius: 5px;
+/* active 클래스가 있는 씬만 보이게 함 */
+.scene.active {
+    display: block;
+}
+
+.toolbar button {
+    /* 이전에 만든 버튼 스타일 */
     cursor: pointer;
+    margin-right: 10px;
+}
+
+
+
+
+.toolbar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  background-color: #f0f0f0;
+  border-bottom: 5px solid #000000;
+}
+
+.toolbar .topButton{
+  padding: 10px 20px;
+  background-color: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 1px;
+  cursor: pointer;
+
+  width: 150px;
+  height: 50px;
+
+  transition: background-color 0.3s ease, transform 0.3s ease;
+
+}
+
+
+.toolbar .topButton:hover {
+  /* 배경색을 회색으로 변경 */
+  background-color: #f0f0f0;
+
+  /* 버튼을 살짝 확대 */
+  transform: scale(1.05);
+
+  /* 그림자 효과 추가 (버튼이 떠오르는 느낌) */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
