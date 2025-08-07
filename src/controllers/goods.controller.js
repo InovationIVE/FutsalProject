@@ -1,15 +1,18 @@
 import { gamePrisma } from '../utils/prisma/index.js';
+import { Prisma as GamePrisma } from '../../prisma/Game/generated/prisma/index.js';
 
-/**상품 등록 API controller**/
+/**상품 등록 API controller
+ * name : 상품명
+ * cashAmount : 금액**/
 export const registGoods = async (req, res) => {
   const { name, cashAmount } = req.body;
 
-  /**오류 표기 : name과 cashAmount입력되지 않을 경우 400반환**/
+  //오류 표기 : name과 cashAmount입력되지 않을 경우 400반환
   if (!name || !cashAmount) {
     return res.status(400).json({ message: 'name과 cashAmount는 필수입니다.' });
   }
   try {
-    /**상품 등록**/
+    //상품 등록
     const newGoods = await gamePrisma.goods.create({
       data: {
         name,
@@ -17,7 +20,7 @@ export const registGoods = async (req, res) => {
       },
     });
 
-    /**클라이언트 응답 형식**/
+    //클라이언트 응답 형식
     const response = {
       id: newGoods.goodsId,
       name: newGoods.name,
