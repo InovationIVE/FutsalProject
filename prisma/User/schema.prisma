@@ -19,7 +19,7 @@ model Account {
   role         String        @default("USER")
   ownedPlayers OwnedPlayers[]
   refreshToken RefreshToken? @relation("refreshToken")
-  squad        Squad?        // 1:1 관계
+  squad        Squad?        
 
   @@map("Account")
 }
