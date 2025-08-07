@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Scene</title>
+    <link rel="stylesheet" href="CashShopScene.css" />
+  </head>
+  <body>
+    <div class="toolbar">
+      <div><button class="topButton" id="cashShop">캐시</button></div>
+      <div><button class="topButton" id="gacha">선수뽑기</button></div>
+      <div><button class="topButton" id="mtTeam">마이팀</button></div>
+      <div><button class="topButton" id="squad">마이스쿼트</button></div>
+      <div><button class="topButton" id="gamePlay">게임플레이</button></div>
+    </div>
+
+    <div id="user-info">
+        <span>유저 ID: <span id="user-id-display"></span></span>
+        <span>보유 캐시: <span id="user-cash-display"></span></span>
+    </div>
+
+    <div class="container">
+      <h1>캐시샵</h1>
+      <div id="cash-item-list" class="item-container">
+        <!-- 캐시 아이템 목록이 여기에 표시됩니다. -->
+      </div>
+      <hr />
+      <h2>아이템 구매</h2>
+      <form id="purchase-item-form">
+        <label for="item-id">아이템 ID:</label>
+        <input type="text" id="item-id" name="item-id" required />
+        <button type="submit">구매</button>
+      </form>
+      <h2>결과</h2>
+      <div id="cash-shop-result" class="result-container">
+        <!-- 캐시샵 결과가 여기에 표시됩니다. -->
+      </div>
+
+    <script src="CashShopScript.js"></script>
+  </body>
+</html>

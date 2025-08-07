@@ -1,25 +1,3 @@
-/* 모든 씬을 기본적으로 숨김 */
-.scene {
-    display: none;
-    padding: 20px;
-    border: 1px solid #ccc;
-    margin-top: 20px;
-}
-
-/* active 클래스가 있는 씬만 보이게 함 */
-.scene.active {
-    display: block;
-}
-
-.toolbar button {
-    /* 이전에 만든 버튼 스타일 */
-    cursor: pointer;
-    margin-right: 10px;
-}
-
-
-
-
 .toolbar {
   display: flex;
   justify-content: flex-start;
@@ -27,6 +5,7 @@
   background-color: #f0f0f0;
   border-bottom: 5px solid #000000;
 }
+
 
 .toolbar .topButton{
   padding: 10px 20px;
