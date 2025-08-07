@@ -1,6 +1,6 @@
 import express from 'express';
 import { GachaController } from '../controllers/gacha.controller.js';
-import { requireAdmin } from './auth.router.js';
+import { requireAdmin } from '../middleWares/auth.middleware.js';
 
 const router = express.Router();
 
