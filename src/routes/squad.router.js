@@ -1,5 +1,5 @@
 import express from 'express';
-import { SquadController } from '../controllers/squad.controller';
+import { SquadController } from '../controllers/squad.controller.js';
 const router = express.Router();
 
 router.post('/squad', SquadController.createOrUpdateSquad);
