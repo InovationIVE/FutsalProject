@@ -10,7 +10,7 @@ export const myPlayersList = async (req, res, next) => {
     }
 
     // 1. User DB에서 OwnedPlayers 조회
-    const myPlayers = await userPrisma.ownedPlayer.findMany({
+    const myPlayers = await userPrisma.ownedPlayers.findMany({
       where: { accountId: +accountId },
       select: {
         ownedPlayerId: true,
@@ -41,9 +41,9 @@ export const myPlayersList = async (req, res, next) => {
     // 4. playerId 기준으로 매핑해서 ownedPlayers에 Player 정보 붙이기
     const playerMap = Object.fromEntries(players.map((p) => [p.playerId, p]));
 
-    const response = myPlayers.map((ownedPlayer) => ({
-      ...ownedPlayer,
-      player: playerMap[ownedPlayer.playerId] || null,
+    const response = myPlayers.map((ownedPlayers) => ({
+      ...ownedPlayers,
+      player: playerMap[ownedPlayers.playerId] || null,
     }));
 
     return res.status(200).json({ response });
@@ -64,7 +64,7 @@ export const myPlayer = async (req, res) => {
     }
 
     // 1. User DB에서 ownedPlayer 조회
-    const ownedPlayer = await userPrisma.ownedPlayer.findUnique({
+    const ownedPlayer = await userPrisma.ownedPlayers.findUnique({
       where: {
         ownedPlayerId: +ownedPlayerId,
       },
@@ -85,7 +85,7 @@ export const myPlayer = async (req, res) => {
     // 2. Game DB에서 Player 상세정보 조회
     const player = await gamePrisma.player.findUnique({
       where: {
-        playerId: ownedPlayer.playerId,
+        playerId: ownedPlayers.playerId,
       },
       select: {
         playerId: true,
@@ -100,7 +100,7 @@ export const myPlayer = async (req, res) => {
     });
 
     // 3. 응답 조합
-    return res.status(200).json({ ...ownedPlayer, player: player || null });
+    return res.status(200).json({ ...ownedPlayers, player: player || null });
   } catch (err) {
     next(err);
   }
@@ -116,7 +116,7 @@ export const playerSale = async (req, res, next) => {
       return res.status(400).json({ message: '유효한 ownedPlayerId와 count를 입력해주세요.' });
     }
 
-    const ownedPlayer = await userPrisma.ownedPlayer.findFirst({
+    const ownedPlayer = await userPrisma.ownedPlayers.findFirst({
       where: {
         ownedPlayerId: +ownedPlayerId,
         accountId: +accountId,
@@ -141,12 +141,12 @@ export const playerSale = async (req, res, next) => {
         });
 
         if (ownedPlayer.count > count) {
-          await tx.ownedPlayer.update({
+          await tx.ownedPlayers.update({
             where: { ownedPlayerId: ownedPlayer.ownedPlayerId },
             data: { count: { decrement: count } },
           });
         } else {
-          await tx.ownedPlayer.delete({
+          await tx.ownedPlayers.delete({
             where: { ownedPlayerId: ownedPlayer.ownedPlayerId },
           });
         }
