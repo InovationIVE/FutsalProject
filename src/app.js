@@ -6,7 +6,7 @@ import ErrorHandlingMiddleware from './middleWares/error-handling.middleware.js'
 import logMiddleware from './middleWares/log.middleware.js';
 import ownedPlayersRouter from './routes/ownedPlayers.router.js';
 import authRouter from './routes/auth.router.js';
-import { authMiddleware } from './routes/auth.router.js';
+import { authMiddleware } from './middleWares/auth.middleware.js';
 
 
 
