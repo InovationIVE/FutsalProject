@@ -150,11 +150,11 @@ export class GachaController {
     try {
       // 가챠 뽑기 요청에서 필요한 데이터 추출
       const { gachaId } = req.body;
-      const { accountId } = req.params;
+      const { accountId } = req.user;
 
       //가챠 카드 유효성 검사 및 존재 여부 확인
       const gachaCard = await IsGachaCard(gachaId);
-      const user = await userPrisma.account.findUnique({ where: { accountId: +accountId } });
+      const user = await userPrisma.account.findUnique({ where: { accountId: accountId } });
 
       if (user.cash < gachaCard.price * 10) {
         throw new HttpError(400, '재화가 부족합니다.');
@@ -167,7 +167,7 @@ export class GachaController {
 
       // 이미 보유한 플레이어 데이터 조회
       const ownedPlayers = await userPrisma.ownedPlayer.findMany({
-        where: { accountId: +accountId },
+        where: { accountId: accountId },
         select: { playerId: true, ownedPlayerId: true },
       });
 
@@ -218,13 +218,13 @@ export class GachaController {
         // 새로 획득한 플레이어를 생성
         for (const [playerId, count] of creates) {
           await tx.ownedPlayer.create({
-            data: { accountId: +accountId, playerId, count },
+            data: { accountId: accountId, playerId, count },
           });
         }
         
         // 계정의 재화 업데이트
         await tx.account.update({
-          where: { accountId: +accountId },
+          where: { accountId: accountId },
           data: { cash: { decrement: gachaCard.price * 10 } },
         });
       });
