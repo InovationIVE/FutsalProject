@@ -267,6 +267,17 @@ const login = async (req, res) => {
       }
     });
 
+    // 혹시 모를 오류로 인해 쿠키가 남아있을 수 있으므로 삭제
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      sameSite: 'strict'
+    });
+    
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      sameSite: 'strict'
+    });
+
     // 2-6. httpOnly 쿠키로 토큰 설정
     setTokenCookies(res, accessToken, refreshToken);
 
