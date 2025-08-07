@@ -1,8 +1,7 @@
 generator client {
-  
-  provider = "prisma-client-js"
-  output   = "../Game/generated/prisma"
-
+  provider        = "prisma-client-js"
+  output          = "../Game/generated/prisma"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
@@ -34,7 +33,6 @@ model Goods {
 }
 
 model Gacha {
-
   gachaId   Int      @id @default(autoincrement())
   cardName  String   @unique
   price     Int
