@@ -6,6 +6,7 @@ import logMiddleware from './middleWares/log.middleware.js';
 import ownedPlayersRouter from './routes/ownedPlayers.router.js';
 import authRouter from './routes/auth.router.js';
 import { authMiddleware } from './routes/auth.router.js';
+import squadRouter from './routes/squad.router.js';
 
 
 dotenv.config();
@@ -18,7 +19,7 @@ app.use(cookieParser());
 app.use(logMiddleware);
 app.use(authMiddleware);
 
-
+app.use('/api', [squadRouter]);
 app.use('/api', [ownedPlayersRouter]);
 app.use('/auth', [authRouter]);
 

@@ -17,22 +17,34 @@ model Account {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   role         String        @default("USER")
-  ownedPlayers OwnedPlayer[]
+  ownedPlayers OwnedPlayers[]
   refreshToken RefreshToken? @relation("refreshToken")
-  squads       Squad[]
+  squad        Squad?        // 1:1 관계
 
   @@map("Account")
 }
 
-model OwnedPlayer {
+model SquadMembers  {
+  id          Int         @id @default(autoincrement())
+  squadId     Int
+  ownedPlayerId Int
+
+  squad       Squad       @relation(fields: [squadId], references: [squadId])
+  ownedPlayer OwnedPlayer @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
+
+  @@unique([squadId, ownedPlayerId])
+  @@map("squadMembers")
+}
+
+model OwnedPlayers {
   ownedPlayerId Int      @id @default(autoincrement())
   accountId     Int
   playerId      Int
-  count         Int
+  count         Int 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   account       Account  @relation(fields: [accountId], references: [accountId])
-  squads        Squad[]
+  squadMembers  squadMembers[]
 
   @@index([accountId], map: "OwnedPlayers_accountId_fkey")
   @@map("OwnedPlayers")
@@ -40,15 +52,12 @@ model OwnedPlayer {
 
 model Squad {
   squadId       Int         @id @default(autoincrement())
-  accountId     Int
-  ownedPlayerId Int
+  accountId     Int         @unique
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   account       Account     @relation(fields: [accountId], references: [accountId])
-  ownedPlayer   OwnedPlayer @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
+  squadMembers  squadMembers[]
 
-  @@index([accountId], map: "Squad_accountId_fkey")
-  @@index([ownedPlayerId], map: "Squad_ownedPlayerId_fkey")
   @@map("Squad")
 }
 
