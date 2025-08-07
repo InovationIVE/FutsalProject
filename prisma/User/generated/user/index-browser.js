@@ -131,7 +131,13 @@ exports.Prisma.AccountScalarFieldEnum = {
   role: 'role'
 };
 
-exports.Prisma.OwnedPlayerScalarFieldEnum = {
+exports.Prisma.SquadMembersScalarFieldEnum = {
+  id: 'id',
+  squadId: 'squadId',
+  ownedPlayerId: 'ownedPlayerId'
+};
+
+exports.Prisma.OwnedPlayersScalarFieldEnum = {
   ownedPlayerId: 'ownedPlayerId',
   accountId: 'accountId',
   playerId: 'playerId',
@@ -143,7 +149,6 @@ exports.Prisma.OwnedPlayerScalarFieldEnum = {
 exports.Prisma.SquadScalarFieldEnum = {
   squadId: 'squadId',
   accountId: 'accountId',
-  ownedPlayerId: 'ownedPlayerId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -180,7 +185,8 @@ exports.Prisma.RefreshTokenOrderByRelevanceFieldEnum = {
 
 exports.Prisma.ModelName = {
   Account: 'Account',
-  OwnedPlayer: 'OwnedPlayer',
+  SquadMembers: 'SquadMembers',
+  OwnedPlayers: 'OwnedPlayers',
   Squad: 'Squad',
   RefreshToken: 'RefreshToken'
 };
