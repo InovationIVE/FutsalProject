@@ -386,7 +386,12 @@ const changePassword = async (req, res) => {
       where: { accountId: urlAccountId },
       data: { password: hashedNewPassword }
     });
-    
+
+    await userPrisma.refreshToken.update({
+      where: { accountId: urlAccountId },
+      data: {updatedAt: new Date()}
+    });
+
     // 8. 보안을 위해 기존 Refresh Token 삭제 
     await userPrisma.refreshToken.deleteMany({
       where: { accountId: urlAccountId }
