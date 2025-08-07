@@ -1,7 +1,5 @@
 import { gamePrisma, userPrisma } from '../utils/prisma/index.js';
 import { Prisma as UserPrisma } from '../../prisma/User/generated/user/index.js';
-
-
 // 내 선수 조회
 export const myPlayersList = async (req, res, next) => {
   try {
@@ -135,25 +133,28 @@ export const playerSale = async (req, res, next) => {
 
     const gain = 10000;
 
-    await userPrisma.$transaction(async (tx) => {
-      await tx.account.update({
-        where: { accountId: +accountId },
-        data: { cash: { increment: gain } },
-      });
+    await userPrisma.$transaction(
+      async (tx) => {
+        await tx.account.update({
+          where: { accountId: +accountId },
+          data: { cash: { increment: gain } },
+        });
 
-      if (ownedPlayer.count > count) {
-        await tx.ownedPlayer.update({
-          where: { ownedPlayerId: ownedPlayer.ownedPlayerId },
-          data: { count: { decrement: count } },
-        });
-      } else {
-        await tx.ownedPlayer.delete({
-          where: { ownedPlayerId: ownedPlayer.ownedPlayerId },
-        });
-      }
-    }, {
-      isolationLevel: UserPrisma.TransactionIsolationLevel.ReadCommitted,
-    });
+        if (ownedPlayer.count > count) {
+          await tx.ownedPlayer.update({
+            where: { ownedPlayerId: ownedPlayer.ownedPlayerId },
+            data: { count: { decrement: count } },
+          });
+        } else {
+          await tx.ownedPlayer.delete({
+            where: { ownedPlayerId: ownedPlayer.ownedPlayerId },
+          });
+        }
+      },
+      {
+        isolationLevel: UserPrisma.TransactionIsolationLevel.ReadCommitted,
+      },
+    );
 
     const updated = await userPrisma.account.findUnique({
       where: { accountId: +accountId },
