@@ -166,7 +166,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\ygm\\Desktop\\FutsalProject\\prisma\\Game\\generated\\prisma",
+      "value": "C:\\My_JS_Project\\FutsalProject\\prisma\\Game\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -180,11 +180,11 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\ygm\\Desktop\\FutsalProject\\prisma\\Game\\schema.prisma",
+    "sourceFilePath": "C:\\My_JS_Project\\FutsalProject\\prisma\\Game\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null,
+    "rootEnvPath": "../../../../.env",
     "schemaEnvPath": "../../../../.env"
   },
   "relativePath": "../..",
@@ -194,6 +194,7 @@ const config = {
     "db"
   ],
   "activeProvider": "mysql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -202,8 +203,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../Game/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"DATABASE_URL_GAME\")\n}\n\nmodel Player {\n  playerId       Int      @id @default(autoincrement())\n  soccerPlayerId String   @unique\n  name           String\n  speed          Int\n  attack         Int\n  defence        Int\n  profileImage   String?\n  rarity         String\n  //price          Int\n  createdAt      DateTime @default(now())\n  updatedAt      DateTime @updatedAt\n\n  @@map(\"Player\")\n}\n\nmodel Goods {\n  goodsId    Int    @id @default(autoincrement())\n  name       String @unique\n  cashAmount Int    @map(\"cash_amount\")\n\n  @@map(\"Goods\")\n}\n\nmodel Gacha {\n  gachaId   Int      @id @default(autoincrement())\n  cardName  String   @unique\n  price     Int\n  bronze    Int\n  silver    Int\n  gold      Int\n  diamond   Int\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n  platinum  Int\n\n  @@map(\"Gacha\")\n}\n",
-  "inlineSchemaHash": "a5fe9e76dc10c9ab4014275e06e1650ad5c87024282c8d8a41a56fa81b10a1dd",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../Game/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"DATABASE_URL_GAME\")\n}\n\nmodel Player {\n  playerId       Int      @id @default(autoincrement())\n  soccerPlayerId String   @unique\n  name           String\n  speed          Int\n  attack         Int\n  defence        Int\n  profileImage   String?\n  rarity         String\n  createdAt      DateTime @default(now())\n  updatedAt      DateTime @updatedAt\n\n  @@map(\"Player\")\n}\n\nmodel Goods {\n  goodsId    Int    @id @default(autoincrement())\n  name       String @unique\n  cashAmount Int    @map(\"cash_amount\")\n\n  @@map(\"Goods\")\n}\n\nmodel Gacha {\n  gachaId   Int      @id @default(autoincrement())\n  cardName  String   @unique\n  price     Int\n  bronze    Int\n  silver    Int\n  gold      Int\n  diamond   Int\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n  platinum  Int\n\n  @@map(\"Gacha\")\n}\n",
+  "inlineSchemaHash": "e192c92e570c0cb23d97ab051d117919635e461c96c9728cf6364b718b17cb61",
   "copyEngine": true
 }
 config.dirname = '/'

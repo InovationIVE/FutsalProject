@@ -57,10 +57,12 @@ export class PlayerModel {
     });
   }
 
-  //  static async isCorrectRarity(rarity) {
-  //    const rarity_list = [N, R, SR, SSR, SSSR];
-  //    if( !rarity in rarity_list){}
-  //  }
+   static async isCorrectRarity(rarity) {
+     const rarity_list = [N, R, SR, SSR, SSSR];
+     if( !rarity_list.has(rarity) ){
+      res.status(500).json( {error: "잘못된 레어도 입력입니다"});
+     }
+   }
 
   static async create(data) {
     const created = await gamePrisma.player.create({ data });

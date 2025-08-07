@@ -34,6 +34,8 @@ export class PlayerController{
         return res.status(409).json({ error: '해당 선수 데이터가 이미 존재합니다' });
       }
 
+      await PlayerModel.isCorrectRarity(rarity);
+
       const player = await PlayerModel.create({ soccerPlayerId, name, speed, attack, defence, profileImage, rarity });
       res.status(201).json({ message: '선수가 성공적으로 생성되었습니다.', data: player });
     } catch (error) {
@@ -51,6 +53,8 @@ export class PlayerController{
       if (!exists) {
         return res.status(404).json({ error: '해당 선수 데이터가 존재하지 않습니다' });
       }
+      
+      await PlayerModel.isCorrectRarity(rarity);
 
       const updatedPlayer = await PlayerModel.update(playerId, {
         soccerPlayerId,
