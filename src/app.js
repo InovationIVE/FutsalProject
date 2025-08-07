@@ -8,6 +8,7 @@ import ownedPlayersRouter from './routes/ownedPlayers.router.js';
 import authRouter from './routes/auth.router.js';
 import goodsRouter from './routes/goods.router.js';
 import { authMiddleware } from './routes/auth.router.js';
+import squadRouter from './routes/squad.router.js';
 
 dotenv.config();
 
@@ -19,8 +20,11 @@ app.use(cookieParser());
 app.use(logMiddleware);
 app.use(authMiddleware);
 
+
+app.use('/api', [squadRouter]);
 app.use('/api', [gachaRouter, goodsRouter]);
 app.use('/auth', [authRouter, ownedPlayersRouter, goodsRouter]);
+
 
 app.use(ErrorHandlingMiddleware);
 
