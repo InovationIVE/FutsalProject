@@ -17,9 +17,9 @@ model Account {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   role         String        @default("USER")
-  ownedPlayers OwnedPlayer[]
-  refreshToken RefreshToken? @relation("refreshToken")
-  squads       Squad[]
+  ownedPlayers OwnedPlayer[] @relation("AccountOwnedPlayers", onDelete: Cascade)
+  refreshToken RefreshToken? @relation("refreshToken", onDelete: Cascade)
+  squads       Squad[]       @relation("AccountSquads", onDelete: Cascade)
 
   @@map("Account")
 }
@@ -31,8 +31,8 @@ model OwnedPlayer {
   count         Int
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  account       Account  @relation(fields: [accountId], references: [accountId])
-  squads        Squad[]
+  account       Account  @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
+  squads        Squad[]  @relation("AccountSquads", onDelete: Cascade)
 
   @@index([accountId], map: "OwnedPlayers_accountId_fkey")
   @@map("OwnedPlayers")
@@ -44,8 +44,8 @@ model Squad {
   ownedPlayerId Int
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-  account       Account     @relation(fields: [accountId], references: [accountId])
-  ownedPlayer   OwnedPlayer @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
+  account       Account     @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
+  ownedPlayer   OwnedPlayer @relation(fields: [ownedPlayerId], references: [ownedPlayerId], onDelete: Cascade)
 
   @@index([accountId], map: "Squad_accountId_fkey")
   @@index([ownedPlayerId], map: "Squad_ownedPlayerId_fkey")
@@ -58,7 +58,7 @@ model RefreshToken {
   token          String
   createdAt      DateTime  @default(now())
   expiresAt      DateTime?
-  account        Account   @relation("refreshToken", fields: [accountId], references: [accountId])
+  account        Account   @relation("refreshToken", fields: [accountId], references: [accountId], onDelete: Cascade)
 
   @@map("Refreshtoken")
 }

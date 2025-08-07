@@ -532,6 +532,51 @@ router.patch('/:accountId/password', async (req, res) => {
   }
 });
 
+/**
+ * 회원 탈퇴 API
+ */
+router.delete('/:accountId', async (req, res) => {
+  try {
+    const urlAccountId = parseInt(req.params.accountId);
+
+    // 1. 회원 탈퇴 권한 확인
+    if (req.user.accountId !== urlAccountId) {
+      return res.status(403).json({
+        message: '본인의 계정만 탈퇴할 수 있습니다.'
+      });
+    }
+    
+    // 2. 회원 탈퇴 처리, db에서 데이터 삭제
+    await userPrisma.account.delete({
+      where: { accountId: urlAccountId }
+    });
+
+    // 2. 쿠키에서 토큰들 삭제
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      sameSite: 'strict'
+    });
+    
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      sameSite: 'strict'
+    });
+    
+    // 3. 성공 응답
+    res.status(200).json({
+      message: '회원 탈퇴가 완료되었습니다.'
+    });
+  } catch (error) {
+    console.error('회원 탈퇴 에러:', error);
+    res.status(500).json({
+      message: '서버 내부 오류가 발생했습니다.'
+    });
+  }
+
+
+
+});
+
 // 미들웨어들을 다른 라우터에서도 사용할 수 있도록 export
 export { authMiddleware, requireAdmin };
 export default router;
