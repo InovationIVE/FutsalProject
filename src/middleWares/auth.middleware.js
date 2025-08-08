@@ -28,23 +28,28 @@ const authMiddleware = async (req, res, next) => {
 
     // Access Token이 유효한 경우 - 바로 통과
     if (accessToken) {
-      const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
-      const account = await userPrisma.account.findUnique({
-        where: { accountId: decoded.accountId },
-        select: {
-          accountId: true,
-          userId: true,
-          email: true,
-          cash: true,
-          role: true,
-          createdAt: true,
-          lastLoginAt: true,
-        },
-      });
+      try {
+        const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+        const account = await userPrisma.account.findUnique({
+          where: { accountId: decoded.accountId },
+          select: {
+            accountId: true,
+            userId: true,
+            email: true,
+            cash: true,
+            role: true,
+            createdAt: true,
+            lastLoginAt: true,
+          },
+        });
 
-      if (account) {
-        req.user = account;
-        return next();
+        if (account) {
+          req.user = account;
+          return next();
+        }
+      } catch (jwtError) {
+        // JWT 에러는 무시하고 아래 refresh 로직으로 진행
+        console.log('Access Token 만료 또는 유효하지 않음:', jwtError.message);
       }
     }
 
@@ -77,9 +82,7 @@ const authMiddleware = async (req, res, next) => {
     });
 
     if (!account) {
-      return res
-        .status(401)
-        .json({ message: '유효하지 않은 토큰입니다. 계정을 찾을 수 없습니다.' });
+      return res.status(401).json({ message: '유효하지 않은 토큰입니다. 계정을 찾을 수 없습니다.' });
     }
 
     req.user = account;
