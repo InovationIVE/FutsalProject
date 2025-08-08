@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Game Scene</title>
-    <link rel="stylesheet" href="gachaStyleSheet.css" />
+    <link rel="stylesheet" href="GachaScene.css" />
   </head>
   <body>
     <div class="toolbar">
@@ -15,23 +15,35 @@
       <div><button class="topButton" id="gamePlay">게임플레이</button></div>
     </div>
 
-    <div id="content-area">
-      <div id="cash-shop" class="scene active">
-        <h2>캐시샵</h2>
-        <p>다양한 캐시 아이템을 구매하세요!</p>
-      </div>
-
-      <div id="player-gacha" class="scene">
-        <h2>선수 뽑기</h2>
-        <p>카드팩을 선택하여 선수를 뽑아보세요!</p>
-      </div>
-
-      <div id="inventory" class="scene">
-        <h2>인벤토리</h2>
-        <p>보유한 아이템과 선수 목록입니다.</p>
-      </div>
+    <div id="user-info">
+        <span>유저 ID: <span id="user-id-display"></span></span>
+        <span>보유 캐시: <span id="user-cash-display"></span></span>
     </div>
 
-    
+
+    <div class="container">
+      <h1>선수 카드팩 상점</h1>
+      <div id="gacha-pack-list" class="pack-container">
+        <!-- 카드팩 목록이 여기에 표시됩니다. -->
+      </div>
+      <hr />
+      <h2>뽑은 선수 결과</h2>
+      <div id="card-display-area" class="card-container">
+        <!-- 뽑은 카드가 여기에 표시됩니다. -->
+      </div>
+      <button id="back-to-lobby-btn">로비로 돌아가기</button>
+      <h2>옵션</h2>
+      <div id="gacha-option-list" class ="gacha-opthins-container">
+        <button id="gacha-delete-btn">가챠 삭제</button>
+        <button id="gacha-modify-btn">가챠 수정</button>
+        <button id="gacha-create-btn">가챠 생성</button>
+        <button id="gacha-view-btn">가챠 조회</button>
+      </div>
+      <h2>결과</h2>
+      <div id="gacha-result" class="result-container">
+        <!-- 가챠 수정 결과가 여기에 표시됩니다. -->
+    </div>
+
+    <script src="GachaScript.js"></script>
   </body>
 </html>
