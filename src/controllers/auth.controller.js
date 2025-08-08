@@ -256,23 +256,30 @@ const login = async (req, res) => {
     // 2-4. JWT 토큰 생성
     const { accessToken, refreshToken } = generateTokens(account.accountId);
 
-    // 2-5. 기존 Refresh Token 업데이트 (upsert 사용, 있으면 값 업데이트, 없으면 생성)
+    // 2-5. 트랜잭션을 사용하여 기존 Refresh Token 삭제 및 새 토큰 생성
     const expiresAt = new Date(Date.now() + TOKEN_EXPIRY.REFRESH_TOKEN_MS);
 
-    await userPrisma.refreshToken.upsert({
-      where: { accountId: account.accountId },
-      update: {
-        token: refreshToken,
-        expiresAt: expiresAt,
-        createdAt: new Date(), // 토큰 갱신 시간 업데이트
-      },
-      create: {
-        accountId: account.accountId,
-        token: refreshToken,
-        expiresAt: expiresAt,
-      },
-    });
+    await userPrisma.$transaction(async (tx) => {
+      // 기존 refreshToken 삭제 (있으면)
+      await tx.refreshToken.deleteMany({
+        where: { accountId: account.accountId },
+      });
 
+      // 새 refreshToken 생성
+      await tx.refreshToken.create({
+        data: {
+          accountId: account.accountId,
+          token: refreshToken,
+          expiresAt: expiresAt,
+        },
+      });
+
+      // 마지막 로그인 시간 업데이트
+      await tx.account.update({
+        where: { accountId: account.accountId },
+        data: { lastLoginAt: new Date() },
+      });
+    });
 
     // 2-6. httpOnly 쿠키로 토큰 설정
     setTokenCookies(res, accessToken, refreshToken);
