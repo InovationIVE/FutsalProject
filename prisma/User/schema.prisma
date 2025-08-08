@@ -13,7 +13,8 @@ model Account {
   email        String         @unique
   userId       String         @unique
   password     String
-  cash         Int
+  cash         Int            @default(100000) 
+  lastLoginAt  DateTime?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   role         String         @default("USER")
