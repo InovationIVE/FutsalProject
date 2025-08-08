@@ -37,7 +37,6 @@ export class PlayerModel {
         defence: true,
         profileImage: true,
         rarity: true,
-        price: true,
         createdAt: true,
         updatedAt: true
       }
