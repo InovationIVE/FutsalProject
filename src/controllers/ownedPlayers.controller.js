@@ -14,7 +14,7 @@ export class OwnedPlayersController {
       const myPlayers = await userPrisma.ownedPlayers.findMany({
         where: { accountId: +accountId },
         select: {
-          ownedPlayerId: true,
+          // ownedPlayerId: true,
           playerId: true,
           count: true,
         },
@@ -31,11 +31,11 @@ export class OwnedPlayersController {
       const players = await gamePrisma.player.findMany({
         where: { playerId: { in: playerIds } },
         select: {
-          playerId: true,
-          soccerPlayerId: true,
+          profileImage: true,
           name: true,
           rarity: true,
-          profileImage: true,
+          playerId: true,
+          soccerPlayerId: true,
         },
       });
 
