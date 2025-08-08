@@ -12,6 +12,7 @@ import goodsRouter from './routes/goods.router.js';
 import PlayerRouter from './routes/player.router.js';
 import squadRouter from './routes/squad.router.js';
 import userRouter from './routes/user.router.js';
+import gameRouter from './routes/game.router.js';
 import { authMiddleware } from './middleWares/auth.middleware.js';
 
 
@@ -40,6 +41,7 @@ app.use('/api', [
   squadRouter,
   ownedPlayersRouter,
   userRouter,
+  gameRouter,
 ]);
 app.use('/auth', [authRouter]);
 
