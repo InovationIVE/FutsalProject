@@ -22,7 +22,14 @@ app.use(cookieParser());
 app.use(logMiddleware);
 app.use(authMiddleware);
 
-app.use('/api', [gachaRouter, goodsRouter, PlayerRouter, squadRouter, ownedPlayersRouter, userRouter]);
+app.use('/api', [
+  gachaRouter,
+  goodsRouter,
+  PlayerRouter,
+  squadRouter,
+  ownedPlayersRouter,
+  userRouter,
+]);
 app.use('/auth', [authRouter]);
 
 app.use(ErrorHandlingMiddleware);
