@@ -6,7 +6,7 @@ export class GoodsController {
    * { name, cashAmount }
    * 출력 : 201(성공)/400(입력오류)/409(중복))/500(서버오류)
    * **/
-  static async registGoods(req, res, next) {
+  static async RegistGoods(req, res, next) {
     const { name, cashAmount } = req.body;
 
     //1.1 오류 표기 : name과 cashAmount입력되지 않을 경우 400반환
@@ -49,7 +49,7 @@ export class GoodsController {
   /**상품 삭제 API controller
    * 출력 : 200(성공)/400(입력오류)/404(데이터 없음)/500(서버오류)
    * **/
-  static async deleteGoods(req, res, next) {
+  static async DeleteGoods(req, res, next) {
     const goodsId = parseInt(req.params.goodsId, 10);
 
     //2.1 오류 표기 : goodsId가 숫자가 아닌 경우 400반환
@@ -95,7 +95,7 @@ export class GoodsController {
    * { name, cashAmount }
    * 출력 : 200(성공)/400(입력오류)/404(데이터 없음))/500(서버오류)
    * **/
-  static async updateGoods(req, res, next) {
+  static async UpdateGoods(req, res, next) {
     const goodsId = parseInt(req.params.goodsId, 10);
     const { name, cashAmount } = req.body;
 
@@ -155,7 +155,7 @@ export class GoodsController {
   /**상품 목록 조회 API
    * * 출력 : 200(성공)/404(데이터 없음)/500(서버오류)
    * **/
-  static async getGoods(req, res, next) {
+  static async GetGoods(req, res, next) {
     try {
       //4.1 상품 목록 조회
       const goodsList = await gamePrisma.goods.findMany();
