@@ -193,7 +193,7 @@ export class GachaController {
         else if (random < gachaCard.platinum) rarity = 'SR';
         else if (random < gachaCard.gold) rarity = 'UR';
         else if (random < gachaCard.silver) rarity = 'R';
-        else rarity = 'R';
+        else rarity = 'N';
 
         // 해당 희귀도에 맞는 플레이어들 중에서 랜덤으로 선택
         const potentialPlayers = players.filter((p) => p.rarity === rarity);
