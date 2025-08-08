@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Scene</title>
+    <link rel="stylesheet" href="SquadScene.css" />
+  </head>
+  <body>
+    <div class="toolbar">
+      <div><button class="topButton" id="cashShop">캐시</button></div>
+      <div><button class="topButton" id="gacha">선수뽑기</button></div>
+      <div><button class="topButton" id="mtTeam">마이팀</button></div>
+      <div><button class="topButton" id="squad">마이스쿼트</button></div>
+      <div><button class="topButton" id="gamePlay">게임플레이</button></div>
+    </div>
+
+    <div id="user-info">
+        <span>유저 ID: <span id="user-id-display"></span></span>
+        <span>보유 캐시: <span id="user-cash-display"></span></span>
+    </div>
+
+    <div class="container">
+      <h1>마이스쿼트</h1>
+      <div id="squad-list" class="squad-container">
+        <!-- 스쿼트 목록이 여기에 표시됩니다. -->
+      </div>
+      <hr />
+      <h2>스쿼트 생성</h2>
+      <form id="create-squad-form">
+        <label for="squad-name">스쿼트 이름:</label>
+        <input type="text" id="squad-name" name="squad-name" required />
+        <button type="submit">생성</button>
+      </form>
+      <h2>스쿼트 관리</h2>
+      <div id="squad-management-options">
+        <button id="edit-squad-btn">스쿼트 수정</button>
+        <button id="delete-squad-btn">스쿼트 삭제</button>
+        <button id="view-squad-btn">스쿼트 조회</button>
+      </div>
+      <h2>결과</h2>
+      <div id="squad-result" class="result-container">
+        <!-- 스쿼트 관리 결과가 여기에 표시됩니다. -->
+      </div>
+
+    <script src="SquadScripts.js"></script>
+  </body>
+</html>
