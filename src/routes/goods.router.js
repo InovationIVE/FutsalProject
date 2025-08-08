@@ -1,7 +1,7 @@
 import express from 'express';
 import { gamePrisma } from '../utils/prisma/index.js';
 import { GoodsController } from '../controllers/goods.controller.js';
-import { requireAdmin } from './auth.router.js';
+import { requireAdmin } from '../middleWares/auth.middleware.js';
 
 const router = express.Router();
 
