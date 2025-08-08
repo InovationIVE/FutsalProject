@@ -37,7 +37,6 @@ export class PlayerModel {
         defence: true,
         profileImage: true,
         rarity: true,
-        price: true,
         createdAt: true,
         updatedAt: true
       }
@@ -57,10 +56,14 @@ export class PlayerModel {
     });
   }
 
-  //  static async isCorrectRarity(rarity) {
-  //    const rarity_list = [N, R, SR, SSR, SSSR];
-  //    if( !rarity in rarity_list){}
-  //  }
+  /** 레어도 유효성 검증 **/
+  static async isCorrectRarity(rarity) {
+    const rarity_list = new Set(["N", "R", "SR", "SSR", "UR"]);
+    if( !rarity_list.has(rarity) ){
+    return false;
+    }
+    return true;
+  }
 
   static async create(data) {
     const created = await gamePrisma.player.create({ data });
