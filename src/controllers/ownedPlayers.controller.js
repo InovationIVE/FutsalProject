@@ -1,5 +1,6 @@
 import { gamePrisma, userPrisma } from '../utils/prisma/index.js';
 import { Prisma as UserPrisma } from '../../prisma/User/generated/user/index.js';
+import { PlayerModel } from '../entity/Player.js';
 // 내 선수 조회
 export class OwnedPlayersController {
   static async myPlayersList(req, res, next) {
@@ -132,7 +133,10 @@ export class OwnedPlayersController {
         return res.status(400).json({ message: '보유 수량보다 많이 판매할 수 없습니다.' });
       }
 
-      const gain = 10000;
+      /** 레어도에 따른 가격 측정 **/
+      const ownedPlayerInfo = await PlayerModel.getSome(ownedPlayer.playerId);
+      const own_rarity = ownedPlayerInfo.rarity;
+      const gain = await PlayerModel.PriceForRarity(own_rarity);
 
       await userPrisma.$transaction(
         async (tx) => {
