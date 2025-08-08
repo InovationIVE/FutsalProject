@@ -84,7 +84,7 @@ export class GachaController {
 
       const selectedCard = await IsGachaCard(gachaId);
 
-      await gamePrisma.$transaction(
+      const result = await gamePrisma.$transaction(
         async (tx) => {
           const cardPack = await tx.gacha.update({
             where: { gachaId: selectedCard.gachaId },
@@ -110,11 +110,12 @@ export class GachaController {
           );
         },
         {
-          isolationLevel: GamePrisma.TransactionIsolationLevel.ReadCommitted,
+          isolationLevel: GamePrisma.TransactionIsolationLevel.ReadCommitted
         },
       );
 
-      return res.status(200).json({ message: '가챠카드가 성공적으로 수정되었습니다' });
+
+      return res.status(200).json(result);
     } catch (error) {
       if (error instanceof HttpError) {
         return res.status(error.statusCode).json({ error: error.message });
@@ -149,20 +150,27 @@ export class GachaController {
   static async DrawGachaCard(req, res) {
     try {
       // 가챠 뽑기 요청에서 필요한 데이터 추출
-      const { gachaId } = req.body;
-      const { accountId } = req.user;
+      const { gachaId, drawCount } = req.body;
+      const { accountId } = req.user; // authMiddleware에서 전달된 사용자 정보
 
       //가챠 카드 유효성 검사 및 존재 여부 확인
       const gachaCard = await IsGachaCard(gachaId);
       const user = await userPrisma.account.findUnique({ where: { accountId: accountId } });
 
-      if (user.cash < gachaCard.price * 10) {
+      if (user.cash < gachaCard.price * drawCount) {
         throw new HttpError(400, '재화가 부족합니다.');
       }
 
       // 가챠 뽑기 시 필요한 플레이어 데이터 조회
       const players = await gamePrisma.player.findMany({
-        select: { playerId: true, name: true, rarity: true },
+        select: {
+          playerId: true,
+          name: true,
+          rarity: true,
+          attack: true,
+          defence: true,
+          speed: true,
+        },
       });
 
       // 이미 보유한 플레이어 데이터 조회
@@ -174,12 +182,11 @@ export class GachaController {
       // 보유한 플레이어 ID를 Map으로 변환하여 빠른 조회를 위해 사용
       const ownedPlayerMap = new Map(ownedPlayers.map((p) => [p.playerId, p.ownedPlayerId]));
 
-      
       const drawnCards = []; // 뽑힌 플레이어 카드들을 저장할 배열
       const updates = new Map(); // 보유 플레이어 업데이트를 위한 Map
       const creates = new Map(); // 새로 획득한 플레이어 생성을 위한 Map
 
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < drawCount; i++) {
         const random = Math.random() * 100;
         let rarity;
         if (random < gachaCard.diamond) rarity = 'SSR';
@@ -221,15 +228,15 @@ export class GachaController {
             data: { accountId: accountId, playerId, count },
           });
         }
-        
+
         // 계정의 재화 업데이트
         await tx.account.update({
           where: { accountId: accountId },
-          data: { cash: { decrement: gachaCard.price * 10 } },
+          data: { cash: { decrement: gachaCard.price * drawCount } },
         });
       });
 
-      return res.status(200).json({ drawnCards });
+      return res.status(200).json(drawnCards);
     } catch (error) {
       if (error instanceof HttpError) {
         return res.status(error.statusCode).json({ error: error.message });
