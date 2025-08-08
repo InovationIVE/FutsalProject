@@ -31,7 +31,7 @@ const authMiddleware = async (req, res, next) => {
        const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
        const account = await userPrisma.account.findUnique({
          where: { accountId: decoded.accountId },
-         select: { accountId: true, userId: true, email: true, cash: true, role: true, createdAt: true }
+         select: { accountId: true, userId: true, email: true, cash: true, role: true, createdAt: true, lastLoginAt: true }
        });
        
        if (account) {
@@ -55,7 +55,7 @@ const authMiddleware = async (req, res, next) => {
      
      const account = await userPrisma.account.findUnique({
        where: { accountId: refreshResult.accountId },
-       select: { accountId: true, userId: true, email: true, cash: true, role: true, createdAt: true }
+       select: { accountId: true, userId: true, email: true, cash: true, role: true, createdAt: true, lastLoginAt: true }
      });
      
      if (!account) {
