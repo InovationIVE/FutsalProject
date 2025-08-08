@@ -133,7 +133,7 @@ export class OwnedPlayersController {
         return res.status(400).json({ message: '보유 수량보다 많이 판매할 수 없습니다.' });
       }
 
-      /** 레어도에 따른 가격 측정 **/
+      /** 레어도에 따른 가격 책정 **/
       const ownedPlayerInfo = await PlayerModel.getSome(ownedPlayer.playerId);
       const own_rarity = ownedPlayerInfo.rarity;
       const gain = await PlayerModel.PriceForRarity(own_rarity);
