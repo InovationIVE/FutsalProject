@@ -13,11 +13,11 @@ model Account {
   email        String         @unique
   userId       String         @unique
   password     String
-  cash         Int            @default(100000) 
-  lastLoginAt  DateTime?
+  cash         Int            @default(100000)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   role         String         @default("USER")
+  lastLoginAt  DateTime?
   ownedPlayers OwnedPlayers[]
   refreshToken RefreshToken?  @relation("refreshToken")
   squad        Squad?
@@ -29,9 +29,8 @@ model SquadMembers {
   id            Int          @id @default(autoincrement())
   squadId       Int
   ownedPlayerId Int
-
-  squad       Squad       @relation(fields: [squadId], references: [squadId], onDelete: Cascade)
-  ownedPlayer OwnedPlayers @relation(fields: [ownedPlayerId], references: [ownedPlayerId], onDelete: Cascade)
+  ownedPlayer   OwnedPlayers @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
+  squad         Squad        @relation(fields: [squadId], references: [squadId])
 
   @@unique([squadId, ownedPlayerId])
   @@index([ownedPlayerId], map: "squadMembers_ownedPlayerId_fkey")
@@ -43,9 +42,9 @@ model OwnedPlayers {
   accountId     Int
   playerId      Int
   count         Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  account       Account  @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  account       Account        @relation(fields: [accountId], references: [accountId])
   squadMembers  SquadMembers[]
 
   @@index([accountId], map: "OwnedPlayers_accountId_fkey")
@@ -53,12 +52,12 @@ model OwnedPlayers {
 }
 
 model Squad {
-  squadId       Int         @id @default(autoincrement())
-  accountId     Int         @unique
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  account       Account     @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
-  squadMembers  SquadMembers[]
+  squadId      Int            @id @default(autoincrement())
+  accountId    Int            @unique
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  account      Account        @relation(fields: [accountId], references: [accountId])
+  squadMembers SquadMembers[]
 
   @@map("Squad")
 }
@@ -69,7 +68,7 @@ model RefreshToken {
   token          String
   createdAt      DateTime  @default(now())
   expiresAt      DateTime?
-  account        Account   @relation("refreshToken", fields: [accountId], references: [accountId], onDelete: Cascade)
+  account        Account   @relation("refreshToken", fields: [accountId], references: [accountId])
 
   @@map("Refreshtoken")
 }
