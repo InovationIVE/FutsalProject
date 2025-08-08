@@ -153,6 +153,8 @@ export class GachaController {
       const { gachaId, drawCount = 10 } = req.body;
       const { accountId } = req.user; // authMiddleware에서 전달된 사용자 정보
 
+    
+
       //가챠 카드 유효성 검사 및 존재 여부 확인
       const gachaCard = await IsGachaCard(gachaId);
       const user = await userPrisma.account.findUnique({ where: { accountId: accountId } });
