@@ -51,18 +51,20 @@ export class PlayerModel {
     });
   }
 
-  // static async existsBySoccerId(soccerPlayerId) {
-  //   return await gamePrisma.player.findUnique({
-  //     where: { soccerPlayerId }
-  //   });
-  // }
+  static async existsBySoccerId(soccerPlayerId) {
+    return await gamePrisma.player.findUnique({
+      where: { soccerPlayerId }
+    });
+  }
 
-   static async isCorrectRarity(rarity) {
-     const rarity_list = [N, R, SR, SSR, SSSR];
-     if( !rarity_list.has(rarity) ){
-      res.status(500).json( {error: "잘못된 레어도 입력입니다"});
-     }
-   }
+  /** 레어도 유효성 검증 **/
+  static async isCorrectRarity(rarity) {
+    const rarity_list = new Set(["N", "R", "SR", "SSR", "UR"]);
+    if( !rarity_list.has(rarity) ){
+    return false;
+    }
+    return true;
+  }
 
   static async create(data) {
     const created = await gamePrisma.player.create({ data });

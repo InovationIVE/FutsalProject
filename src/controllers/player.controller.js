@@ -34,7 +34,11 @@ export class PlayerController{
         return res.status(409).json({ error: '해당 선수 데이터가 이미 존재합니다' });
       }
 
-      await PlayerModel.isCorrectRarity(rarity);
+      /** 레어도 유효성 검사 **/
+      const rarity_right = await PlayerModel.isCorrectRarity(rarity);
+      if(!rarity_right){
+        return res.status(500).json( {error: "잘못된 레어도 입력입니다"}); /**  return을 통해 출력을 반환하고 이후 기능은 처리하지 않음 **/
+      }
 
       const player = await PlayerModel.create({ soccerPlayerId, name, speed, attack, defence, profileImage, rarity });
       res.status(201).json({ message: '선수가 성공적으로 생성되었습니다.', data: player });
