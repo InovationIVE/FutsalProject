@@ -480,6 +480,30 @@ const deleteAccount = async (req, res) => {
   }
 };
 
+
+/**
+ * auth/isAdmin 컨트롤러: 현재 로그인한 사용자 정보 조회
+ * 
+ * 프론트 분기 로직의 기준으로 활용 가능
+ */
+const isAdmin = async (req, res) => {
+  try {
+    const { accountId } = req.user;
+    const account = await userPrisma.account.findUnique({
+      where: { accountId: accountId },
+      select: {
+        role: true,
+      }
+    });
+
+    res.status(200).json({
+      isAdmin: account.role === 'ADMIN'
+    });
+  } catch (error) {
+    console.error('isAdmin 에러:', error);
+  }
+};
+
 export { 
   generateTokens, 
   validateAndRefreshTokens, 
