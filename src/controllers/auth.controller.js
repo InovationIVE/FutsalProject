@@ -512,5 +512,6 @@ export {
   login,
   logout,
   changePassword,
-  deleteAccount
+  deleteAccount,
+  isAdmin
 }; 
