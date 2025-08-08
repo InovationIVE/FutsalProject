@@ -55,7 +55,7 @@ export class OwnedPlayersController {
 
   //보유선수 상세 조회
 
-  static async myPlayer(req, res) {
+  static async myPlayer(req, res, next) {
     try {
       const { accountId } = req.user;
       const { ownedPlayerId } = req.params;
@@ -86,7 +86,7 @@ export class OwnedPlayersController {
       // 2. Game DB에서 Player 상세정보 조회
       const player = await gamePrisma.player.findUnique({
         where: {
-          playerId: ownedPlayers.playerId,
+          playerId: ownedPlayer.playerId,
         },
         select: {
           playerId: true,
@@ -101,7 +101,7 @@ export class OwnedPlayersController {
       });
 
       // 3. 응답 조합
-      return res.status(200).json({ ...ownedPlayers, player: player || null });
+      return res.status(200).json({ ...ownedPlayer, player: player || null });
     } catch (err) {
       next(err);
     }
