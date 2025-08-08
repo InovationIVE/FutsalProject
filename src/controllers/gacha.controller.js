@@ -150,7 +150,7 @@ export class GachaController {
   static async DrawGachaCard(req, res) {
     try {
       // 가챠 뽑기 요청에서 필요한 데이터 추출
-      const { gachaId, drawCount } = req.body;
+      const { gachaId, drawCount = 10 } = req.body;
       const { accountId } = req.user; // authMiddleware에서 전달된 사용자 정보
 
       //가챠 카드 유효성 검사 및 존재 여부 확인
