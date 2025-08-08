@@ -13,11 +13,11 @@ model Account {
   email        String         @unique
   userId       String         @unique
   password     String
-  cash         Int            @default(100000) 
-  lastLoginAt  DateTime?
+  cash         Int            @default(100000)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   role         String         @default("USER")
+  lastLoginAt  DateTime?
   ownedPlayers OwnedPlayers[]
   refreshToken RefreshToken?  @relation("refreshToken")
   squad        Squad?

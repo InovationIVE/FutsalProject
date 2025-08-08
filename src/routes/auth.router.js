@@ -5,7 +5,7 @@ import {
   logout, 
   changePassword, 
   deleteAccount,
-  isAdmin
+  getMyRole
 } from '../controllers/auth.controller.js';
 
 const router = express.Router();
@@ -39,6 +39,6 @@ router.delete('/:accountId', deleteAccount);
 /**
  * 관리자 확인 API
  */
-router.get('/isAdmin', isAdmin);
+router.get('/role', getMyRole);
 
 export default router;
