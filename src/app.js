@@ -12,6 +12,8 @@ import goodsRouter from './routes/goods.router.js';
 import PlayerRouter from './routes/player.router.js';
 import squadRouter from './routes/squad.router.js';
 import { authMiddleware } from './middleWares/auth.middleware.js';
+import cors from 'cors';
+import matchRouter from './routes/match.router.js';
 
 
 const __filename = fileURLToPath(import.meta.url); //현재 파일의 경로를 가져오기 위해 fileURLToPath 사용
@@ -21,6 +23,9 @@ const __dirname = path.dirname(__filename); // 현재 디렉토리 경로를 가
 dotenv.config();
 
 const app = express();
+app.use(cors())
+app.use(express.json())
+
 const PORT = 3018;
 
 // GameLogic 폴더를 정적 파일 경로로 설정
@@ -33,7 +38,7 @@ app.use(logMiddleware);
 app.use(authMiddleware);
 
 
-app.use('/api', [gachaRouter, goodsRouter, PlayerRouter, squadRouter, ownedPlayersRouter]);
+app.use('/api', [gachaRouter, goodsRouter, PlayerRouter, squadRouter, ownedPlayersRouter, matchRouter]);
 app.use('/auth', [authRouter]);
 
 
