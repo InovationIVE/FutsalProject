@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function LoadUserAndGoods() {
     try {
       //유저 정보 가져오기
-      const userRes = await fetch(`/auth/users/${accountId}`, {
+      const userRes = await fetch(`/api/users/${accountId}`, {
         method: 'GET',
         credentials: 'include',
       });
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     try {
       //캐시충전 경로 수정 필요
-      const res = await fetch(`/auth/users/${accountId}/charge`, {
+      const res = await fetch(`/api/users/${accountId}/charge`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
