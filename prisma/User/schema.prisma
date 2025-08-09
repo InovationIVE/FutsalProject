@@ -18,9 +18,15 @@ model Account {
   updatedAt    DateTime       @updatedAt
   role         String         @default("USER")
   lastLoginAt  DateTime?
+
   ownedPlayers OwnedPlayers[]
   refreshToken RefreshToken?  @relation("refreshToken")
   squad        Squad?
+  rank       Rank?       @relation("rank")
+  auction  Auction[]
+  matchHistory MatchHistory[]
+  sentGifts     GiftTransaction[] @relation("SentGifts")
+  receivedGifts GiftTransaction[] @relation("ReceivedGifts")
 
   @@map("Account")
 }
@@ -41,11 +47,17 @@ model OwnedPlayers {
   ownedPlayerId Int            @id @default(autoincrement())
   accountId     Int
   playerId      Int
-  count         Int
+  name           String       
+  rarity         String
+  level         Int?
+  attack         Int        
+  defence        Int         
+  speed          Int
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   account       Account        @relation(fields: [accountId], references: [accountId])
   squadMembers  SquadMembers[]
+  auctions Auction[]
 
   @@index([accountId], map: "OwnedPlayers_accountId_fkey")
   @@map("OwnedPlayers")
@@ -72,3 +84,78 @@ model RefreshToken {
 
   @@map("Refreshtoken")
 }
+
+model Rank {
+  rankId         Int       @id @default(autoincrement())
+  accountId      Int       @unique
+  rankScore      Int       @default(1000)
+  tier           String    @default("silver")
+    
+  updatedAt      DateTime  @updatedAt
+  account        Account   @relation("rank", fields:[accountId], references:[accountId])
+
+  @@map("Rank")
+}
+
+
+
+model MatchHistory {
+  matchId        Int          @id @default(autoincrement())
+  accountId      Int
+  goalScore      Int          @default(0)   
+  passScore      Int          @default(0)
+  shootScore     Int          @default(0)
+  defenceScore   Int          @default(0)
+  createdAt      DateTime     @default(now())
+
+  account      Account        @relation(fields:[accountId], references:[accountId])
+  @@map("MatchHistory")
+}
+
+
+model GiftTransaction {
+  id          Int   @id @default(autoincrement())
+  senderId    Int
+  receiverId  Int
+  cash        Int
+  status      GiftStatus @default(success)
+  createdAt  DateTime @default(now())
+
+  sender   Account @relation("SentGifts", fields: [senderId], references: [accountId])
+  receiver Account @relation("ReceivedGifts", fields: [receiverId], references: [accountId])
+
+ @@map("GiftTransaction")
+}
+
+enum GiftStatus {
+  success
+  pending
+  failed
+}
+
+
+model Auction {
+  auctionId         Int          @id @default(autoincrement())
+  accountId         Int
+  ownedPlayerId     Int
+  startingPrice     Int
+  currentPrice      Int
+  status            AuctionStatus @default(open)
+  createdAt         DateTime     @default(now())
+  endsAt            DateTime
+   
+  account      Account     @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
+  ownedPlayer  OwnedPlayers@relation(fields: [ownedPlayerId], references: [ownedPlayerId])
+
+  @@map("Auction")
+}
+
+enum AuctionStatus {
+  open
+  closed
+  cancelled
+}
+
+
+
+
