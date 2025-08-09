@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { decode } from 'jsonwebtoken';
 import { userPrisma } from '../utils/prisma/index.js';
 import { validateInput } from '../utils/validation.js';
 import { TOKEN_EXPIRY } from '../middleWares/auth.middleware.js';
@@ -61,7 +61,7 @@ const validateAndRefreshTokens = async (refreshToken) => {
     const result = await userPrisma.$transaction(async (tx) => {
       // 기존 refreshToken 삭제
       await tx.refreshToken.delete({
-        where: { token: storedToken.token },
+        where: { accountId: decoded.accountId },
       });
 
       // 새 토큰 발급
