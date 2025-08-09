@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
   purchaseForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const inputId = document.getElementById('goods-id').ariaValueMax.trim();
+    const inputId = document.getElementById('goods-id').value.trim();
     if (!inputId) {
       cashShopResult.textContent = '상품 ID를 입력하세요.';
       cashShopResult.style.color = 'red';
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     try {
       //캐시충전 경로 수정 필요
-      const res = await fetch(`/api/users/${accountId}/charge`, {
+      const res = await fetch(`/api/users/${accountId}/cash`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
