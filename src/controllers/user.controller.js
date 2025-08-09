@@ -68,6 +68,12 @@ const getUserDetail = async (req, res) => {
   }
 };
 
+const getMe = async (req, res) => {
+  res.status(200).json({
+    account: req.user,
+  });
+};
+
 const chargeCash = async (req, res) => {
   try {
     const accountId = parseInt(req.params.accountId);
@@ -101,7 +107,7 @@ const chargeCash = async (req, res) => {
     });
 
     res.status(200).json({
-      message: `캐시 충전 완료, 충전 금액: ${cashAmount} 캐시 충전전 후 잔액: ${cash}`,
+      cash,
     });
   } catch (error) {
     console.error('캐시 충전 에러:', error);
@@ -111,4 +117,23 @@ const chargeCash = async (req, res) => {
   }
 };
 
-export { getUserList, getUserDetail, chargeCash };
+const getUserCash = async (req, res) => {
+  try {
+    const accountId = parseInt(req.params.accountId);
+    const { cash } = await userPrisma.account.findUnique({
+      where: { accountId: accountId },
+      select: { cash: true },
+    });
+
+    res.status(200).json({
+      cash,
+    });
+  } catch (error) {
+    console.error('유저 캐시 조회 에러:', error);
+    res.status(500).json({
+      message: '유저 캐시 조회 중 서버 내부 오류가 발생했습니다.',
+    });
+  }
+};
+
+export { getUserList, getUserDetail, chargeCash, getUserCash, getMe };
