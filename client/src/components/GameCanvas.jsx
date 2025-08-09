@@ -99,7 +99,7 @@ const GameCanvas = () => {
   const movePlayer = (player, tile) => {
     const dx = Math.abs(player.x - tile.x);
     const dy = Math.abs(player.y - tile.y);
-    if (dx + dy <= 3) {
+    if (dx + dy <= 10) {
       const updated = players.map((p) =>
         p.id === player.id ? { ...p, x: tile.x, y: tile.y } : p
       );
