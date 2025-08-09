@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const mtTeamBtn = document.getElementById('mtTeam');
   const squadBtn = document.getElementById('squad');
   const gamePlayBtn = document.getElementById('gamePlay');
-  const userIdDisplay = document.getElementById('user-id-display');
+  //const userIdDisplay = document.getElementById('user-id-display');
   const userCashDisplay = document.getElementById('user-cash-display');
   const cashGoodsList = document.getElementById('cash-item-list');
   const purchaseForm = document.getElementById('purchase-item-form');
@@ -30,18 +30,18 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = '../GamePlayScene/GamePlayScene.html';
   });
 
-  /**유저 정보 및 캐시 상품 불러오기**/
-  async function LoadUserAndGoods() {
-    try {
-      //유저 정보 가져오기
-      const userRes = await fetch(`/api/users/${accountId}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      if (!userRes.ok) throw new Error('유저 정보를 불러오는데 실패했습니다.');
-      const userData = await userRes.json();
+  /**로그인 시 sessionStorage에 저장된 accountId 불러오기**/
+  const accountId = sessionStorage.getItem('accountId');
 
-      //상품 목록 가져오기
+  if (!accountId) {
+    cashShopResult.textContent = '로그인 정보가 없습니다. 다시 로그인 해주세요.';
+    cashShopResult.style.color = 'red';
+    return;
+  }
+
+  /** 상품 목록 불러오기**/
+  async function LoadGoods() {
+    try {
       const goodsRes = await fetch('/api/goods', {
         method: 'GET',
         credentials: 'include',
@@ -51,10 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const goodsData = await goodsRes.json();
 
       //유저 정보 표시
-      userIdDisplay.textContent = userData.id;
-      userCashDisplay.textContent = userData.cash.toLocaleString();
+      //userCashDisplay.textContent = userData.cash.toLocaleString();
 
-      //상품 목록 표시
+      // 상품 목록 표시
       RenderCashGoods(goodsData);
     } catch (error) {
       cashShopResult.textContent = `오류 : ${error.message}`;
@@ -63,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /**상품 목록 화면 렌더링**/
+  /** 상품 목록 화면 렌더링 **/
   function RenderCashGoods(goods) {
     cashGoodsList.innerHTML = '';
     if (!goods || goods.length === 0) {
@@ -73,13 +72,13 @@ document.addEventListener('DOMContentLoaded', () => {
     goods.forEach((goods) => {
       const div = document.createElement('div');
       div.className = 'cash-goods';
-      const price = Number(goods.cashAmount);
-      div.textContent = `${goods.name} (ID : ${goods.id}) - 가격 : ${price.toLocaleString()} 캐시`;
+      const price = Number(goods.cashAmount || goods.cash_Amount);
+      div.textContent = `${goods.name} (ID : ${goods.id || goods.goodsId}) - 가격 : ${price.toLocaleString()} 캐시`;
       cashGoodsList.appendChild(div);
     });
   }
 
-  /**상품 구매**/
+  /** 상품 구매 **/
   purchaseForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -90,30 +89,34 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    //숫자 변환 실패 시 예외처리
+    // 숫자 변환 실패 시 예외처리
     const goodsId = parseInt(inputId, 10);
     if (isNaN(goodsId)) {
       cashShopResult.textContent = '상품ID는 숫자로 입력하세요.';
       cashShopResult.style.color = 'red';
       return;
     }
+
     try {
-      //캐시충전 경로 수정 필요
       const res = await fetch(`/api/users/${accountId}/cash`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ goodsId }),
       });
+
       const result = await res.json();
 
-      //구매 성공 시 유저 캐시 충전 및 메시지 출력
       if (res.ok) {
-        userCashDisplay.textContent = result.newCash.toLocaleString();
-        cashShopResult.textContent = result.message;
+        // 구매 성공 시 유저 캐시 갱신
+        if (result.newCash !== undefined) {
+          userCashDisplay.textContent = result.newCash.toLocaleString();
+        } else {
+          userCashDisplay.textContent = '-';
+        }
+        cashShopResult.textContent = result.message || '구매가 완료되었습니다.';
         cashShopResult.style.color = 'green';
       } else {
-        //실패 시 실패 매시지 출력
         cashShopResult.textContent = result.message || '구매에 실패했습니다.';
         cashShopResult.style.color = 'red';
       }
@@ -124,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     purchaseForm.reset();
   });
-  //페이지 로드 시 초기화
-  LoadUserAndGoods();
+
+  // 페이지 로드 시 상품 목록만 초기화
+  LoadGoods();
 });

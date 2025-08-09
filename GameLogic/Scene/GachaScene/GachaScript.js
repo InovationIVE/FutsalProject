@@ -31,13 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = '../GamePlayScene/GamePlayScene.html';
   });
 
-
-
   // 페이지 로드 시 가챠 팩 목록을 불러옵니다.
   loadGachaPacks();
-
-  
-
 
   backToLobbyBtn.addEventListener('click', () => {
     window.location.href = '../LobbyScene/LobbyScene.html';
@@ -77,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
- async function modifyGacha() {
+  async function modifyGacha() {
     const gachaId = prompt('수정할 가챠 카드의 ID를 입력하세요:');
     if (!gachaId) {
       alert('가챠 카드 ID를 입력하지 않았습니다.');
@@ -92,7 +87,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const platinum = parseInt(prompt('새로운 플래티넘 확률을 입력하세요:'), 10);
     const diamond = parseInt(prompt('새로운 다이아몬드 확률을 입력하세요:'), 10);
 
-    if (!cardName || isNaN(price) || isNaN(bronze) || isNaN(silver) || isNaN(gold) || isNaN(platinum) || isNaN(diamond)) {
+    if (
+      !cardName ||
+      isNaN(price) ||
+      isNaN(bronze) ||
+      isNaN(silver) ||
+      isNaN(gold) ||
+      isNaN(platinum) ||
+      isNaN(diamond)
+    ) {
       alert('모든 필드를 올바르게 입력해야 합니다.');
       return;
     }
