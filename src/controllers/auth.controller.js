@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { decode } from 'jsonwebtoken';
 import { userPrisma } from '../utils/prisma/index.js';
 import { validateInput } from '../utils/validation.js';
 import { TOKEN_EXPIRY } from '../middleWares/auth.middleware.js';
