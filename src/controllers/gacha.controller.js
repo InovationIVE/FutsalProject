@@ -185,7 +185,6 @@ export class GachaController {
       const ownedPlayerMap = new Map(ownedPlayers.map((p) => [p.playerId, p.ownedPlayerId]));
 
       const drawnCards = []; // 뽑힌 플레이어 카드들을 저장할 배열
-      const updates = new Map(); // 보유 플레이어 업데이트를 위한 Map
       const creates = new Map(); // 새로 획득한 플레이어 생성을 위한 Map
 
       for (let i = 0; i < drawCount; i++) {
@@ -205,29 +204,18 @@ export class GachaController {
         const drawnPlayer = potentialPlayers[Math.floor(Math.random() * potentialPlayers.length)];
         drawnCards.push(drawnPlayer);
 
-        // 이미 보유한 플레이어인지 확인
-        if (ownedPlayerMap.has(drawnPlayer.playerId)) {
-          const ownedPlayerId = ownedPlayerMap.get(drawnPlayer.playerId); // 보유 플레이어 ID
-          updates.set(ownedPlayerId, (updates.get(ownedPlayerId) || 0) + 1); // 업데이트할 플레이어의 개수 증가
-        } else {
-          creates.set(drawnPlayer.playerId, (creates.get(drawnPlayer.playerId) || 0) + 1); // 새로 획득한 플레이어의 개수 증가
-        }
+
+        creates.set(drawnPlayer.playerId, (creates.get(drawnPlayer.playerId) || 0) + 1); // 플레이어의 개수 증가
+        
       }
 
       // 트랜잭션을 사용하여 데이터베이스 업데이트
       await userPrisma.$transaction(async (tx) => {
-        for (const [ownedPlayerId, count] of updates) {
-          // 보유 플레이어의 개수를 증가시키는 업데이트
-          await tx.ownedPlayers.update({
-            where: { ownedPlayerId },
-            data: { count: { increment: count } },
-          });
-        }
 
         // 새로 획득한 플레이어를 생성
-        for (const [playerId, count] of creates) {
+        for (const playerId of creates) {
           await tx.ownedPlayers.create({
-            data: { accountId: accountId, playerId, count },
+            data: { accountId: accountId, playerId },
           });
         }
 
