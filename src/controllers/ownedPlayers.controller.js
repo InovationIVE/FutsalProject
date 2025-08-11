@@ -140,7 +140,8 @@ export class OwnedPlayersController {
       //   where:{ rarity : ownedPlayerInfo.rarity}
       // });
       const gain = await PlayerModel.PriceForRarity(own_rarity);
-      // const gain = own_rarity_price.priceForRarity * (ownedPlayer.level/10 + 1);
+      /** 레어도 비용 에 (보유선수레벨*10)% 만큼 가산 후, 100의 자리수에서 버림**/
+      // const gain = Math.floor( (own_rarity_price.priceForRarity * (ownedPlayer.level/10 + 1)) /100 )*100; 
 
       await userPrisma.$transaction(
         async (tx) => {
