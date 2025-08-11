@@ -140,7 +140,7 @@ export class OwnedPlayersController {
       //   where:{ rarity : ownedPlayerInfo.rarity}
       // });
       const gain = await PlayerModel.PriceForRarity(own_rarity);
-      // const gain = own_rarity_price.priceForRarity;
+      // const gain = own_rarity_price.priceForRarity * (ownedPlayer.level/10 + 1);
 
       await userPrisma.$transaction(
         async (tx) => {
