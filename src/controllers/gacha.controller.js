@@ -110,10 +110,9 @@ export class GachaController {
           );
         },
         {
-          isolationLevel: GamePrisma.TransactionIsolationLevel.ReadCommitted
+          isolationLevel: GamePrisma.TransactionIsolationLevel.ReadCommitted,
         },
       );
-
 
       return res.status(200).json(result);
     } catch (error) {
@@ -152,8 +151,6 @@ export class GachaController {
       // 가챠 뽑기 요청에서 필요한 데이터 추출
       const { gachaId, drawCount = 10 } = req.body;
       const { accountId } = req.user; // authMiddleware에서 전달된 사용자 정보
-
-    
 
       //가챠 카드 유효성 검사 및 존재 여부 확인
       const gachaCard = await IsGachaCard(gachaId);
@@ -202,16 +199,16 @@ export class GachaController {
         // 랜덤으로 플레이어 선택
         const drawnPlayer = potentialPlayers[Math.floor(Math.random() * potentialPlayers.length)];
         drawnCards.push(drawnPlayer);
-        
       }
 
       // 트랜잭션을 사용하여 데이터베이스 업데이트
       await userPrisma.$transaction(async (tx) => {
-
         // 새로 획득한 플레이어를 생성
-        for(const player of drawnCards){
+
+        for (const player of drawnCards) {
           await tx.ownedPlayers.create({
-            data:{accountId: accountId,
+            data: {
+              accountId: accountId,
               playerId: player.playerId,
               name: player.name,
               rarity: player.rarity,
@@ -219,7 +216,7 @@ export class GachaController {
               attack: player.attack,
               defence: player.defence,
               speed: player.speed,
-            }
+            },
           });
         }
 
