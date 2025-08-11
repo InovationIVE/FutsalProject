@@ -10,8 +10,9 @@ export default function registerGameEvents(io, socket, gameRooms) {
       return socket.emit('action_error', { message: "It's not your turn!" });
     }
 
-    const player = [...game.teams[0].players, ...game.teams[1].players]
-      .find((p) => p.id === payload.playerId);
+    const player = [...game.teams[0].players, ...game.teams[1].players].find(
+      (p) => p.id === payload.playerId,
+    );
     if (!player) return;
 
     switch (action) {
@@ -24,8 +25,10 @@ export default function registerGameEvents(io, socket, gameRooms) {
         socket.emit('shoot_result', { message: game.log });
         break;
       case 'pass':
-        const receiverInstance = [...game.teams[0].players, ...game.teams[1].players]
-          .find((p) => p.id === payload.receiver.id);
+        const receiverInstance = [...game.teams[0].players, ...game.teams[1].players].find(
+          (p) => p.id === payload.receiverId,
+        );
+        console.log(receiverInstance);
         if (receiverInstance) {
           game.handleAction('pass', player, receiverInstance);
         } else {
@@ -43,6 +46,6 @@ export default function registerGameEvents(io, socket, gameRooms) {
         break;
     }
 
-    io.to(roomId).emit('game_state_update', { gameState: game });
+    io.to(roomId).emit('game_state_update', { gameState: game.getStateForClient() });
   });
 }

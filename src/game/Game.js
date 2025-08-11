@@ -1,5 +1,7 @@
 export class Game {
   constructor(teamA, teamB, ball, gameMap, goalA, goalB) {
+    this.teamA = teamA;
+    this.teamB = teamB;
     this.teams = [teamA, teamB];
     this.ball = ball;
     this.gameMap = gameMap;
@@ -117,8 +119,8 @@ export class Game {
 
       case 'pass':
         this.log.length = 0;
-        const receiver = params;
-        if (receiver) {
+        const receiver = this.currentTeam.players.find((p) => p.id === params.id);
+        if (receiver && selectedPlayer.id !== receiver.id) {
           selectedPlayer.pass(receiver, this.ball, this.log);
         } else {
           this.log.push('잘못된 선택입니다.');
@@ -166,5 +168,20 @@ export class Game {
         }
         break;
     }
+  }
+
+  getStateForClient() {
+    return {
+      teams: [this.teamA.toPlainObject(), this.teamB.toPlainObject()],
+      ball: this.ball.toPlainObject(),
+      gameMap: this.gameMap,
+      goalA: this.goalA,
+      goalB: this.goalB,
+      turnCount: this.turnCount,
+      maxTurns: this.maxTurns,
+      selectedTeam: this.selectedTeam.toPlainObject(),
+      isGameOver: this.isGameOver,
+      initialPlayerPositions: this.initialPlayerPositions,
+    };
   }
 }

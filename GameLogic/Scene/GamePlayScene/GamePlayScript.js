@@ -41,7 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
   socket.on('game_start', (data) => {
     log('Game is starting!');
     game = data.gameState;
-    log(`${game.ball.owner.name}가 공을 가지고 시작합니다.`);
+    const allPlayers = [...game.teams[0].players, ...game.teams[1].players];
+    const ballOwner = allPlayers.find((p) => p.id === game.ball.ownerId);
+    log(`${ballOwner.name}가 공을 가지고 시작합니다.`);
     log(`---${game.selectedTeam.name}의 턴 시작---`);
     render();
     updateUI();
@@ -74,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
       playerEl.classList.add('player', p.teamName);
       playerEl.textContent = p.name;
       playerEl.dataset.playerId = p.id;
-      if (game.ball.owner && game.ball.owner.id === p.id) {
+      if (game.ball.ownerId && game.ball.ownerId === p.id) {
         playerEl.style.fontWeight = 'bold';
         playerEl.textContent += '*';
       }
@@ -86,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Render ball
-    if (!game.ball.owner) {
+    if (!game.ball.ownerId) {
       const ballEl = document.createElement('div');
       ballEl.classList.add('ball');
       const cell = getCell(game.ball.position.x, game.ball.position.y);
@@ -103,7 +105,11 @@ document.addEventListener('DOMContentLoaded', () => {
     turnCounterEl.textContent = game.turnCount;
     maxTurnsEl.textContent = game.maxTurns;
     currentTeamEl.textContent = game.selectedTeam.name;
-    ballOwnerEl.textContent = game.ball.owner ? game.ball.owner.name : 'None';
+
+    const allPlayers = [...game.teams[0].players, ...game.teams[1].players];
+    const ballOwner = allPlayers.find((p) => p.id === game.ball.ownerId);
+
+    ballOwnerEl.textContent = ballOwner ? ballOwner.name : 'None';
 
     // Determine if it is this client's turn
     const isMyTurn = game.selectedTeam.socketId === socket.id;
@@ -118,14 +124,14 @@ document.addEventListener('DOMContentLoaded', () => {
       game.selectedTeam.players.some((p) => p.id === selectedPlayer.id);
 
     shootBtn.disabled =
-      !canPerformAction || !game.ball.owner || game.ball.owner.id !== selectedPlayer.id;
+      !canPerformAction || !game.ball.ownerId || game.ball.ownerId !== selectedPlayer.id;
     moveBtn.disabled = !canPerformAction;
     passBtn.disabled =
-      !canPerformAction || !game.ball.owner || game.ball.owner.id !== selectedPlayer.id;
+      !canPerformAction || !game.ball.ownerId || game.ball.ownerId !== selectedPlayer.id;
     tackleBtn.disabled =
       !canPerformAction ||
-      (game.ball.owner && game.selectedTeam.players.some((p) => p.id === game.ball.owner.id));
-    getBallBtn.disabled = !canPerformAction || game.ball.owner;
+      (game.ball.ownerId && game.selectedTeam.players.some((p) => p.id === game.ball.ownerId));
+    getBallBtn.disabled = !canPerformAction || game.ball.ownerId;
 
     // Visually indicate whose turn it is
     if (isMyTurn) {
@@ -210,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const receiver = teammates[parseInt(receiverName) - 1];
         socket.emit('game_action', {
           action: 'pass',
-          payload: { receiver, playerId: selectedPlayer.id },
+          payload: { receiverId: receiver.id , playerId: selectedPlayer.id },
         });
       }
     }
