@@ -136,7 +136,11 @@ export class OwnedPlayersController {
       /** 레어도에 따른 가격 책정 **/
       const ownedPlayerInfo = await PlayerModel.getSome(ownedPlayer.playerId);
       const own_rarity = ownedPlayerInfo.rarity;
+      // const own_rarity_price = await gamePrisma.rarityPrice.findUnique({
+      //   where:{ rarity : ownedPlayerInfo.rarity}
+      // });
       const gain = await PlayerModel.PriceForRarity(own_rarity);
+      // const gain = own_rarity_price.priceForRarity;
 
       await userPrisma.$transaction(
         async (tx) => {

@@ -1,6 +1,7 @@
 import { PlayerModel } from '../entity/Player.js';
 
 export class PlayerController{
+  /** 모든 선수 조회 **/
   static async getAllPlayers(req, res, next) {
     try {
       const players = await PlayerModel.getAll();
@@ -11,6 +12,7 @@ export class PlayerController{
     }
   };
 
+  /** 특정 선수 조회 **/
   static async getThePlayer(req, res, next) {
     try {
       const { playerId } = req.params;
@@ -25,6 +27,7 @@ export class PlayerController{
     }
   };
 
+  /** 선수 등록 **/
   static async createPlayer (req, res, next) {
     try {
       const { soccerPlayerId, name, speed, attack, defence, profileImage, rarity } = req.body;
@@ -48,6 +51,7 @@ export class PlayerController{
     }
   };
 
+  /** 선수 갱신 **/
   static async updatePlayer (req, res, next) {
     try {
       const { playerId } = req.params;
@@ -59,7 +63,7 @@ export class PlayerController{
       }
       
       /** 레어도 유효성 검사 **/
-      const rarity_right = await PlayerModel.isCorrectRarity(rarity);
+      const rarity_right = await gamePrisma.RarityPrice.findUnique(rarity);
       if(!rarity_right){
         return res.status(500).json( {error: "잘못된 레어도 입력입니다"});
       }
@@ -81,6 +85,7 @@ export class PlayerController{
     }
   };
 
+  /** 선수 삭제 **/
   static async deletePlayer (req, res, next) {
     try {
       const { playerId } = req.params;
