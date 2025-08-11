@@ -28,7 +28,6 @@ export default function registerGameEvents(io, socket, gameRooms) {
         const receiverInstance = [...game.teams[0].players, ...game.teams[1].players].find(
           (p) => p.id === payload.receiverId,
         );
-        console.log(receiverInstance);
         if (receiverInstance) {
           game.handleAction('pass', player, receiverInstance);
         } else {
