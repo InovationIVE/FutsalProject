@@ -75,3 +75,12 @@ model RarityPrice {
 
   @@map("RarityPrice")
 }
+
+model StatForRarity {
+  statForRarityId Int    @id @default(autoincrement())
+  rarity          String @unique
+  minstat         Int
+  maxstat         Int
+
+  @@map("StatForRarity")
+}
