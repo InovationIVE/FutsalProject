@@ -60,14 +60,6 @@ model Reinforce {
   @@map("Reinforce")
 }
 
-model LevelPrice {
-  levelPriceId  Int @id @default(autoincrement())
-  level         Int @unique
-  magnification Int
-
-  @@map("LevelPrice")
-}
-
 model RarityPrice {
   rarityPriceId  Int    @id @default(autoincrement())
   rarity         String @unique
