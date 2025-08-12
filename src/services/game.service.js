@@ -13,12 +13,13 @@ export default class GameService {
     const goalA = new GoalPost({ x: 0, y: 2 });
     const goalB = new GoalPost({ x: 6, y: 2 });
     const ball = new Ball();
+    console.log('이거 실행되냐');
 
     const teamAPlayers = await createTeamPlayer(accountId1, 'teamA');
     const teamBPlayers = await createTeamPlayer(accountId2, 'teamB');
 
-    if (!teamAPlayers || !teamBPlayers) {
-      throw new Error('스쿼드 정보를 불러오는데 실패했다.');
+    if (!teamAPlayers || teamAPlayers.length === 0 || !teamBPlayers || teamBPlayers.length === 0) {
+      throw new Error('스쿼드 정보를 불러오는데 실패했거나 스쿼드에 선수가 없습니다.');
     }
 
     // TODO: Replace with actual player data from DB
@@ -219,7 +220,7 @@ export default class GameService {
         // Remove the opponent first. If it has a higher index, it won't affect the player's index.
         // If it has a lower index, the player's index will shift, so we find it again.
         const playerIndex = waitingQueue.findIndex((p) => p.accountId === player.accountId);
-        
+
         // Remove by index, making sure to remove the one with the larger index first
         // to avoid messing up the index of the other one.
         const index1 = playerIndex;
@@ -232,7 +233,7 @@ export default class GameService {
           waitingQueue.splice(index2, 1);
           waitingQueue.splice(index1, 1);
         }
-        
+
         return matchedPair;
       }
     }
@@ -286,7 +287,7 @@ function updateTier(score) {
   return tier;
 }
 
-function removeFromQueue(waitingQueue ,accountId) {
-  const index = waitingQueue.findIndex(p => p.accountId === accountId);
+function removeFromQueue(waitingQueue, accountId) {
+  const index = waitingQueue.findIndex((p) => p.accountId === accountId);
   if (index !== -1) waitingQueue.splice(index, 1);
 }

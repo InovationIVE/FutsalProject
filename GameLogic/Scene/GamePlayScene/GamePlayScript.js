@@ -18,7 +18,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const tackleBtn = document.getElementById('tackle-btn');
   const getBallBtn = document.getElementById('get-ball-btn');
   const logList = document.getElementById('log-list');
-  const findMatchBtn = document.getElementById('find-match-btn'); // Assuming you add this button to your HTML
+  const ReadyBtn = document.getElementById('find-match-btn'); // Assuming you add this button to your HTML
+
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const roomId = urlParams.get('roomId');
+
+  socket.emit('join_game_room');
 
   // --- Game State ---
   let selectedPlayer = null;
@@ -26,10 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let matchmakingTimer = null;
 
   // --- Socket Event Handlers ---
-  findMatchBtn.addEventListener('click', () => {
-    log('서버에 매칭을 요청합니다...');
+  ReadyBtn.addEventListener('click', () => {
+    log('상대방을 기다리는 중...');
     socket.emit('find_match');
-    findMatchBtn.disabled = true;
+    ReadyBtn.disabled = true;
   });
 
   socket.on('waiting_for_match', (data) => {
@@ -49,21 +55,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   socket.on('already_in_queue', (data) => {
     log(data.message);
-    findMatchBtn.disabled = false; // Re-enable button if they are already in queue somehow
+    ReadyBtn.disabled = false; // Re-enable button if they are already in queue somehow
   });
 
   socket.on('matchmaking_error', (data) => {
     log(`매칭 오류: ${data.message}`);
     if (matchmakingTimer) clearInterval(matchmakingTimer);
-    findMatchBtn.disabled = false;
+    ReadyBtn.disabled = false;
   });
 
-  socket.on('match_found', (data) => {
-    if (matchmakingTimer) clearInterval(matchmakingTimer);
-    log(`매치 발견! 게임 방: ${data.roomId}`);
-    log('게임 시작을 기다립니다...');
-    // The findMatchBtn can remain disabled as we are proceeding to the game.
-  });
 
   socket.on('game_start', (data) => {
     log('게임 시작!');
