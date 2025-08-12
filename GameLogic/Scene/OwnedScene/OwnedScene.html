@@ -7,35 +7,44 @@
     <link rel="stylesheet" href="OwnedScene.css" />
   </head>
   <body>
-    <div class="toolbar">
-      <div><button class="topButton" id="cashShop">캐시</button></div>
-      <div><button class="topButton" id="gacha">선수뽑기</button></div>
-      <div><button class="topButton" id="mtTeam">마이팀</button></div>
-      <div><button class="topButton" id="squad">마이스쿼트</button></div>
-      <div><button class="topButton" id="gamePlay">게임플레이</button></div>
+    <!-- 상단 네비게이션 -->
+    <div class="navbar">
+      <div class="nav-left">
+       <a href="../CashShopScene/CashShopScene.html" class="cashShopBtn">캐쉬 상점</a>
+       <a href="../GachaScene/GachaScene.html" class="gachaBtn">가챠 뽑기</a>
+       <a href="../OwnedScene/OwnedScene.html" class="MyPlayerBtn">My Player</a>
+       <a href="../SquadScene/SquadScene.html" class="MysquadBtn">My 스쿼드</a>
+      </div>
+      <div class="nav-right">
+       <div class="cash">보유 캐시 <strong>100,000,000</strong></div>
+       <a href="#" class="logout">로그아웃</a>
+       <button class="gamePlayBtn">게임시작</button>
+      </div>
     </div>
 
-    <div id="user-info">
-        <span>유저 ID: <span id="user-id-display"></span></span>
-        <span>보유 캐시: <span id="user-cash-display"></span></span>
-    </div>
-
+    <!-- 메인 컨텐츠 -->
     <div class="container">
-      <h1>소유한 선수 카드</h1>
-      <div id="owned-card-list" class="card-container">
-        <!-- 소유한 카드 목록이 여기에 표시됩니다. -->
+      <div class="card">
+        <div class="profileImage"></div>
+        <div class="stats">
+          <div>선수이름</div>
+          <div>등급</div>
+          <div>ATK</div>
+          <div>DEF</div>
+          <div>SPD</div>
+        </div>
       </div>
-      <hr />
-      <h2>카드 관리</h2>
-      <div id="card-management-options">
-        <button id="edit-card-btn">카드 수정</button>
-        <button id="delete-card-btn">카드 삭제</button>
-        <button id="view-card-btn">카드 조회</button>
-      </div>
-      <h2>결과</h2>
-      <div id="owned-result" class="result-container">
-        <!-- 카드 관리 결과가 여기에 표시됩니다. -->
-      </div>
+      <div class="player-list">
+        <h3>선수 목록</h3>
+        <div class="player-item">1</div>
+        <div class="player-item">2</div>
+        <div class="player-item">3</div>
+        <div class="player-item">4</div>
+        <div class="player-item">5</div>
+        <div class="player-item">6</div>
+        <div class="player-item">7</div>
+      </div> 
+    </div>
     
 
     <script src="OwnedScripts.js"></script>

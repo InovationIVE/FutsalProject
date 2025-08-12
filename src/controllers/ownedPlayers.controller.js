@@ -16,39 +16,41 @@ export class OwnedPlayersController {
         where: { accountId: +accountId },
         select: {
           ownedPlayerId: true,
-          playerId: true,
-          count: true,
-        },
-      });
-
-      // 2. playerId 목록 추출
-      const playerIds = myPlayers.map((p) => p.playerId);
-
-      if (playerIds.length === 0) {
-        return res.status(200).json({ response: [] });
-      }
-
-      // 3. Game DB에서 해당 playerId에 해당하는 Player 조회
-      const players = await gamePrisma.player.findMany({
-        where: { playerId: { in: playerIds } },
-        select: {
-          playerId: true,
-          soccerPlayerId: true,
+          // playerId: true,
+          // profileImage: true,
           name: true,
           rarity: true,
-          profileImage: true,
         },
       });
 
+      // // 2. playerId 목록 추출
+      // const playerIds = myPlayers.map((p) => p.playerId);
+
+      // if (playerIds.length === 0) {
+      //   return res.status(200).json({ response: [] });
+      // }
+
+      // // 3. Game DB에서 해당 playerId에 해당하는 Player 조회
+      // const players = await gamePrisma.player.findMany({
+      //   where: { playerId: { in: playerIds } },
+      //   select: {
+      //     profileImage: true,
+      //     name: true,
+      //     rarity: true,
+      //     playerId: true,
+      //     soccerPlayerId: true,
+      //   },
+      // });
+
       // 4. playerId 기준으로 매핑해서 ownedPlayers에 Player 정보 붙이기
-      const playerMap = Object.fromEntries(players.map((p) => [p.playerId, p]));
+      // const playerMap = Object.fromEntries(players.map((p) => [p.playerId, p]));
 
-      const response = myPlayers.map((ownedPlayers) => ({
-        ...ownedPlayers,
-        player: playerMap[ownedPlayers.playerId] || null,
-      }));
+      // const response = myPlayers.map((ownedPlayers) => ({
+      //   ...ownedPlayers,
+      //   player: playerMap[ownedPlayers.playerId] || null,
+      // }));
 
-      return res.status(200).json({ response });
+      return res.status(200).json({ data: myPlayers });
     } catch (err) {
       next(err);
     }
@@ -68,41 +70,44 @@ export class OwnedPlayersController {
       // 1. User DB에서 ownedPlayer 조회
       const ownedPlayer = await userPrisma.ownedPlayers.findUnique({
         where: {
+          accountId: +accountId,
           ownedPlayerId: +ownedPlayerId,
         },
         select: {
           ownedPlayerId: true,
-          accountId: true,
-          playerId: true,
-          count: true,
+          name: true,
+          speed: true,
+          attack: true,
+          defence: true,
+          rarity: true,
           createdAt: true,
           updatedAt: true,
         },
       });
 
       if (!ownedPlayer) {
-        return res.status(404).json({ message: '소유한 선수가 없습니다.' });
+        return res.status(404).json({ message: '해당 선수를 보유하고 있지 않습니다.' });
       }
 
-      // 2. Game DB에서 Player 상세정보 조회
-      const player = await gamePrisma.player.findUnique({
-        where: {
-          playerId: ownedPlayer.playerId,
-        },
-        select: {
-          playerId: true,
-          soccerPlayerId: true,
-          name: true,
-          speed: true,
-          attack: true,
-          defence: true,
-          rarity: true,
-          profileImage: true,
-        },
-      });
+      // // 2. Game DB에서 Player 상세정보 조회
+      // const player = await gamePrisma.player.findUnique({
+      //   where: {
+      //     playerId: ownedPlayer.playerId,
+      //   },
+      //   select: {
+      //     playerId: true,
+      //     soccerPlayerId: true,
+      //     name: true,
+      //     speed: true,
+      //     attack: true,
+      //     defence: true,
+      //     rarity: true,
+      //     profileImage: true,
+      //   },
+      // });
 
       // 3. 응답 조합
-      return res.status(200).json({ ...ownedPlayer, player: player || null });
+      return res.status(200).json({message:`${ownedPlayer.name}의 세부정보입니다.`, ...ownedPlayer});
     } catch (err) {
       next(err);
     }
@@ -129,9 +134,10 @@ export class OwnedPlayersController {
         return res.status(404).json({ message: '해당 선수를 찾을 수 없습니다.' });
       }
 
-      if (ownedPlayer.count < count) {
-        return res.status(400).json({ message: '보유 수량보다 많이 판매할 수 없습니다.' });
-      }
+      // 카운트 삭제로 인한 주석처리
+      // if (ownedPlayer.count < count) {
+      //   return res.status(400).json({ message: '보유 수량보다 많이 판매할 수 없습니다.' });
+      // }
 
       /** 레어도에 따른 가격 책정 **/
       const ownedPlayerInfo = await PlayerModel.getSome(ownedPlayer.playerId);
