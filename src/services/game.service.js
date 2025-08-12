@@ -14,12 +14,12 @@ export default class GameService {
     const goalB = new GoalPost({ x: 6, y: 2 });
     const ball = new Ball();
 
-    const teamAPlayers = await createTeamPlayer(accountId1,'teamA');
-    const teamBPlayers = await createTeamPlayer(accountId2,'teamB');
+    const teamAPlayers = await createTeamPlayer(accountId1, 'teamA');
+    const teamBPlayers = await createTeamPlayer(accountId2, 'teamB');
 
-    if(!teamAPlayers || !teamBPlayers){
+    if (!teamAPlayers || !teamBPlayers) {
       throw new Error('스쿼드 정보를 불러오는데 실패했다.');
-    } 
+    }
 
     // TODO: Replace with actual player data from DB
     teamAPlayers[0].position = { x: 2, y: 2 };
@@ -44,30 +44,108 @@ export default class GameService {
 
     return game;
   }
+
+  static async updateRank(winnerId, loserId, socketIdToUserIdMap) {
+    try {
+      const winnerAccountId = socketIdToUserIdMap.get(winnerId);
+      const loserAccountId = socketIdToUserIdMap.get(loserId);
+
+      const winnerRankInfo = await userPrisma.rank.findUnique({
+        where: { accountId: winnerAccountId },
+      });
+
+      const loserRankInfo = await userPrisma.rank.findUnique({
+        where: { accountId: loserAccountId },
+      });
+
+      let acquireScore = 0;
+      let acquiredCash = 0;
+      const addScore = Math.abs(winnerRankInfo.rankScore - loserRankInfo.rankScore);
+      const minusScore = addScore / 2;
+      if (winnerRankInfo.rankScore > loserRankInfo.rankScore) {
+        acquireScore = Math.floor(addScore / 2);
+        acquiredCash = Math.floor((addScore / 2) * 1000);
+      } else {
+        acquireScore = addScore;
+        acquiredCash = addScore * 1000;
+      }
+
+      const winnerTier = updateTier(winnerRankInfo.rankScore + acquireScore);
+      const loserTier = updateTier(loserRankInfo.rankScore - minusScore);
+
+      const winnerUpdatePromise = userPrisma.rank.update({
+        where: { accountId: winnerAccountId },
+        data: {
+          rankScore: { increment: acquireScore },
+          tier: winnerTier,
+        },
+      });
+
+      const winnerUpdateCash = userPrisma.account.update({
+        where: { accountId: winnerAccountId },
+        data: {
+          cash: { increment: acquiredCash },
+        },
+      });
+
+      const loserUpdatePromise = userPrisma.rank.update({
+        where: { accountId: loserAccountId },
+        data: {
+          rankScore: { decrement: minusScore },
+          tier: loserTier,
+        },
+      });
+
+      await userPrisma.$transaction([winnerUpdatePromise, winnerUpdateCash, loserUpdatePromise]);
+    } catch (error) {
+      console.error('Error updating ranks:', error);
+    }
+  }
 }
 
 async function createTeamPlayer(accountId, temaName) {
-  const squadInfo  = await userPrisma.squad.findUnique({
+  const squadInfo = await userPrisma.squad.findUnique({
     where: { accountId },
-    include:{
-      squadMembers:{
-        include:{
+    include: {
+      squadMembers: {
+        include: {
           ownedPlayer: true,
-        }
-      }
-    }
+        },
+      },
+    },
   });
-  
+
   let squadPlayers = [];
 
-  for(let i =0; i < squadInfo.squadMembers.length; i++){
+  for (let i = 0; i < squadInfo.squadMembers.length; i++) {
     //const playerA1 = new Player(1, 'A1', 8, 6, 3, 'teamA');
     // playerA1.position = { x: 2, y: 2 };
-      const info = squadInfo.squadMembers[i];
-      const stat = info.ownedPlayer;
-      const player = new Player(stat.ownedPlayerId, stat.name, stat.attack, stat.defence, stat.speed, temaName);
-      squadPlayers.push(player);
+    const info = squadInfo.squadMembers[i];
+    const stat = info.ownedPlayer;
+    const player = new Player(
+      stat.ownedPlayerId,
+      stat.name,
+      stat.attack,
+      stat.defence,
+      stat.speed,
+      temaName,
+    );
+    squadPlayers.push(player);
   }
-  
+
   return squadPlayers;
+}
+
+function updateTier(score) {
+  let tier = '';
+
+  if (score < 1000) tier = 'Bronze';
+  else if (score < 1500) tier = 'Silver';
+  else if (score < 2000) tier = 'Gold';
+  else if (score < 2700) tier = 'Platinum';
+  else if (score < 3500) tier = 'Dia';
+  else if (score < 4200) tier = 'Master';
+  else if (score >= 4200) tier = 'GrandMaster';
+
+  return tier;
 }

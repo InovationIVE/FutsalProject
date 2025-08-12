@@ -1,4 +1,6 @@
-export default function registerGameEvents(io, socket, gameRooms) {
+import GameService from '../services/game.service.js';
+
+export default function registerGameEvents(io, socket, gameRooms, socketIdToUserIdMap) {
   socket.on('game_action', ({ action, payload }) => {
     const roomId = Array.from(socket.rooms).find((r) => r.startsWith('room-'));
     if (!roomId) return;
@@ -15,36 +17,38 @@ export default function registerGameEvents(io, socket, gameRooms) {
     );
     if (!player) return;
 
-    switch (action) {
-      case 'move':
-        game.handleAction('move', player, { x: payload.x, y: payload.y });
-        socket.emit('move_result', { message: game.log });
-        break;
-      case 'shoot':
-        game.handleAction('shoot', player);
-        socket.emit('shoot_result', { message: game.log });
-        break;
-      case 'pass':
-        const receiverInstance = [...game.teams[0].players, ...game.teams[1].players].find(
-          (p) => p.id === payload.receiverId,
-        );
-        if (receiverInstance) {
-          game.handleAction('pass', player, receiverInstance);
-        } else {
-          return socket.emit('action_error', { message: 'Pass receiver not found!' });
-        }
-        socket.emit('pass_result', { message: game.log });
-        break;
-      case 'tackle':
-        game.handleAction('tackle', player);
-        socket.emit('tackle_result', { message: game.log });
-        break;
-      case 'getBall':
-        game.handleAction('getBall', player);
-        socket.emit('getBall_result', { message: game.log });
-        break;
+    game.handleAction(action, player, payload);
+
+    if (game.isGameOver) {
+      registerGameEndEvents(game, socketIdToUserIdMap);
+      gameRooms.delete(roomId);
+      console.log(`Room ${roomId} closed.`);
     }
 
     io.to(roomId).emit('game_state_update', { gameState: game.getStateForClient() });
   });
+}
+
+async function registerGameEndEvents(game, socketIdToUserIdMap) {
+  if (!game) {
+    return;
+  }
+
+  const teamA = game.teams[0];
+  const teamB = game.teams[1];
+  let winner, loser;
+
+  if (teamA.score > teamB.score) {
+    winner = teamA;
+    loser = teamB;
+  } else if (teamB.score > teamA.score) {
+    winner = teamB;
+    loser = teamA;
+  } else {
+    game.log.push('무승부 입니다.');
+    return;
+  }
+
+  game.log.push(`승리팀: ${winner.name}, 패배팀: ${loser.name}`);
+  await GameService.updateRank(winner.socketId, loser.socketId, socketIdToUserIdMap);
 }
