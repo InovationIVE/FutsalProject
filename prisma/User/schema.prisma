@@ -88,49 +88,6 @@ model Squad {
   @@map("Squad")
 }
 
-model Auction {
-  auctionId     Int            @id @default(autoincrement())
-  accountId     Int
-  ownedPlayerId Int
-  startingPrice Int
-  currentPrice  Int
-  status        Auction_status @default(open)
-  createdAt     DateTime       @default(now())
-  endsAt        DateTime
-  Account       Account        @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
-  OwnedPlayers  OwnedPlayers   @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
-
-  @@index([accountId], map: "Auction_accountId_fkey")
-  @@index([ownedPlayerId], map: "Auction_ownedPlayerId_fkey")
-}
-
-model GiftTransaction {
-  id                                          Int                    @id @default(autoincrement())
-  senderId                                    Int
-  receiverId                                  Int
-  cash                                        Int
-  status                                      GiftTransaction_status @default(success)
-  createdAt                                   DateTime               @default(now())
-  Account_GiftTransaction_receiverIdToAccount Account                @relation("GiftTransaction_receiverIdToAccount", fields: [receiverId], references: [accountId])
-  Account_GiftTransaction_senderIdToAccount   Account                @relation("GiftTransaction_senderIdToAccount", fields: [senderId], references: [accountId])
-
-  @@index([receiverId], map: "GiftTransaction_receiverId_fkey")
-  @@index([senderId], map: "GiftTransaction_senderId_fkey")
-}
-
-model MatchHistory {
-  matchId      Int      @id @default(autoincrement())
-  accountId    Int
-  goalScore    Int      @default(0)
-  passScore    Int      @default(0)
-  shootScore   Int      @default(0)
-  defenceScore Int      @default(0)
-  createdAt    DateTime @default(now())
-  Account      Account  @relation(fields: [accountId], references: [accountId])
-
-  @@map("Refreshtoken")
-}
-
 model Rank {
   rankId    Int      @id @default(autoincrement())
   accountId Int      @unique
