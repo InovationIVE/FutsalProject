@@ -79,6 +79,7 @@ export class GiftController {
     try {
       const gifts = await userPrisma.giftTransaction.findMany({
         include: {
+          //3.1 보낸 사람 정보
           sender: {
             select: {
               accountId: true,
@@ -87,6 +88,7 @@ export class GiftController {
               cash: true,
             },
           },
+          //3.2 받는 사람 정보
           receiver: {
             select: {
               accountId: true,
@@ -110,7 +112,7 @@ export class GiftController {
    */
   async acceptGift(req, res, next) {
     try {
-      //params에 giftId가 있을 경우 giftId 사용, 없으면 body에서 사용
+      //4.1 params에 giftId가 있을 경우 giftId 사용, 없으면 body에서 사용
       const giftId = Number(req.params.giftId ?? req.body.giftId);
       const loginUserId = req.user.accountId;
 
@@ -126,6 +128,7 @@ export class GiftController {
       }
       if (gift.status === 'success')
         return res.status(400).json({ message: '이미 받은 선물입니다.' });
+      //4.2 선물 받기
       await userPrisma.$transaction(async (tx) => {
         await tx.account.update({
           where: { accountId: gift.receiverId },
