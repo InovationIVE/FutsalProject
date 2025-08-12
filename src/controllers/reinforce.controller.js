@@ -1,19 +1,51 @@
-import { gamePrisma } from '../utils/prisma/index.js';
+import { userPrisma, gamePrisma } from '../utils/prisma/index.js';
 
 export class ReinforceController{
-    // static async reinforce(req, res, next) {
-    //     try{
-    //         // const { accountId } = req.user;
-    //         const { ownedplayerId } = req.params;
+    static async reinforce(req, res, next) {
+        try{
+            // const { accountId } = req.user;
+            const { ownedplayerId } = req.params;
+            // const { just_do_it } = req.body;
+            // if(!just_do_it){ 
+            //     return res.status(200).json({ message : "강화 대기중.. "});
+            // }
+
+            const toReinforce = await userPrisma.ownedPlayers.findUnique({
+                where : {ownedPlayerId : +ownedplayerId }
+            });
+            const ReinforceLv = await gamePrisma.reinforce.findUnique({
+                where: { level : toReinforce.level }
+            });
+
+            const your_prob = Math.random() * 100;
+            if( your_prob <= ReinforceLv.probability){
+                toReinforce.attack += ReinforceLv.attackIncrement;
+                toReinforce.defence += ReinforceLv.defenceIncrement;
+                toReinforce.speed += ReinforceLv.speedIncrement;
+
+                res.status(200).json({ 
+                    message: "강화 성공!",
+                    stat : { toReinforce }
+                });
+            }
+            else{
+                // await userPrisma.ownedPlayers.delete({
+                //     where: { ownedPlayerId }
+                // });
+
+                res.status(200).json({
+                    message: "강화 실패!" //로 캐릭터가 파괴되었습니다."
+                });
+            }
 
             
-    //     } catch (error){
-    //         console.error('Error creating Player data:', error);
-    //         res.status(500).json({ error: 'Internal Server Error' });
-    //     }
-    // }
+        } catch (error){
+            console.error('Error creating Player data:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
 
-    //** 결과 도출? **/
+    // /** 결과 도출? **/
     // static async reinforceResult(req, res, next)  {
     //     try{
     //         // const { accountId } = req.user;
