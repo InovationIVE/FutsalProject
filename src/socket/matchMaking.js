@@ -17,7 +17,7 @@ export default function registerMatchmakingEvents(socket, waitingQueue) {
         console.log(
           `User ${socket.id} joined the matchmaking queue. Queue length: ${waitingQueue.length}`,
         );
-        socket.emit('waiting_for_match', { message: '상대를 찾고 있습니다...' });
+        socket.emit('waiting_for_match');
       }
     } catch (error) {
       console.error(`Failed to get match info for socket ${socket.id}:`, error);

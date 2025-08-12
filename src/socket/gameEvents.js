@@ -1,6 +1,6 @@
 import GameService from '../services/game.service.js';
 
-export default function registerGameEvents(io, socket, gameRooms, socketIdToUserIdMap) {
+export default function registerGameEvents(io, socket, gameRooms) {
   socket.on('game_action', ({ action, payload }) => {
     const roomId = Array.from(socket.rooms).find((r) => r.startsWith('room-'));
     if (!roomId) return;
@@ -8,7 +8,7 @@ export default function registerGameEvents(io, socket, gameRooms, socketIdToUser
     const game = gameRooms.get(roomId);
     if (!game || game.isGameOver) return;
 
-    if (socket.id !== game.currentTeam.socketId) {
+    if (socket.request.user.accountId !== game.currentTeam.accountId) {
       return socket.emit('action_error', { message: "It's not your turn!" });
     }
 
@@ -20,7 +20,7 @@ export default function registerGameEvents(io, socket, gameRooms, socketIdToUser
     game.handleAction(action, player, payload);
 
     if (game.isGameOver) {
-      registerGameEndEvents(game, socketIdToUserIdMap);
+      registerGameEndEvents(game);
       gameRooms.delete(roomId);
       console.log(`Room ${roomId} closed.`);
     }
@@ -29,7 +29,7 @@ export default function registerGameEvents(io, socket, gameRooms, socketIdToUser
   });
 }
 
-async function registerGameEndEvents(game, socketIdToUserIdMap) {
+async function registerGameEndEvents(game) {
   if (!game) {
     return;
   }
@@ -46,11 +46,11 @@ async function registerGameEndEvents(game, socketIdToUserIdMap) {
     loser = teamA;
   } else {
     game.log.push('무승부 입니다.');
-    await GameService.updateDraw(teamA.socketId, teamB.socketId, socketIdToUserIdMap);
+    await GameService.updateDraw(teamA.accountId, teamB.accountId);
     return;
   }
 
   game.log.push(`승리팀: ${winner.name}, 패배팀: ${loser.name}`);
-  await GameService.updateRank(winner.socketId, loser.socketId, socketIdToUserIdMap);
-  await GameService.createMatchHistory(teamA.socketId, teamB.socketId, game, socketIdToUserIdMap);
+  await GameService.updateRank(winner.accountId, loser.accountId);
+  await GameService.createMatchHistory(teamA.accountId, teamB.accountId, game);
 }

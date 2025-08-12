@@ -8,12 +8,11 @@ import { Game } from '../game/Game.js';
 import { userPrisma } from '../utils/prisma/index.js';
 
 export default class GameService {
-  static async initGame(player1SocketId, player2SocketId, accountId1, accountId2) {
+  static async initGame(player1SocketId, player2SocketId ,accountId1, accountId2) {
     const gameMap = new MapData(7, 5);
     const goalA = new GoalPost({ x: 0, y: 2 });
     const goalB = new GoalPost({ x: 6, y: 2 });
     const ball = new Ball();
-    console.log('이거 실행되냐');
 
     const teamAPlayers = await createTeamPlayer(accountId1, 'teamA');
     const teamBPlayers = await createTeamPlayer(accountId2, 'teamB');
@@ -31,8 +30,8 @@ export default class GameService {
     teamBPlayers[1].position = { x: 5, y: 1 };
     teamBPlayers[2].position = { x: 5, y: 3 };
 
-    const teamA = new Team('Team A', teamAPlayers, player1SocketId);
-    const teamB = new Team('Team B', teamBPlayers, player2SocketId);
+    const teamA = new Team('Team A', teamAPlayers, player1SocketId ,accountId1);
+    const teamB = new Team('Team B', teamBPlayers, player2SocketId ,accountId2);
 
     const game = new Game(teamA, teamB, ball, gameMap, goalA, goalB);
 
@@ -48,15 +47,12 @@ export default class GameService {
 
   static async updateRank(winnerId, loserId, socketIdToUserIdMap) {
     try {
-      const winnerAccountId = socketIdToUserIdMap.get(winnerId);
-      const loserAccountId = socketIdToUserIdMap.get(loserId);
-
       const winnerRankInfo = await userPrisma.rank.findUnique({
-        where: { accountId: winnerAccountId },
+        where: { accountId: winnerId },
       });
 
       const loserRankInfo = await userPrisma.rank.findUnique({
-        where: { accountId: loserAccountId },
+        where: { accountId: loserId },
       });
 
       const basicScore = 10;
@@ -77,7 +73,7 @@ export default class GameService {
       const loserTier = updateTier(loserRankInfo.rankScore - minusScore);
 
       const winnerUpdatePromise = userPrisma.rank.update({
-        where: { accountId: winnerAccountId },
+        where: { accountId: winnerId },
         data: {
           rankScore: { increment: acquireScore },
           tier: winnerTier,
@@ -88,14 +84,14 @@ export default class GameService {
       });
 
       const winnerUpdateCash = userPrisma.account.update({
-        where: { accountId: winnerAccountId },
+        where: { accountId: winnerId },
         data: {
           cash: { increment: acquiredCash },
         },
       });
 
       const loserUpdatePromise = userPrisma.rank.update({
-        where: { accountId: loserAccountId },
+        where: { accountId: loserId },
         data: {
           rankScore: { decrement: minusScore },
           tier: loserTier,
@@ -111,13 +107,10 @@ export default class GameService {
     }
   }
 
-  static async updateDraw(drawId1, drawId2, socketIdToUserIdMap) {
+  static async updateDraw(drawId1, drawId2) {
     try {
-      const drawId1AccountId = socketIdToUserIdMap.get(drawId1);
-      const drawId2AccountId = socketIdToUserIdMap.get(drawId2);
-
       const drawId1UpdatePromise = userPrisma.rank.update({
-        where: { accountId: drawId1AccountId },
+        where: { accountId: drawId1 },
         data: {
           draw: {
             increment: 1,
@@ -126,7 +119,7 @@ export default class GameService {
       });
 
       const drawId2UpdatePromise = userPrisma.rank.update({
-        where: { accountId: drawId2AccountId },
+        where: { accountId: drawId2 },
         data: {
           draw: {
             increment: 1,
@@ -140,10 +133,8 @@ export default class GameService {
     }
   }
 
-  static async createMatchHistory(teamAsocketId, teamBsocketId, game, socketIdToUserIdMap) {
+  static async createMatchHistory(teamAAccountId, teamBAccountId, game) {
     try {
-      const teamAAccountId = socketIdToUserIdMap.get(teamAsocketId);
-      const teamBAccountId = socketIdToUserIdMap.get(teamBsocketId);
 
       const teamAUpdateHistoryPrisma = userPrisma.matchHistory.create({
         data: {

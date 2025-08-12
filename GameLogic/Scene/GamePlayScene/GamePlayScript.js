@@ -1,5 +1,3 @@
-
-
 document.addEventListener('DOMContentLoaded', () => {
   const socket = io();
 
@@ -20,9 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const logList = document.getElementById('log-list');
   const ReadyBtn = document.getElementById('find-match-btn'); // Assuming you add this button to your HTML
 
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const roomId = urlParams.get('roomId');
+  // const urlParams = new URLSearchParams(window.location.search);
+  // const opponents = urlParams.get('opponents');
 
   socket.emit('join_game_room');
 
@@ -63,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (matchmakingTimer) clearInterval(matchmakingTimer);
     ReadyBtn.disabled = false;
   });
-
 
   socket.on('game_start', (data) => {
     log('게임 시작!');
@@ -125,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateUI() {
     if (!game) return;
-
+    console.log('들어옴');
     // Update scores, turn counters etc.
     teamAScoreEl.textContent = game.teams[0].score;
     teamBScoreEl.textContent = game.teams[1].score;
@@ -280,16 +276,15 @@ document.addEventListener('DOMContentLoaded', () => {
     updateUI();
   });
 
-  socket.on('process_game_end', (data) =>{
-    socket.emit('process_game_end', { roomId: data.roomId})
+  socket.on('process_game_end', (data) => {
+    socket.emit('process_game_end', { roomId: data.roomId });
   });
 
-  socket.on('game_ended', (data) =>{
+  socket.on('game_ended', (data) => {
     log(data.result);
   });
 
   socket.on('action_error', (data) => {
     log(`Error: ${data.message}`);
   });
-
 });

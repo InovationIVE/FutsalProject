@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (matchmakingTimer) clearInterval(matchmakingTimer);
     // Redirect to the game play scene
     // The server will emit 'game_start' which should be handled by the gameplay script.
-    window.location.href = `../GamePlayScene/GamePlayScene.html?roomId=${data.roomId}`; // Adjust this URL if needed
+    window.location.href = `../GamePlayScene/GamePlayScene.html?opponents=${data.opponents}`; // Adjust this URL if needed
   });
 
   socket.on('matchmaking_error', (data) => {
