@@ -24,11 +24,26 @@ model Account {
   matchHistory  MatchHistory[] @relation("MyMatches")
   ownedPlayers  OwnedPlayers[]
   rank          Rank?             @relation("rank")
-  refreshToken  RefreshToken?     @relation("refreshToken")
+  session       Session?     @relation("session")
   squad         Squad?
   opponentMatch MatchHistory[] @relation("OpponentMatches")
+  bids      Bid[]
 
   @@map("Account")
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  accountId Int      @unique
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  lastUsedAt DateTime @updatedAt
+
+  account   Account  @relation("session", fields: [accountId], references: [accountId], onDelete: Cascade)
+
+  @@index([expiresAt])
+  @@map("Session")
 }
 
 model SquadMembers {
@@ -72,17 +87,6 @@ model Squad {
   squadMembers SquadMembers[]
 
   @@map("Squad")
-}
-
-model RefreshToken {
-  refreshTokenId Int       @id @default(autoincrement())
-  accountId      Int       @unique
-  token          String
-  createdAt      DateTime  @default(now())
-  expiresAt      DateTime?
-  account        Account   @relation("refreshToken", fields: [accountId], references: [accountId])
-
-  @@map("Refreshtoken")
 }
 
 model Rank {
@@ -140,13 +144,30 @@ model Auction {
   status        AuctionStatus @default(open)
   createdAt     DateTime      @default(now())
   endsAt        DateTime
-  account       Account       @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
+  deletedAt     DateTime?
+  account       Account       @relation(fields: [accountId], references: [accountId])
   ownedPlayer   OwnedPlayers  @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
+  bid           Bid[]
 
   @@index([accountId], map: "Auction_accountId_fkey")
   @@index([ownedPlayerId], map: "Auction_ownedPlayerId_fkey")
   @@map("Auction")
 }
+
+model Bid {
+  bidId     Int      @id @default(autoincrement())
+  auctionId Int
+  accountId Int   // bidderId 대신 accountId로 표기
+  bidAmount Int
+  bidTime   DateTime @default(now())
+
+  auction Auction @relation(fields: [auctionId], references: [auctionId])
+  account Account @relation(fields: [accountId], references: [accountId]) // Account 테이블 참조
+
+  @@map("Bid")
+}
+
+
 
 enum GiftStatus {
   success
