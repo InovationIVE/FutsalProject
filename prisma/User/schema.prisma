@@ -9,23 +9,24 @@ datasource db {
 }
 
 model Account {
-  accountId     Int               @id @default(autoincrement())
-  email         String            @unique
-  userId        String            @unique
-  password      String
-  cash          Int               @default(100000)
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-  role          String            @default("USER")
-  lastLoginAt   DateTime?
-  auction       Auction[]
-  receivedGifts GiftTransaction[] @relation("ReceivedGifts")
-  sentGifts     GiftTransaction[] @relation("SentGifts")
-  matchHistory  MatchHistory[]
-  ownedPlayers  OwnedPlayers[]
-  rank          Rank?             @relation("rank")
-  refreshToken  RefreshToken?     @relation("refreshToken")
-  squad         Squad?
+  accountId                                     Int               @id @default(autoincrement())
+  email                                         String            @unique
+  userId                                        String            @unique
+  password                                      String
+  cash                                          Int               @default(100000)
+  createdAt                                     DateTime          @default(now())
+  updatedAt                                     DateTime          @updatedAt
+  role                                          String            @default("USER")
+  lastLoginAt                                   DateTime?
+  auction                                       Auction[]
+  receivedGifts                                 GiftTransaction[] @relation("ReceivedGifts")
+  sentGifts                                     GiftTransaction[] @relation("SentGifts")
+  matchHistory                                  MatchHistory[]
+  MatchHistory_MatchHistory_opponentIdToAccount MatchHistory[]    @relation("MatchHistory_opponentIdToAccount")
+  ownedPlayers                                  OwnedPlayers[]
+  rank                                          Rank?             @relation("rank")
+  refreshToken                                  RefreshToken?     @relation("refreshToken")
+  squad                                         Squad?
 
   @@map("Account")
 }
@@ -90,22 +91,28 @@ model Rank {
   rankScore Int      @default(1000)
   tier      String   @default("silver")
   updatedAt DateTime @updatedAt
+  draw      Int      @default(0)
+  lose      Int      @default(0)
+  win       Int      @default(0)
   account   Account  @relation("rank", fields: [accountId], references: [accountId])
 
   @@map("Rank")
 }
 
 model MatchHistory {
-  matchId      Int      @id @default(autoincrement())
-  accountId    Int
-  goalScore    Int      @default(0)
-  passScore    Int      @default(0)
-  shootScore   Int      @default(0)
-  defenceScore Int      @default(0)
-  createdAt    DateTime @default(now())
-  account      Account  @relation(fields: [accountId], references: [accountId])
+  matchId                                  Int      @id @default(autoincrement())
+  accountId                                Int
+  goalScore                                Int      @default(0)
+  passScore                                Int      @default(0)
+  shootScore                               Int      @default(0)
+  defenceScore                             Int      @default(0)
+  createdAt                                DateTime @default(now())
+  opponentId                               Int
+  account                                  Account  @relation(fields: [accountId], references: [accountId])
+  Account_MatchHistory_opponentIdToAccount Account  @relation("MatchHistory_opponentIdToAccount", fields: [opponentId], references: [accountId])
 
   @@index([accountId], map: "MatchHistory_accountId_fkey")
+  @@index([opponentId], map: "MatchHistory_opponentId_fkey")
   @@map("MatchHistory")
 }
 
