@@ -19,16 +19,15 @@ model Account {
   role          String            @default("USER")
   lastLoginAt   DateTime?
   auction       Auction[]
+  bids          Bid[]
   receivedGifts GiftTransaction[] @relation("ReceivedGifts")
   sentGifts     GiftTransaction[] @relation("SentGifts")
   matchHistory  MatchHistory[]    @relation("MyMatches")
   opponentMatch MatchHistory[]    @relation("OpponentMatches")
   ownedPlayers  OwnedPlayers[]
   rank          Rank?             @relation("rank")
-  refreshToken  RefreshToken?     @relation("refreshToken")
+  Session       Session?
   squad         Squad?
-  opponentMatch MatchHistory[] @relation("OpponentMatches")
-  bids      Bid[]
 
   @@map("Account")
 }
@@ -74,17 +73,6 @@ model Squad {
   squadMembers SquadMembers[]
 
   @@map("Squad")
-}
-
-model RefreshToken {
-  refreshTokenId Int       @id @default(autoincrement())
-  accountId      Int       @unique
-  token          String
-  createdAt      DateTime  @default(now())
-  expiresAt      DateTime?
-  account        Account   @relation("refreshToken", fields: [accountId], references: [accountId])
-
-  @@map("Refreshtoken")
 }
 
 model Rank {
@@ -155,17 +143,28 @@ model Auction {
 model Bid {
   bidId     Int      @id @default(autoincrement())
   auctionId Int
-  accountId Int   // bidderId 대신 accountId로 표기
+  accountId Int
   bidAmount Int
   bidTime   DateTime @default(now())
+  account   Account  @relation(fields: [accountId], references: [accountId])
+  auction   Auction  @relation(fields: [auctionId], references: [auctionId])
 
-  auction Auction @relation(fields: [auctionId], references: [auctionId])
-  account Account @relation(fields: [accountId], references: [accountId]) // Account 테이블 참조
-
+  @@index([accountId], map: "Bid_accountId_fkey")
+  @@index([auctionId], map: "Bid_auctionId_fkey")
   @@map("Bid")
 }
 
+model Session {
+  id         Int      @id @default(autoincrement())
+  accountId  Int      @unique
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  lastUsedAt DateTime
+  Account    Account  @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
 
+  @@index([expiresAt])
+}
 
 enum GiftStatus {
   success
