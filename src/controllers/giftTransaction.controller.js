@@ -10,8 +10,10 @@ export class GiftController {
    * **/
   async sendGift(req, res, next) {
     try {
+      const { receiverId, cash } = req.body;
+      const senderId = req.user.accountId;
+
       //1.1 보내는 사람 존재 확인 및 잔액 조회
-      const { senderId, receiverId, cash } = req.body;
       const sender = await userPrisma.account.findUnique({ where: { accountId: senderId } });
       if (!sender) return res.status(404).json({ message: '보내는 유저가 존재하지 않습니다.' });
       if (sender.cash < cash) return res.status(400).json({ message: '잔액이 부족합니다.' });
@@ -110,6 +112,7 @@ export class GiftController {
     try {
       //params에 giftId가 있을 경우 giftId 사용, 없으면 body에서 사용
       const giftId = Number(req.params.giftId ?? req.body.giftId);
+      const loginUserId = req.user.accountId;
 
       if (!giftId || isNaN(giftId)) {
         return res.status(400).json({ message: '유효한 giftId가 필요합니다.' });
@@ -118,6 +121,9 @@ export class GiftController {
         where: { id: giftId },
       });
       if (!gift) return res.status(404).json({ message: '받은 선물이 존재하지 않습니다.' });
+      if (gift.receiverId !== loginUserId) {
+        return res.status(403).json({ message: '선물을 받을 수 없습니다.' });
+      }
       if (gift.status === 'success')
         return res.status(400).json({ message: '이미 받은 선물입니다.' });
       await userPrisma.$transaction(async (tx) => {
