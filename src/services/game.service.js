@@ -171,6 +171,59 @@ export default class GameService {
       console.error('Error updating ranks:', error);
     }
   }
+
+  static async getMatchInfo(socket) {
+    const accountInfo = await userPrisma.account.findUnique({
+      where: { accountId: socket.request.user.accountId },
+      select: {
+        accountId: true,
+        rank: {
+          select: {
+            rankScore: true,
+          },
+        },
+      },
+    });
+
+    const waitingQueue = {
+      socket: socket,
+      accountId: accountInfo.accountId,
+      rankScore: accountInfo.rank.rankScore,
+      joinedAt: Date.now(),
+    };
+
+    return waitingQueue;
+  }
+
+  static async tryMatch(waitingQueue) {
+    if (waitingQueue.length < 2) return;
+
+    waitingQueue.sort((a, b) => a.joinedAt - b.joinedAt);
+    let  matchedPlayers =[];
+
+    for (let i = 0; i < waitingQueue.length; i++) {
+      const player = waitingQueue[i];
+
+      const waitTIme = Date.now() - player.joinedAt;
+      const scoreRange = 50 + Math.floor(waitTIme / 5000) * 50;
+      console.log(scoreRange);
+
+      const opponentIndex = waitingQueue.findIndex(
+        (p, idx) => idx !== i && Math.abs(p.rankScore - player.rankScore) <= scoreRange,
+      );
+
+      if(opponentIndex !== -1){
+        const opponent = waitingQueue[opponentIndex];
+
+        matchedPlayers = [player, opponent];
+        removeFromQueue(waitingQueue, player.accountId);
+        removeFromQueue(waitingQueue, opponent.accountId);
+        return matchedPlayers;
+      } 
+    }
+
+    return matchedPlayers;
+  }
 }
 
 async function createTeamPlayer(accountId, temaName) {
@@ -216,4 +269,9 @@ function updateTier(score) {
   else if (score >= 4200) tier = 'GrandMaster';
 
   return tier;
+}
+
+function removeFromQueue(waitingQueue ,accountId) {
+  const index = waitingQueue.findIndex(p => p.accountId === accountId);
+  if (index !== -1) waitingQueue.splice(index, 1);
 }

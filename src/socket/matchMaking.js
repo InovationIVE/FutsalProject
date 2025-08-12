@@ -1,33 +1,47 @@
-import  GameService  from "../services/game.service.js";
+import GameService from '../services/game.service.js';
 
-export default function registerMatchmakingEvents(io, socket, waitingQueue, gameRooms, socketIdToUserIdMap) {
+export default function registerMatchmakingEvents(
+  io,
+  socket,
+  waitingQueue,
+  matchedPlayers,
+  gameRooms,
+  socketIdToUserIdMap,
+) {
   socket.on('find_match', async () => {
-    if (waitingQueue.find((p) => p.id === socket.id) || Array.from(socket.rooms).length > 1) {
-      return;
-    }
+    const matchingInfo = await GameService.getMatchInfo(socket);
 
-    console.log(`User ${socket.id} is looking for a match`);
-    waitingQueue.push(socket);
+    if (waitingQueue.find((p) => p.accountId === socket.request.user.accountId)) return;
 
-    if (waitingQueue.length >= 2) {
-      const player1Socket = waitingQueue.shift();
-      const player2Socket = waitingQueue.shift();
-      const accountId1 = player1Socket.request.user.accountId;
-      const accountId2 = player2Socket.request.user.accountId;
+    console.log(`User ${matchingInfo.socket.id} is looking for a match`);
+    waitingQueue.push(matchingInfo);
 
-      console.log(`Match found between ${player1Socket.id} and ${player2Socket.id}`);
+    matchedPlayers = await GameService.tryMatch(waitingQueue);
 
-      const roomId = `room-${player1Socket.id}-${player2Socket.id}`;
-      player1Socket.join(roomId);
-      player2Socket.join(roomId);
+    if (matchedPlayers && matchedPlayers.length >= 2) {
+      const player1Socket = matchedPlayers.shift();
+      const player2Socket = matchedPlayers.shift();
+      const accountId1 = player1Socket.accountId;
+      const accountId2 = player2Socket.accountId;
 
-      player1Socket.emit('match_found', { opponentId: player2Socket.id, roomId });
-      player2Socket.emit('match_found', { opponentId: player1Socket.id, roomId });
+      console.log(`Match found between ${player1Socket.socket.id} and ${player2Socket.socket.id}`);
 
-      socketIdToUserIdMap.set(player1Socket.id, accountId1);
-      socketIdToUserIdMap.set(player2Socket.id, accountId2);
+      const roomId = `room-${player1Socket.socket.id}-${player2Socket.socket.id}`;
+      player1Socket.socket.join(roomId);
+      player2Socket.socket.join(roomId);
 
-      const gameState = await GameService.initGame(player1Socket.id, player2Socket.id, accountId1, accountId2);
+      player1Socket.socket.emit('match_found', { opponentId: player2Socket.socket.id, roomId });
+      player2Socket.socket.emit('match_found', { opponentId: player1Socket.socket.id, roomId });
+
+      socketIdToUserIdMap.set(player1Socket.socket.id, accountId1);
+      socketIdToUserIdMap.set(player2Socket.socket.id, accountId2);
+
+      const gameState = await GameService.initGame(
+        player1Socket.socket.id,
+        player2Socket.socket.id,
+        accountId1,
+        accountId2,
+      );
       gameRooms.set(roomId, gameState);
       io.to(roomId).emit('game_start', { gameState: gameState.getStateForClient() });
     } else {
