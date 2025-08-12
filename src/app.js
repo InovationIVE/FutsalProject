@@ -57,7 +57,7 @@ app.use('/api', [
   ownedPlayersRouter,
   userRouter,
   gameRouter,
-  auctionRouter
+  auctionRouter,
   rankRouter,
   //reinforceRouter,
 
