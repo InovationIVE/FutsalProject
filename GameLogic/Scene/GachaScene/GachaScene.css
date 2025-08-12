@@ -1,0 +1,51 @@
+.toolbar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  background-color: #f0f0f0;
+  border-bottom: 5px solid #000000;
+}
+
+.toolbar .topButton {
+  padding: 10px 20px;
+  background-color: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 1px;
+  cursor: pointer;
+
+  width: 150px;
+  height: 50px;
+
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease;
+}
+
+.toolbar .topButton:hover {
+  /* 배경색을 회색으로 변경 */
+  background-color: #f0f0f0;
+
+  /* 버튼을 살짝 확대 */
+  transform: scale(1.05);
+
+  /* 그림자 효과 추가 (버튼이 떠오르는 느낌) */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.pack-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  border: 1px solid #000000;
+}
+
+.card-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.gacha-pack{
+  border: solid #0fd63a;
+}
+

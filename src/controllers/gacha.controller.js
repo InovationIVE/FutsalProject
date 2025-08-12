@@ -84,7 +84,7 @@ export class GachaController {
 
       const selectedCard = await IsGachaCard(gachaId);
 
-      await gamePrisma.$transaction(
+      const result = await gamePrisma.$transaction(
         async (tx) => {
           const cardPack = await tx.gacha.update({
             where: { gachaId: selectedCard.gachaId },
@@ -114,7 +114,7 @@ export class GachaController {
         },
       );
 
-      return res.status(200).json({ message: '가챠카드가 성공적으로 수정되었습니다' });
+      return res.status(200).json(result);
     } catch (error) {
       if (error instanceof HttpError) {
         return res.status(error.statusCode).json({ error: error.message });
@@ -149,20 +149,27 @@ export class GachaController {
   static async DrawGachaCard(req, res) {
     try {
       // 가챠 뽑기 요청에서 필요한 데이터 추출
-      const { gachaId } = req.body;
-      const { accountId } = req.user;
+      const { gachaId, drawCount = 10 } = req.body;
+      const { accountId } = req.user; // authMiddleware에서 전달된 사용자 정보
 
       //가챠 카드 유효성 검사 및 존재 여부 확인
       const gachaCard = await IsGachaCard(gachaId);
       const user = await userPrisma.account.findUnique({ where: { accountId: accountId } });
 
-      if (user.cash < gachaCard.price * 10) {
+      if (user.cash < gachaCard.price * drawCount) {
         throw new HttpError(400, '재화가 부족합니다.');
       }
 
       // 가챠 뽑기 시 필요한 플레이어 데이터 조회
       const players = await gamePrisma.player.findMany({
-        select: { playerId: true, name: true, rarity: true },
+        select: {
+          playerId: true,
+          name: true,
+          rarity: true,
+          attack: true,
+          defence: true,
+          speed: true,
+        },
       });
 
       // 이미 보유한 플레이어 데이터 조회
@@ -174,19 +181,16 @@ export class GachaController {
       // 보유한 플레이어 ID를 Map으로 변환하여 빠른 조회를 위해 사용
       const ownedPlayerMap = new Map(ownedPlayers.map((p) => [p.playerId, p.ownedPlayerId]));
 
-      
       const drawnCards = []; // 뽑힌 플레이어 카드들을 저장할 배열
-      const updates = new Map(); // 보유 플레이어 업데이트를 위한 Map
-      const creates = new Map(); // 새로 획득한 플레이어 생성을 위한 Map
 
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < drawCount; i++) {
         const random = Math.random() * 100;
         let rarity;
         if (random < gachaCard.diamond) rarity = 'SSR';
         else if (random < gachaCard.platinum) rarity = 'SR';
         else if (random < gachaCard.gold) rarity = 'UR';
         else if (random < gachaCard.silver) rarity = 'R';
-        else rarity = 'R';
+        else rarity = 'N';
 
         // 해당 희귀도에 맞는 플레이어들 중에서 랜덤으로 선택
         const potentialPlayers = players.filter((p) => p.rarity === rarity);
@@ -195,41 +199,40 @@ export class GachaController {
         // 랜덤으로 플레이어 선택
         const drawnPlayer = potentialPlayers[Math.floor(Math.random() * potentialPlayers.length)];
         drawnCards.push(drawnPlayer);
-
-        // 이미 보유한 플레이어인지 확인
-        if (ownedPlayerMap.has(drawnPlayer.playerId)) {
-          const ownedPlayerId = ownedPlayerMap.get(drawnPlayer.playerId); // 보유 플레이어 ID
-          updates.set(ownedPlayerId, (updates.get(ownedPlayerId) || 0) + 1); // 업데이트할 플레이어의 개수 증가
-        } else {
-          creates.set(drawnPlayer.playerId, (creates.get(drawnPlayer.playerId) || 0) + 1); // 새로 획득한 플레이어의 개수 증가
-        }
       }
 
       // 트랜잭션을 사용하여 데이터베이스 업데이트
-      await userPrisma.$transaction(async (tx) => {
-        for (const [ownedPlayerId, count] of updates) {
-          // 보유 플레이어의 개수를 증가시키는 업데이트
-          await tx.ownedPlayers.update({
-            where: { ownedPlayerId },
-            data: { count: { increment: count } },
-          });
-        }
+      await userPrisma.$transaction(
+        async (tx) => {
+          // 새로 획득한 플레이어를 생성
 
-        // 새로 획득한 플레이어를 생성
-        for (const [playerId, count] of creates) {
-          await tx.ownedPlayers.create({
-            data: { accountId: accountId, playerId, count },
-          });
-        }
-        
-        // 계정의 재화 업데이트
-        await tx.account.update({
-          where: { accountId: accountId },
-          data: { cash: { decrement: gachaCard.price * 10 } },
-        });
-      });
+          for (const player of drawnCards) {
+            await tx.ownedPlayers.create({
+              data: {
+                accountId: accountId,
+                playerId: player.playerId,
+                name: player.name,
+                rarity: player.rarity,
+                level: 1,
+                attack: player.attack,
+                defence: player.defence,
+                speed: player.speed,
+              },
+            });
+          }
 
-      return res.status(200).json({ drawnCards });
+          // 계정의 재화 업데이트
+          await tx.account.update({
+            where: { accountId: accountId },
+            data: { cash: { decrement: gachaCard.price * drawCount } },
+          });
+        },
+        {
+          isolationLevel: UserPrisma.TransactionIsolationLevel.ReadCommitted,
+        },
+      );
+
+      return res.status(200).json(drawnCards);
     } catch (error) {
       if (error instanceof HttpError) {
         return res.status(error.statusCode).json({ error: error.message });

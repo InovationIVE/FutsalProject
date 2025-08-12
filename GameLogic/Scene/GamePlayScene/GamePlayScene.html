@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futsal Game</title>
+    <link rel="stylesheet" href="GamePlayScene.css">
+</head>
+<body>
+    <div id="game-wrapper">
+        <div id="game-content">
+            <h1>Futsal Game</h1>
+            <div id="scoreboard">
+                <span id="teamA-name">Team A</span>: <span id="teamA-score">0</span>
+                vs
+                <span id="teamB-name">Team B</span>: <span id="teamB-score">0</span>
+            </div>
+            <div id="turn-info">
+                <p>Turn: <span id="turn-counter">0</span> / <span id="max-turns">20</span></p>
+                <p>Current Turn: <span id="current-team"></span></p>
+                <p>Ball Owner: <span id="ball-owner"></span></p>
+            </div>
+            <div id="game-board"></div>
+            <div id="action-panel">
+                <h2>Actions</h2>
+                <p>Selected Player: <span id="selected-player-name">None</span></p>
+                <button id="shoot-btn" disabled>Shoot</button>
+                <button id="move-btn" disabled>Move</button>
+                <button id="pass-btn" disabled>Pass</button>
+                <button id="tackle-btn" disabled>Tackle</button>
+                <button id="get-ball-btn" disabled>Get Ball</button>
+                <button id="find-match-btn" >Find Matcing</button>
+            </div>
+        </div>
+        <div id="game-log-container">
+            <h2>Game Log</h2>
+            <div id="game-log">
+                <ul id="log-list"></ul>
+            </div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="GamePlayScript.js"></script>
+</body>
+</html>
