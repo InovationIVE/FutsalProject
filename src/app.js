@@ -12,8 +12,8 @@ import goodsRouter from './routes/goods.router.js';
 import PlayerRouter from './routes/player.router.js';
 import squadRouter from './routes/squad.router.js';
 import userRouter from './routes/user.router.js';
-import { authMiddleware } from './middleWares/auth.middleware.js';
 import giftTransactionRouter from './routes/giftTransaction.router.js';
+import { authMiddleware } from './middleWares/auth.middleware.js';
 
 const __filename = fileURLToPath(import.meta.url); //현재 파일의 경로를 가져오기 위해 fileURLToPath 사용
 const __dirname = path.dirname(__filename); // 현재 디렉토리 경로를 가져오기 위해 dirname 사용
