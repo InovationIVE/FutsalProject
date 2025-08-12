@@ -195,34 +195,49 @@ export default class GameService {
     return waitingQueue;
   }
 
-  static async tryMatch(waitingQueue) {
-    if (waitingQueue.length < 2) return;
+  static tryMatch(waitingQueue) {
+    if (waitingQueue.length < 2) return [];
 
     waitingQueue.sort((a, b) => a.joinedAt - b.joinedAt);
-    let  matchedPlayers =[];
 
     for (let i = 0; i < waitingQueue.length; i++) {
       const player = waitingQueue[i];
 
-      const waitTIme = Date.now() - player.joinedAt;
-      const scoreRange = 50 + Math.floor(waitTIme / 5000) * 50;
-      console.log(scoreRange);
+      const waitTime = Date.now() - player.joinedAt;
+      const scoreRange = 50 + Math.floor(waitTime / 5000) * 50;
 
+      // Find an opponent for the current player
       const opponentIndex = waitingQueue.findIndex(
         (p, idx) => idx !== i && Math.abs(p.rankScore - player.rankScore) <= scoreRange,
       );
 
-      if(opponentIndex !== -1){
+      if (opponentIndex !== -1) {
         const opponent = waitingQueue[opponentIndex];
+        const matchedPair = [player, opponent];
 
-        matchedPlayers = [player, opponent];
-        removeFromQueue(waitingQueue, player.accountId);
-        removeFromQueue(waitingQueue, opponent.accountId);
-        return matchedPlayers;
-      } 
+        // IMPORTANT: Remove players from the original waitingQueue array.
+        // Remove the opponent first. If it has a higher index, it won't affect the player's index.
+        // If it has a lower index, the player's index will shift, so we find it again.
+        const playerIndex = waitingQueue.findIndex((p) => p.accountId === player.accountId);
+        
+        // Remove by index, making sure to remove the one with the larger index first
+        // to avoid messing up the index of the other one.
+        const index1 = playerIndex;
+        const index2 = opponentIndex;
+
+        if (index1 > index2) {
+          waitingQueue.splice(index1, 1);
+          waitingQueue.splice(index2, 1);
+        } else {
+          waitingQueue.splice(index2, 1);
+          waitingQueue.splice(index1, 1);
+        }
+        
+        return matchedPair;
+      }
     }
 
-    return matchedPlayers;
+    return []; // No match found
   }
 }
 

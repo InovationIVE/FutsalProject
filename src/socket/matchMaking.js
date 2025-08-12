@@ -1,51 +1,27 @@
 import GameService from '../services/game.service.js';
 
-export default function registerMatchmakingEvents(
-  io,
-  socket,
-  waitingQueue,
-  matchedPlayers,
-  gameRooms,
-  socketIdToUserIdMap,
-) {
+export default function registerMatchmakingEvents(socket, waitingQueue) {
   socket.on('find_match', async () => {
-    const matchingInfo = await GameService.getMatchInfo(socket);
+    // Check if the user is already in the queue
+    if (waitingQueue.find((p) => p.accountId === socket.request.user.accountId)) {
+      console.log(`User ${socket.id} is already in the queue.`);
+      socket.emit('already_in_queue', { message: '이미 대기열에 등록되어 있습니다.' });
+      return;
+    }
 
-    if (waitingQueue.find((p) => p.accountId === socket.request.user.accountId)) return;
-
-    console.log(`User ${matchingInfo.socket.id} is looking for a match`);
-    waitingQueue.push(matchingInfo);
-
-    matchedPlayers = await GameService.tryMatch(waitingQueue);
-
-    if (matchedPlayers && matchedPlayers.length >= 2) {
-      const player1Socket = matchedPlayers.shift();
-      const player2Socket = matchedPlayers.shift();
-      const accountId1 = player1Socket.accountId;
-      const accountId2 = player2Socket.accountId;
-
-      console.log(`Match found between ${player1Socket.socket.id} and ${player2Socket.socket.id}`);
-
-      const roomId = `room-${player1Socket.socket.id}-${player2Socket.socket.id}`;
-      player1Socket.socket.join(roomId);
-      player2Socket.socket.join(roomId);
-
-      player1Socket.socket.emit('match_found', { opponentId: player2Socket.socket.id, roomId });
-      player2Socket.socket.emit('match_found', { opponentId: player1Socket.socket.id, roomId });
-
-      socketIdToUserIdMap.set(player1Socket.socket.id, accountId1);
-      socketIdToUserIdMap.set(player2Socket.socket.id, accountId2);
-
-      const gameState = await GameService.initGame(
-        player1Socket.socket.id,
-        player2Socket.socket.id,
-        accountId1,
-        accountId2,
-      );
-      gameRooms.set(roomId, gameState);
-      io.to(roomId).emit('game_start', { gameState: gameState.getStateForClient() });
-    } else {
-      socket.emit('waiting_for_match', { message: '상대를 기다리는 중입니다...' });
+    // Get player info and add them to the queue
+    try {
+      const matchingInfo = await GameService.getMatchInfo(socket);
+      if (matchingInfo) {
+        waitingQueue.push(matchingInfo);
+        console.log(
+          `User ${socket.id} joined the matchmaking queue. Queue length: ${waitingQueue.length}`,
+        );
+        socket.emit('waiting_for_match', { message: '상대를 찾고 있습니다...' });
+      }
+    } catch (error) {
+      console.error(`Failed to get match info for socket ${socket.id}:`, error);
+      socket.emit('matchmaking_error', { message: '매칭 정보를 가져오는데 실패했습니다.' });
     }
   });
 }
