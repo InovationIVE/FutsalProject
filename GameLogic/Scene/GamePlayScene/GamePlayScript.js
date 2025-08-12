@@ -1,3 +1,5 @@
+
+
 document.addEventListener('DOMContentLoaded', () => {
   const socket = io();
 
@@ -216,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const receiver = teammates[parseInt(receiverName) - 1];
         socket.emit('game_action', {
           action: 'pass',
-          payload: { receiverId: receiver.id , playerId: selectedPlayer.id },
+          payload: { receiverId: receiver.id, playerId: selectedPlayer.id },
         });
       }
     }
@@ -243,51 +245,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // Listen for state updates from the server
   socket.on('game_state_update', (data) => {
     game = data.gameState;
+    const logs = game.log;
+    for (let i = 0; i < logs.length; i++) {
+      log(logs[i]);
+    }
+
     render();
     updateUI();
+  });
+
+  socket.on('process_game_end', (data) =>{
+    socket.emit('process_game_end', { roomId: data.roomId})
+  });
+
+  socket.on('game_ended', (data) =>{
+    log(data.result);
   });
 
   socket.on('action_error', (data) => {
     log(`Error: ${data.message}`);
   });
 
-  socket.on('shoot_result', (data) => {
-    const logs = data.message;
-
-    for (let i = 0; i < logs.length; i++) {
-      log(logs[i]);
-    }
-  });
-
-  socket.on('pass_result', (data) => {
-    const logs = data.message;
-
-    for (let i = 0; i < logs.length; i++) {
-      log(logs[i]);
-    }
-  });
-
-  socket.on('move_result', (data) => {
-    const logs = data.message;
-
-    for (let i = 0; i < logs.length; i++) {
-      log(logs[i]);
-    }
-  });
-
-  socket.on('tackle_result', (data) => {
-    const logs = data.message;
-
-    for (let i = 0; i < logs.length; i++) {
-      log(logs[i]);
-    }
-  });
-
-  socket.on('getBall_result', (data) => {
-    const logs = data.message;
-
-    for (let i = 0; i < logs.length; i++) {
-      log(logs[i]);
-    }
-  });
 });

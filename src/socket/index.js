@@ -4,12 +4,13 @@ import registerGameEvents from './gameEvents.js';
 export default function initSocketEvents(io) {
   const waitingQueue = []; // 매칭 대기열
   const gameRooms = new Map(); // 활성화된 게임방 목록
+  const socketIdToUserIdMap = new Map();
 
   io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
-    registerMatchmakingEvents(io, socket, waitingQueue, gameRooms);
-    registerGameEvents(io, socket, gameRooms);
+    registerMatchmakingEvents(io, socket, waitingQueue, gameRooms, socketIdToUserIdMap);
+    registerGameEvents(io, socket, gameRooms, socketIdToUserIdMap);
 
     socket.on('disconnect', () => {
       console.log('User disconnected', socket.id);

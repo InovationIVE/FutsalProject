@@ -119,7 +119,7 @@ export class Game {
 
       case 'pass':
         this.log.length = 0;
-        const receiver = this.currentTeam.players.find((p) => p.id === params.id);
+        const receiver = this.currentTeam.players.find((p) => p.id === params.receiverId);
         if (receiver && selectedPlayer.id !== receiver.id) {
           selectedPlayer.pass(receiver, this.ball, this.log);
         } else {
@@ -182,6 +182,7 @@ export class Game {
       selectedTeam: this.selectedTeam.toPlainObject(),
       isGameOver: this.isGameOver,
       initialPlayerPositions: this.initialPlayerPositions,
+      log: this.log
     };
   }
 }

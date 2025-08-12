@@ -1,6 +1,6 @@
 import  GameService  from "../services/game.service.js";
 
-export default function registerMatchmakingEvents(io, socket, waitingQueue, gameRooms) {
+export default function registerMatchmakingEvents(io, socket, waitingQueue, gameRooms, socketIdToUserIdMap) {
   socket.on('find_match', async () => {
     if (waitingQueue.find((p) => p.id === socket.id) || Array.from(socket.rooms).length > 1) {
       return;
@@ -23,6 +23,9 @@ export default function registerMatchmakingEvents(io, socket, waitingQueue, game
 
       player1Socket.emit('match_found', { opponentId: player2Socket.id, roomId });
       player2Socket.emit('match_found', { opponentId: player1Socket.id, roomId });
+
+      socketIdToUserIdMap.set(player1Socket.id, accountId1);
+      socketIdToUserIdMap.set(player2Socket.id, accountId2);
 
       const gameState = await GameService.initGame(player1Socket.id, player2Socket.id, accountId1, accountId2);
       gameRooms.set(roomId, gameState);
