@@ -14,6 +14,7 @@ export class PlayerModel {
     this.updatedAt = data.updatedAt;
   }
 
+  /** 전체 조회 **/
   static async getAll() {
     const players = await gamePrisma.player.findMany({
       select: {
@@ -26,6 +27,7 @@ export class PlayerModel {
     return players.map(p => new PlayerModel(p));
   }
 
+  /** 상세 조회 **/
   static async getSome(playerId) {
     const data = await gamePrisma.player.findUnique({
       where: { playerId: Number(playerId) },
@@ -44,23 +46,27 @@ export class PlayerModel {
     return data ? new PlayerModel(data) : null;
   }
 
+  /** playerId로 탐색 **/
   static async existsByPlayerId(playerId) {
     return await gamePrisma.player.findUnique({
       where: { playerId: Number(playerId) }
     });
   }
 
+  /** soccerId로 탐색 **/
   static async existsBySoccerId(soccerPlayerId) {
     return await gamePrisma.player.findUnique({
       where: { soccerPlayerId }
     });
   }
 
+  /** 생성 **/
   static async create(data) {
     const created = await gamePrisma.player.create({ data });
     return new PlayerModel(created);
   }
 
+  /** 수정 **/
   static async update(playerId, data) {
     const updated = await gamePrisma.player.update({
       where: { playerId: Number(playerId) },
@@ -69,6 +75,7 @@ export class PlayerModel {
     return new PlayerModel(updated);
   }
 
+  /** 삭제 **/
   static async delete(playerId) {
     return await gamePrisma.player.delete({
       where: { playerId: Number(playerId) }
