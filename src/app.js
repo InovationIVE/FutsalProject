@@ -17,7 +17,7 @@ import userRouter from './routes/user.router.js';
 import gameRouter from './routes/game.router.js';
 import rankRouter from './routes/rank.router.js';
 import auctionRouter from './routes/auction.router.js';
-//import reinforceRouter from './routes/reinforce.router.js';
+import reinforceRouter from './routes/reinforce.router.js';
 import { authMiddleware } from './middleWares/auth.middleware.js';
 import { platform } from 'os';
 
@@ -59,7 +59,7 @@ app.use('/api', [
   gameRouter,
   auctionRouter,
   rankRouter,
-  //reinforceRouter,
+  reinforceRouter,
 
 ]);
 app.use('/auth', [authRouter]);
