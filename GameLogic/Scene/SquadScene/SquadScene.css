@@ -1,33 +1,129 @@
-.toolbar {
+body {
+  margin: 0;
+  font-family: pretendard, sans-serif;
+background: rgba( 255, 255, 255, 0.15 );}
+
+/* 상단 네비게이션 */
+.navbar {
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  background-color: #f0f0f0;
-  border-bottom: 5px solid #000000;
-}
-
-.toolbar .topButton{
+  align-items: center;
+  background-color: black;
+  color: white;
   padding: 10px 20px;
-  background-color: #ffffff;
-  border: 2px solid #000000;
-  border-radius: 1px;
-  cursor: pointer;
-
-  width: 150px;
-  height: 50px;
-
-  transition: background-color 0.3s ease, transform 0.3s ease;
-
+  justify-content: space-between;
+}
+.nav-left, .nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.nav-left a {
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+.nav-left a.active {
+  background-color: #1a1a1a;
+}
+.cash {
+  font-size: 14px;
 }
 
+.logout {
+  font-size: small;
+  color:white;
+  text-decoration:none;
+}
 
-.toolbar .topButton:hover {
-  /* 배경색을 회색으로 변경 */
-  background-color: #f0f0f0;
+.gamePlayBtn {
+  background-color: #00c853;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+}
+/* 메인 컨텐츠 */
+.container {
+  display: flex;
+  padding: 40px;
+  gap: 40px;
+  justify-content: center;
+}
+.cards {
+  display: flex;
+  gap: 20px;
+}
+.card {
+  width: 180px;
+  background-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+  border-radius: 26px;
+  border: 1px solid rgba( 255, 255, 255, 0.18 );
+  padding: 10px;
+  text-align: center;
+  backdrop-filter: blur( 4.5px );
+}
+.card .img {
+  width: 100%;
+  height: 180px;
+  background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), 
+                    linear-gradient(-45deg, #ccc 25%, transparent 25%), 
+                    linear-gradient(45deg, transparent 75%, #ccc 75%), 
+                    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+.stats {
+  font-size: 14px;
+  text-align: left;
+  margin-top: 5px;
+}
+.stats div {
+  margin: 2px 0;
+}
 
-  /* 버튼을 살짝 확대 */
-  transform: scale(1.05);
+/* 선수 목록 */
+.player-list {
+  width: 200px;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  padding: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.player-list h3 {
+  text-align: center;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+.player-item {
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.player-item:hover, .player-item.active {
+  background-color: #00c853;
+}
 
-  /* 그림자 효과 추가 (버튼이 떠오르는 느낌) */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+/* 하단 버튼 */
+.bottom-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 40px;
+}
+.btn-action {
+  background-color: #00c853;
+  border: none;
+  color: white;
+  padding: 12px 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
 }

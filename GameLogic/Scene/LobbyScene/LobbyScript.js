@@ -22,6 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   gamePlayBtn.addEventListener('click', () => {
-    window.location.href = '../GamePlayScene/GamePlayScene.html';
-  });
+    window.location.href = '../client/index.html';
+});
 });
