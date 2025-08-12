@@ -49,4 +49,72 @@ export class AuctionController {
         }
     }
 
+    //경매 조회 API
+    static async getAuctions(req, res, next) {
+        try {
+            const auctions = await userPrisma.auction.findMany({
+                where: { status: 'open' },
+                orderBy: { createdAt: 'desc' },
+                select: {
+                    auctionId: true,
+                    startingPrice: true,
+                    currentPrice: true,
+                    endsAt: true,
+                    status: true,
+                    ownedPlayer: {
+                        select: {
+                            name: true,
+                            rarity: true,
+                            level: true,
+                        },
+                    },
+                },
+            });
+
+            return res.status(200).json({ message:"경매장 목록을 조회했습니다.",data: auctions });
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    // 경매 상세 조회 API (추가 기능)
+    static async getAuctionDetails(req, res, next) {
+        try {
+            const { auctionId } = req.params;
+
+            if (!auctionId) {
+                return res.status(400).json({ error: '경매 ID가 필요합니다.' });
+            }
+
+            const auction = await userPrisma.auction.findUnique({
+                where: { auctionId: +auctionId },
+                include: {
+                    ownedPlayer: {
+                        select: {
+                            name: true,
+                            rarity: true,
+                            level: true,
+                            speed: true,
+                            attack: true,
+                            defence: true,
+                        },
+                    },
+                    account: {
+                        select: {
+                            userId: true,
+                        },
+                    },
+                },
+            });
+
+            if (!auction) {
+                return res.status(404).json({ error: '해당 경매를 찾을 수 없습니다.' });
+            }
+
+            return res.status(200).json({ data: auction });
+        } catch (err) {
+            next(err);
+        }
+    }
 }
+
