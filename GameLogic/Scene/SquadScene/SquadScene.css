@@ -1,8 +1,7 @@
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #fff;
-}
+  font-family: pretendard, sans-serif;
+background: rgba( 255, 255, 255, 0.15 );}
 
 /* 상단 네비게이션 */
 .navbar {
@@ -30,7 +29,14 @@ body {
 .cash {
   font-size: 14px;
 }
-.btn-green {
+
+.logout {
+  font-size: small;
+  color:white;
+  text-decoration:none;
+}
+
+.gamePlayBtn {
   background-color: #00c853;
   border: none;
   color: white;
@@ -39,11 +45,6 @@ body {
   cursor: pointer;
   font-size: 14px;
 }
-.logout {
-  color:white;
-  text-decoration:none;
-}
-
 /* 메인 컨텐츠 */
 .container {
   display: flex;
@@ -57,11 +58,13 @@ body {
 }
 .card {
   width: 180px;
-  background-color: white;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+  border-radius: 26px;
+  border: 1px solid rgba( 255, 255, 255, 0.18 );
   padding: 10px;
   text-align: center;
+  backdrop-filter: blur( 4.5px );
 }
 .card .img {
   width: 100%;
@@ -105,7 +108,7 @@ body {
   border-radius: 6px;
 }
 .player-item:hover, .player-item.active {
-  background-color: #66e28c;
+  background-color: #00c853;
 }
 
 /* 하단 버튼 */
@@ -116,7 +119,7 @@ body {
   margin-top: 40px;
 }
 .btn-action {
-  background-color: #2e7d32;
+  background-color: #00c853;
   border: none;
   color: white;
   padding: 12px 30px;
