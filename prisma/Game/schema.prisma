@@ -47,37 +47,30 @@ model Gacha {
 }
 
 model Reinforce {
-  reinforceId             Int             @id @default(autoincrement())
-
-  level                   Int             @default(0)
-  probability             Int             @default(0)
-  attackIncrement         Int             @default(0)
-  defenceIncrement        Int             @default(0) 
-  speedIncrement          Int             @default(0)
-  coast                   Int             @default(0)
-  createdAt               DateTime        @default(now())
-  updatedAt               DateTime        @updatedAt
-
+  reinforceId      Int      @id @default(autoincrement())
+  level            Int      @default(0)
+  probability      Int      @default(0)
+  attackIncrement  Int      @default(0)
+  defenceIncrement Int      @default(0)
+  speedIncrement   Int      @default(0)
+  coast            Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@map("Reinforce")
 }
 
-model LevelPrice {
-  levelPriceId          Int     @id @default(autoincrement())
-  level        Int  @unique
-  magnification  Int     
-  
-  @@map("LevelPrice")
-}
-
-
 model RarityPrice {
-  rarityPriceId          Int     @id @default(autoincrement())
-  rarity        Int  @unique
-  rankPrice  Int     
-  
+  rarityPriceId  Int    @id @default(autoincrement())
+  rarity         String @unique
+  priceForRarity Int
+
   @@map("RarityPrice")
 }
 
-
-
+model StatForRarity {
+  statForRarityId Int    @id @default(autoincrement())
+  rarity          String @unique
+  minstat         Int
+  maxstat         Int
+}
