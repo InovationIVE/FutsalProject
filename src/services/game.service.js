@@ -58,16 +58,18 @@ export default class GameService {
         where: { accountId: loserAccountId },
       });
 
+      const basicScore = 10;
+      const basicCash = 1000;
       let acquireScore = 0;
       let acquiredCash = 0;
       const addScore = Math.abs(winnerRankInfo.rankScore - loserRankInfo.rankScore);
       const minusScore = addScore / 2;
       if (winnerRankInfo.rankScore > loserRankInfo.rankScore) {
-        acquireScore = Math.floor(addScore / 2);
-        acquiredCash = Math.floor((addScore / 2) * 1000);
+        acquireScore = basicScore + Math.floor(addScore / 2);
+        acquiredCash = basicCash + Math.floor((addScore / 2) * 1000);
       } else {
-        acquireScore = addScore;
-        acquiredCash = addScore * 1000;
+        acquireScore = basicScore + addScore;
+        acquiredCash = basicCash + addScore * 1000;
       }
 
       const winnerTier = updateTier(winnerRankInfo.rankScore + acquireScore);
