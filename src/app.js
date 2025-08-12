@@ -15,6 +15,7 @@ import PlayerRouter from './routes/player.router.js';
 import squadRouter from './routes/squad.router.js';
 import userRouter from './routes/user.router.js';
 import gameRouter from './routes/game.router.js';
+import rankRouter from './routes/rank.router.js';
 import { authMiddleware } from './middleWares/auth.middleware.js';
 import { platform } from 'os';
 
@@ -52,6 +53,7 @@ app.use('/api', [
   ownedPlayersRouter,
   userRouter,
   gameRouter,
+  rankRouter,
 ]);
 app.use('/auth', [authRouter]);
 
