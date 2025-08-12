@@ -26,11 +26,7 @@ model Account {
   opponentMatch MatchHistory[]    @relation("OpponentMatches")
   ownedPlayers  OwnedPlayers[]
   rank          Rank?             @relation("rank")
-<<<<<<< HEAD
-  Session       Session?
-=======
   session       Session?     @relation("session")
->>>>>>> 230630185a668b89ecd54c4c8a24012d1c4300be
   squad         Squad?
 
   @@map("Account")
@@ -172,17 +168,6 @@ model Bid {
   @@map("Bid")
 }
 
-model Session {
-  id         Int      @id @default(autoincrement())
-  accountId  Int      @unique
-  tokenHash  String   @unique
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  lastUsedAt DateTime
-  Account    Account  @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
-
-  @@index([expiresAt])
-}
 
 enum GiftStatus {
   success
