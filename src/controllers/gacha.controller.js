@@ -202,30 +202,35 @@ export class GachaController {
       }
 
       // 트랜잭션을 사용하여 데이터베이스 업데이트
-      await userPrisma.$transaction(async (tx) => {
-        // 새로 획득한 플레이어를 생성
+      await userPrisma.$transaction(
+        async (tx) => {
+          // 새로 획득한 플레이어를 생성
 
-        for (const player of drawnCards) {
-          await tx.ownedPlayers.create({
-            data: {
-              accountId: accountId,
-              playerId: player.playerId,
-              name: player.name,
-              rarity: player.rarity,
-              level: 1,
-              attack: player.attack,
-              defence: player.defence,
-              speed: player.speed,
-            },
+          for (const player of drawnCards) {
+            await tx.ownedPlayers.create({
+              data: {
+                accountId: accountId,
+                playerId: player.playerId,
+                name: player.name,
+                rarity: player.rarity,
+                level: 1,
+                attack: player.attack,
+                defence: player.defence,
+                speed: player.speed,
+              },
+            });
+          }
+
+          // 계정의 재화 업데이트
+          await tx.account.update({
+            where: { accountId: accountId },
+            data: { cash: { decrement: gachaCard.price * drawCount } },
           });
-        }
-
-        // 계정의 재화 업데이트
-        await tx.account.update({
-          where: { accountId: accountId },
-          data: { cash: { decrement: gachaCard.price * drawCount } },
-        });
-      });
+        },
+        {
+          isolationLevel: UserPrisma.TransactionIsolationLevel.ReadCommitted,
+        },
+      );
 
       return res.status(200).json(drawnCards);
     } catch (error) {

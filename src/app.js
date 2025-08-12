@@ -15,6 +15,8 @@ import PlayerRouter from './routes/player.router.js';
 import squadRouter from './routes/squad.router.js';
 import userRouter from './routes/user.router.js';
 import gameRouter from './routes/game.router.js';
+import rankRouter from './routes/rank.router.js';
+import auctionRouter from './routes/auction.router.js';
 //import reinforceRouter from './routes/reinforce.router.js';
 import { authMiddleware } from './middleWares/auth.middleware.js';
 import { platform } from 'os';
@@ -31,6 +33,8 @@ dotenv.config();
 
 
 const app = express();
+
+
 const PORT = 3018;
 
 // http 서버 생성 및 socket.io 서버 초기화
@@ -53,7 +57,10 @@ app.use('/api', [
   ownedPlayersRouter,
   userRouter,
   gameRouter,
+  auctionRouter,
+  rankRouter,
   //reinforceRouter,
+
 ]);
 app.use('/auth', [authRouter]);
 
