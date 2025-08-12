@@ -46,9 +46,11 @@ async function registerGameEndEvents(game, socketIdToUserIdMap) {
     loser = teamA;
   } else {
     game.log.push('무승부 입니다.');
+    await GameService.updateDraw(teamA.socketId, teamB.socketId, socketIdToUserIdMap);
     return;
   }
 
   game.log.push(`승리팀: ${winner.name}, 패배팀: ${loser.name}`);
   await GameService.updateRank(winner.socketId, loser.socketId, socketIdToUserIdMap);
+  await GameService.createMatchHistory(teamA.socketId, teamB.socketId, game, socketIdToUserIdMap);
 }

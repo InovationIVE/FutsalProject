@@ -78,6 +78,9 @@ export default class GameService {
         data: {
           rankScore: { increment: acquireScore },
           tier: winnerTier,
+          win: {
+            increment: 1,
+          },
         },
       });
 
@@ -93,10 +96,75 @@ export default class GameService {
         data: {
           rankScore: { decrement: minusScore },
           tier: loserTier,
+          lose: {
+            increment: 1,
+          },
         },
       });
 
       await userPrisma.$transaction([winnerUpdatePromise, winnerUpdateCash, loserUpdatePromise]);
+    } catch (error) {
+      console.error('Error updating ranks:', error);
+    }
+  }
+
+  static async updateDraw(drawId1, drawId2, socketIdToUserIdMap) {
+    try {
+      const drawId1AccountId = socketIdToUserIdMap.get(drawId1);
+      const drawId2AccountId = socketIdToUserIdMap.get(drawId2);
+
+      const drawId1UpdatePromise = userPrisma.rank.update({
+        where: { accountId: drawId1AccountId },
+        data: {
+          draw: {
+            increment: 1,
+          },
+        },
+      });
+
+      const drawId2UpdatePromise = userPrisma.rank.update({
+        where: { accountId: drawId2AccountId },
+        data: {
+          draw: {
+            increment: 1,
+          },
+        },
+      });
+
+      await userPrisma.$transaction([drawId1UpdatePromise, drawId2UpdatePromise]);
+    } catch (error) {
+      console.error('Error updating ranks:', error);
+    }
+  }
+
+  static async createMatchHistory(teamAsocketId, teamBsocketId, game, socketIdToUserIdMap) {
+    try {
+      const teamAAccountId = socketIdToUserIdMap.get(teamAsocketId);
+      const teamBAccountId = socketIdToUserIdMap.get(teamBsocketId);
+
+      const teamAUpdateHistoryPrisma = userPrisma.matchHistory.create({
+        data: {
+          accountId: teamAAccountId,
+          opponentId: teamBAccountId,
+          goalScore: game.teamA.score,
+          passScore: game.teamA.totalPass,
+          shootScore: game.teamA.totalShoot,
+          defenceScore: game.teamA.totalTackle,
+        },
+      });
+
+      const teamBUpdateHistoryPrisma = userPrisma.matchHistory.create({
+        data: {
+          accountId: teamBAccountId,
+          opponentId: teamAAccountId,
+          goalScore: game.teamB.score,
+          passScore: game.teamB.totalPass,
+          shootScore: game.teamB.totalShoot,
+          defenceScore: game.teamB.totalTackle,
+        },
+      });
+
+      await userPrisma.$transaction([teamAUpdateHistoryPrisma, teamBUpdateHistoryPrisma]);
     } catch (error) {
       console.error('Error updating ranks:', error);
     }
@@ -118,8 +186,6 @@ async function createTeamPlayer(accountId, temaName) {
   let squadPlayers = [];
 
   for (let i = 0; i < squadInfo.squadMembers.length; i++) {
-    //const playerA1 = new Player(1, 'A1', 8, 6, 3, 'teamA');
-    // playerA1.position = { x: 2, y: 2 };
     const info = squadInfo.squadMembers[i];
     const stat = info.ownedPlayer;
     const player = new Player(

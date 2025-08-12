@@ -3,6 +3,9 @@ export class Team {
     this.name = name;
     this.players = players;
     this.score = 0;
+    this.totalPass = 0;
+    this.totalTackle = 0;
+    this.totalShoot = 0;
     this.socketId = socketId; // Add socketId property
   }
 

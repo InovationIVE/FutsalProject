@@ -46,10 +46,16 @@ export class Game {
   endGame() {
     this.log.length = 0;
     this.isGameOver = true;
+
+    totalPassTackleScore(this.teamA);
+    totalPassTackleScore(this.teamB);
+
     this.log.push('게임 종료!');
     this.log.push(
       `최종 점수: ${this.teams[0].name} ${this.teams[0].score} : ${this.teams[1].score} ${this.teams[1].name}`,
     );
+    this.log.push(`${this.teamA.name}: 골점수:${this.teamA.score}, 패스점수:${this.teamA.totalPass}, 방어점수: ${this.teamA.totalTackle}`);
+    this.log.push(`${this.teamB.name}: 골점수:${this.teamB.score}, 패스점수:${this.teamB.totalPass}, 방어점수: ${this.teamB.totalTackle}`);
   }
 
   resetPositions() {
@@ -184,5 +190,13 @@ export class Game {
       initialPlayerPositions: this.initialPlayerPositions,
       log: this.log
     };
+  }
+}
+
+function totalPassTackleScore(team){
+  for(let i = 0;  i < team.players.length; i++){
+    team.totalPass += team.players[i].passNum;
+    team.totalTackle += team.players[i].tackleNum;
+    team.totalShoot += team.players[i].shootNum;
   }
 }
