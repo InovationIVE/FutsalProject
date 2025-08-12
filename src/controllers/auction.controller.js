@@ -4,53 +4,63 @@ import { Prisma as UserPrisma } from '../../prisma/User/generated/user/index.js'
 
 
 export class AuctionController {
-    //경매 등록 API
-    static  async createAuction(req, res, next) {
-        try {
-            const { accountId } = req.user;
-            const { ownedPlayerId, startingPrice } = req.body;
+   static async createAuction(req, res, next) {
+    try {
+        const { accountId } = req.user;
+        const { ownedPlayerId, startingPrice } = req.body;
 
-            // 유효성 검사
-            if (!ownedPlayerId || !startingPrice) {
-                return res.status(400).json({ message: '경매에 올릴 선수와 시작가를 입력해주세요.' });
-            }
+        if (!ownedPlayerId || !startingPrice) {
+            return res.status(400).json({ message: '경매에 올릴 선수와 시작가를 입력해주세요.' });
+        }
 
-            // 1) account 존재 확인
-            const account = await userPrisma.account.findUnique({
-                where: { accountId: +accountId },
-            });
-            if (!account) {
-                return res.status(404).json({ message: '해당 계정이 존재하지 않습니다.' });
-            }
-
-            // 2) OwnedPlayer가 account 소유인지 확인
-            const ownedPlayer = await userPrisma.ownedPlayers.findUnique({
+        // 트랜잭션 시작
+        const result = await userPrisma.$transaction(async (tx) => {
+            // 1) OwnedPlayer가 account 소유인지 확인
+            const ownedPlayer = await tx.ownedPlayers.findUnique({
                 where: {
                     ownedPlayerId: +ownedPlayerId,
                     accountId: +accountId,
                 },
             });
+
+            // 해당 선수가 없거나 이미 경매에 등록된 경우 (accountId가 null인 경우)
             if (!ownedPlayer) {
-                return res.status(400).json({ message: '내 소유의 선수만 경매에 등록할 수 있습니다.' });
+                // 이 경우, 경매를 올릴 권한이 없거나 이미 경매에 올라간 선수입니다.
+                // ownedPlayerId를 가진 선수가 존재하지 않거나,
+                // ownedPlayerId를 가졌지만 accountId가 현재 사용자가 아닌 경우입니다.
+                throw new Error('내 소유의 선수만 경매에 등록할 수 있습니다.');
             }
 
-            // 3) 경매 등록
-            const auction = await userPrisma.auction.create({
+            // 2) 경매 등록
+            const auction = await tx.auction.create({
                 data: {
                     ownedPlayerId: +ownedPlayerId,
                     startingPrice: +startingPrice,
                     accountId: +accountId,
-                    currentPrice: +startingPrice, // 초기 가격은 시작가로 설정
-                    status: 'open', // 경매 상태 초기화
-                    endsAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24시간 후 종료
+                    currentPrice: +startingPrice,
+                    status: 'open',
+                    endsAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
                 },
             });
 
-            return res.status(201).json({ data: auction });
-        } catch (err) {
-            next(err);
+            // 3) OwnedPlayers에서 해당 선수의 accountId를 null로 업데이트
+            await tx.ownedPlayers.update({
+                where: { ownedPlayerId: +ownedPlayerId },
+                data: { accountId: null },
+            });
+            
+            return auction;
+        });
+
+        return res.status(201).json({ data: result });
+    } catch (err) {
+        // 커스텀 에러 메시지 처리
+        if (err.message === '내 소유의 선수만 경매에 등록할 수 있습니다.') {
+            return res.status(400).json({ message: err.message });
         }
+        next(err);
     }
+}
 
     //경매 조회 API
     static async getAuctions(req, res, next) {
