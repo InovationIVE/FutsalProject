@@ -21,12 +21,12 @@ model Account {
   auction       Auction[]
   receivedGifts GiftTransaction[] @relation("ReceivedGifts")
   sentGifts     GiftTransaction[] @relation("SentGifts")
-  matchHistory  MatchHistory[] @relation("MyMatches")
+  matchHistory  MatchHistory[]    @relation("MyMatches")
+  opponentMatch MatchHistory[]    @relation("OpponentMatches")
   ownedPlayers  OwnedPlayers[]
   rank          Rank?             @relation("rank")
   refreshToken  RefreshToken?     @relation("refreshToken")
   squad         Squad?
-  opponentMatch MatchHistory[] @relation("OpponentMatches")
 
   @@map("Account")
 }
@@ -90,10 +90,10 @@ model Rank {
   accountId Int      @unique
   rankScore Int      @default(1000)
   tier      String   @default("silver")
-  win       Int      @default(0)
+  updatedAt DateTime @updatedAt
   draw      Int      @default(0)
   lose      Int      @default(0)
-  updatedAt DateTime @updatedAt
+  win       Int      @default(0)
   account   Account  @relation("rank", fields: [accountId], references: [accountId])
 
   @@map("Rank")
@@ -102,17 +102,17 @@ model Rank {
 model MatchHistory {
   matchId      Int      @id @default(autoincrement())
   accountId    Int
-  opponentId   Int
   goalScore    Int      @default(0)
   passScore    Int      @default(0)
   shootScore   Int      @default(0)
   defenceScore Int      @default(0)
   createdAt    DateTime @default(now())
-  account      Account  @relation("MyMatches", fields: [accountId], references: [accountId])
-  opponent     Account  @relation("OpponentMatches", fields: [opponentId], references: [accountId])
+  opponentId   Int
+  account      Account  @relation("MyMatches", fields: [accountId], references: [accountId])
+  opponent     Account  @relation("OpponentMatches", fields: [opponentId], references: [accountId])
 
   @@index([accountId], map: "MatchHistory_accountId_fkey")
-  @@index([opponentId], map:"MatchHistory_opponentId_fkey")
+  @@index([opponentId], map: "MatchHistory_opponentId_fkey")
   @@map("MatchHistory")
 }
 
