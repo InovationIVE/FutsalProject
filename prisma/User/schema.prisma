@@ -9,24 +9,24 @@ datasource db {
 }
 
 model Account {
-  accountId    Int            @id @default(autoincrement())
-  email        String         @unique
-  userId       String         @unique
-  password     String
-  cash         Int            @default(100000)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  role         String         @default("USER")
-  lastLoginAt  DateTime?
-
-  ownedPlayers OwnedPlayers[]
-  refreshToken RefreshToken?  @relation("refreshToken")
-  squad        Squad?
-  rank       Rank?       @relation("rank")
-  auction  Auction[]
-  matchHistory MatchHistory[]
-  sentGifts     GiftTransaction[] @relation("SentGifts")
+  accountId     Int               @id @default(autoincrement())
+  email         String            @unique
+  userId        String            @unique
+  password      String
+  cash          Int               @default(100000)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  role          String            @default("USER")
+  lastLoginAt   DateTime?
+  auction       Auction[]
   receivedGifts GiftTransaction[] @relation("ReceivedGifts")
+  sentGifts     GiftTransaction[] @relation("SentGifts")
+  matchHistory  MatchHistory[] @relation("MyMatches")
+  ownedPlayers  OwnedPlayers[]
+  rank          Rank?             @relation("rank")
+  refreshToken  RefreshToken?     @relation("refreshToken")
+  squad         Squad?
+  opponentMatch MatchHistory[] @relation("OpponentMatches")
 
   @@map("Account")
 }
@@ -47,17 +47,17 @@ model OwnedPlayers {
   ownedPlayerId Int            @id @default(autoincrement())
   accountId     Int
   playerId      Int
-  name           String       
-  rarity         String
+  name          String
+  rarity        String
   level         Int?
-  attack         Int        
-  defence        Int         
-  speed          Int
+  attack        Int
+  defence       Int
+  speed         Int
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  auctions      Auction[]
   account       Account        @relation(fields: [accountId], references: [accountId])
   squadMembers  SquadMembers[]
-  auctions Auction[]
 
   @@index([accountId], map: "OwnedPlayers_accountId_fkey")
   @@map("OwnedPlayers")
@@ -86,45 +86,66 @@ model RefreshToken {
 }
 
 model Rank {
-  rankId         Int       @id @default(autoincrement())
-  accountId      Int       @unique
-  rankScore      Int       @default(1000)
-  tier           String    @default("silver")
-    
-  updatedAt      DateTime  @updatedAt
-  account        Account   @relation("rank", fields:[accountId], references:[accountId])
+  rankId    Int      @id @default(autoincrement())
+  accountId Int      @unique
+  rankScore Int      @default(1000)
+  tier      String   @default("silver")
+  win       Int      @default(0)
+  draw      Int      @default(0)
+  lose      Int      @default(0)
+  updatedAt DateTime @updatedAt
+  account   Account  @relation("rank", fields: [accountId], references: [accountId])
 
   @@map("Rank")
 }
 
-
-
 model MatchHistory {
-  matchId        Int          @id @default(autoincrement())
-  accountId      Int
-  goalScore      Int          @default(0)   
-  passScore      Int          @default(0)
-  shootScore     Int          @default(0)
-  defenceScore   Int          @default(0)
-  createdAt      DateTime     @default(now())
+  matchId      Int      @id @default(autoincrement())
+  accountId    Int
+  opponentId   Int
+  goalScore    Int      @default(0)
+  passScore    Int      @default(0)
+  shootScore   Int      @default(0)
+  defenceScore Int      @default(0)
+  createdAt    DateTime @default(now())
+  account      Account  @relation("MyMatches", fields: [accountId], references: [accountId])
+  opponent     Account  @relation("OpponentMatches", fields: [opponentId], references: [accountId])
 
-  account      Account        @relation(fields:[accountId], references:[accountId])
+  @@index([accountId], map: "MatchHistory_accountId_fkey")
+  @@index([opponentId], map:"MatchHistory_opponentId_fkey")
   @@map("MatchHistory")
 }
 
-
 model GiftTransaction {
-  id          Int   @id @default(autoincrement())
-  senderId    Int
-  receiverId  Int
-  cash        Int
-  status      GiftStatus @default(success)
-  createdAt  DateTime @default(now())
+  id         Int        @id @default(autoincrement())
+  senderId   Int
+  receiverId Int
+  cash       Int
+  status     GiftStatus @default(success)
+  createdAt  DateTime   @default(now())
+  receiver   Account    @relation("ReceivedGifts", fields: [receiverId], references: [accountId])
+  sender     Account    @relation("SentGifts", fields: [senderId], references: [accountId])
 
-  sender   Account @relation("SentGifts", fields: [senderId], references: [accountId])
-  receiver Account @relation("ReceivedGifts", fields: [receiverId], references: [accountId])
+  @@index([receiverId], map: "GiftTransaction_receiverId_fkey")
+  @@index([senderId], map: "GiftTransaction_senderId_fkey")
+  @@map("GiftTransaction")
+}
 
- @@map("GiftTransaction")
+model Auction {
+  auctionId     Int           @id @default(autoincrement())
+  accountId     Int
+  ownedPlayerId Int
+  startingPrice Int
+  currentPrice  Int
+  status        AuctionStatus @default(open)
+  createdAt     DateTime      @default(now())
+  endsAt        DateTime
+  account       Account       @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
+  ownedPlayer   OwnedPlayers  @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
+
+  @@index([accountId], map: "Auction_accountId_fkey")
+  @@index([ownedPlayerId], map: "Auction_ownedPlayerId_fkey")
+  @@map("Auction")
 }
 
 enum GiftStatus {
@@ -133,29 +154,8 @@ enum GiftStatus {
   failed
 }
 
-
-model Auction {
-  auctionId         Int          @id @default(autoincrement())
-  accountId         Int
-  ownedPlayerId     Int
-  startingPrice     Int
-  currentPrice      Int
-  status            AuctionStatus @default(open)
-  createdAt         DateTime     @default(now())
-  endsAt            DateTime
-   
-  account      Account     @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
-  ownedPlayer  OwnedPlayers@relation(fields: [ownedPlayerId], references: [ownedPlayerId])
-
-  @@map("Auction")
-}
-
 enum AuctionStatus {
   open
   closed
   cancelled
 }
-
-
-
-
