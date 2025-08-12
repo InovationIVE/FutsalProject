@@ -56,39 +56,6 @@ export class PlayerModel {
     });
   }
 
-  /** 레어도 유효성 검증 **/
-  static async isCorrectRarity(rarity) {
-    const rarity_list = new Set(["N", "R", "SR", "SSR", "UR"]);
-    if( !rarity_list.has(rarity) ){
-    return false;
-    }
-    return true;
-  }
-
-  /** 레어도에 따른 가격 책정 **/
-  static async PriceForRarity(rarity) {
-    switch(rarity){
-      case "N":
-        return 100;
-        break;
-      case "R":
-        return 500;
-        break;
-      case "SR":
-        return 1000;
-        break;
-      case "SSR":
-        return 3000;
-        break;
-      case "UR":
-        return 10000;
-        break;
-      default:
-        return 0;
-      
-    }
-  }
-
   static async create(data) {
     const created = await gamePrisma.player.create({ data });
     return new PlayerModel(created);
