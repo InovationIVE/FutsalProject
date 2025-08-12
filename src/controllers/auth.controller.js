@@ -46,13 +46,17 @@ const signup = async (req, res) => {
       return res.status(400).json({ message: '모든 필드를 입력해주세요.' });
     }
     if (!validateInput.userId(userId)) {
-      return res.status(400).json({ message: 'userId는 4-20자의 영문, 숫자, 언더스코어만 사용 가능합니다.' });
+      return res
+        .status(400)
+        .json({ message: 'userId는 4-20자의 영문, 숫자, 언더스코어만 사용 가능합니다.' });
     }
     if (!validateInput.email(email)) {
       return res.status(400).json({ message: '올바른 이메일 형식이 아닙니다.' });
     }
     if (!validateInput.password(password)) {
-      return res.status(400).json({ message: '비밀번호는 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.' });
+      return res
+        .status(400)
+        .json({ message: '비밀번호는 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.' });
     }
     if (password !== confirmPassword) {
       return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' });
@@ -72,6 +76,7 @@ const signup = async (req, res) => {
       data: {
         userId,
         email,
+        role: 'USER',
         password: hashedPassword,
         cash: 10000,
       },
@@ -191,7 +196,9 @@ const changePassword = async (req, res) => {
       return res.status(400).json({ message: '새 비밀번호와 확인 비밀번호가 일치하지 않습니다.' });
     }
     if (!validateInput.password(newPassword)) {
-      return res.status(400).json({ message: '새 비밀번호는 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.' });
+      return res
+        .status(400)
+        .json({ message: '새 비밀번호는 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.' });
     }
 
     const account = await userPrisma.account.findUnique({ where: { accountId } });
@@ -214,11 +221,13 @@ const changePassword = async (req, res) => {
 
     // 캐시에서 현재 세션 삭제 및 쿠키 클리어
     if (account.sessionToken) {
-        cache.del(account.sessionToken);
+      cache.del(account.sessionToken);
     }
     res.clearCookie('sessionToken');
 
-    res.status(200).json({ message: '비밀번호가 성공적으로 변경되었습니다. 보안을 위해 다시 로그인해주세요.' });
+    res
+      .status(200)
+      .json({ message: '비밀번호가 성공적으로 변경되었습니다. 보안을 위해 다시 로그인해주세요.' });
   } catch (error) {
     console.error('비밀번호 변경 에러:', error);
     res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
@@ -236,7 +245,7 @@ const deleteAccount = async (req, res) => {
     await userPrisma.account.delete({ where: { accountId } });
 
     if (req.user.sessionToken) {
-        cache.del(req.user.sessionToken);
+      cache.del(req.user.sessionToken);
     }
     res.clearCookie('sessionToken');
 
@@ -251,19 +260,16 @@ const deleteAccount = async (req, res) => {
  * auth/role 컨트롤러: 현재 로그인한 사용자 역할 조회
  */
 const getMyRole = async (req, res) => {
+  const { role } = await userPrisma.account.findUnique({
+    where: { accountId: req.user.accountId },
+    select: { role: true },
+  });
   try {
-    res.status(200).json({ role: req.user.role });
+    res.status(200).json({ role });
   } catch (error) {
     console.error('getMyRole 에러:', error);
     res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
   }
 };
 
-export {
-  signup,
-  login,
-  logout,
-  changePassword,
-  deleteAccount,
-  getMyRole,
-};
+export { signup, login, logout, changePassword, deleteAccount, getMyRole };
