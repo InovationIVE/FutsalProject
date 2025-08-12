@@ -23,25 +23,50 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Game State ---
   let selectedPlayer = null;
   let game = null; // Game state will be received from the server
+  let matchmakingTimer = null;
 
   // --- Socket Event Handlers ---
   findMatchBtn.addEventListener('click', () => {
-    log('Looking for a match...');
+    log('서버에 매칭을 요청합니다...');
     socket.emit('find_match');
     findMatchBtn.disabled = true;
   });
 
   socket.on('waiting_for_match', (data) => {
+    // Start a timer and display it.
+    if (matchmakingTimer) clearInterval(matchmakingTimer);
+
+    let startTime = Date.now();
+    const timerLogElement = log(`경과 시간: 00:00`);
+
+    matchmakingTimer = setInterval(() => {
+      const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+      const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
+      const seconds = String(elapsedTime % 60).padStart(2, '0');
+      timerLogElement.textContent = `경과 시간: ${minutes}:${seconds}`;
+    }, 1000);
+  });
+
+  socket.on('already_in_queue', (data) => {
     log(data.message);
+    findMatchBtn.disabled = false; // Re-enable button if they are already in queue somehow
+  });
+
+  socket.on('matchmaking_error', (data) => {
+    log(`매칭 오류: ${data.message}`);
+    if (matchmakingTimer) clearInterval(matchmakingTimer);
+    findMatchBtn.disabled = false;
   });
 
   socket.on('match_found', (data) => {
-    log(`Match found! Opponent: ${data.opponentId}. Room: ${data.roomId}`);
-    log('Waiting for game to start...');
+    if (matchmakingTimer) clearInterval(matchmakingTimer);
+    log(`매치 발견! 게임 방: ${data.roomId}`);
+    log('게임 시작을 기다립니다...');
+    // The findMatchBtn can remain disabled as we are proceeding to the game.
   });
 
   socket.on('game_start', (data) => {
-    log('Game is starting!');
+    log('게임 시작!');
     game = data.gameState;
     const allPlayers = [...game.teams[0].players, ...game.teams[1].players];
     const ballOwner = allPlayers.find((p) => p.id === game.ball.ownerId);
@@ -148,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
     li.textContent = message;
     logList.appendChild(li);
     logList.scrollTop = logList.scrollHeight; // Auto-scroll
+    return li; // Return the created element
   }
 
   function getCell(x, y) {
