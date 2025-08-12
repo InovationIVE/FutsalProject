@@ -24,7 +24,7 @@ model Account {
   matchHistory  MatchHistory[] @relation("MyMatches")
   ownedPlayers  OwnedPlayers[]
   rank          Rank?             @relation("rank")
-  refreshToken  RefreshToken?     @relation("refreshToken")
+  session       Session?     @relation("session")
   squad         Squad?
   opponentMatch MatchHistory[] @relation("OpponentMatches")
   bids      Bid[]
