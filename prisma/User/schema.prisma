@@ -26,21 +26,20 @@ model Account {
   opponentMatch MatchHistory[]    @relation("OpponentMatches")
   ownedPlayers  OwnedPlayers[]
   rank          Rank?             @relation("rank")
-  session       Session?     @relation("session")
+  session       Session?          @relation("session")
   squad         Squad?
 
   @@map("Account")
 }
 
 model Session {
-  id        Int      @id @default(autoincrement())
-  accountId Int      @unique
-  tokenHash String   @unique
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  accountId  Int      @unique
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
   lastUsedAt DateTime @updatedAt
-
-  account   Account  @relation("session", fields: [accountId], references: [accountId], onDelete: Cascade)
+  account    Account  @relation("session", fields: [accountId], references: [accountId], onDelete: Cascade)
 
   @@index([expiresAt])
   @@map("Session")
@@ -71,7 +70,7 @@ model OwnedPlayers {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   auctions      Auction[]
-  account       Account?        @relation(fields: [accountId], references: [accountId], onDelete:SetNull)
+  account       Account?       @relation(fields: [accountId], references: [accountId])
   squadMembers  SquadMembers[]
 
   @@index([accountId], map: "OwnedPlayers_accountId_fkey")
@@ -167,7 +166,6 @@ model Bid {
   @@index([auctionId], map: "Bid_auctionId_fkey")
   @@map("Bid")
 }
-
 
 enum GiftStatus {
   success
