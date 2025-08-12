@@ -1,112 +1,37 @@
 import bcrypt from 'bcrypt';
-import jwt, { decode } from 'jsonwebtoken';
+import crypto from 'crypto';
 import { userPrisma } from '../utils/prisma/index.js';
 import { validateInput } from '../utils/validation.js';
-import { TOKEN_EXPIRY } from '../middleWares/auth.middleware.js';
+import { cache } from '../utils/sessionCache.js';
+import { SESSION_DURATION_MINUTES } from '../middleWares/auth.middleware.js';
 
 /**
- * JWT 토큰 생성 함수
- *
- * 입력: accountId (사용자 계정 ID)
- * 출력: { accessToken, refreshToken }
+ * 안전한 랜덤 토큰을 생성합니다.
+ * @returns {string} 16진수 형식의 토큰
  */
-const generateTokens = (accountId) => {
-  const accessToken = jwt.sign({ accountId }, process.env.ACCESS_TOKEN_SECRET, {
-    header: { alg: 'HS256', typ: 'JWT' },
-    expiresIn: TOKEN_EXPIRY.ACCESS_TOKEN,
-  });
-
-  const refreshToken = jwt.sign({ accountId }, process.env.REFRESH_TOKEN_SECRET, {
-    header: { alg: 'HS256', typ: 'JWT' },
-    expiresIn: TOKEN_EXPIRY.REFRESH_TOKEN,
-  });
-
-  return { accessToken, refreshToken };
+const generateSessionToken = () => {
+  return crypto.randomBytes(32).toString('hex');
 };
 
 /**
- * Refresh Token으로 새 access/refresh 토큰 발급, refresh 토큰은 db에 저장
- *
- * 입력: refreshToken (갱신용 토큰 문자열)
- * 출력: { success: true/false, tokens: {accessToken, refreshToken}, accountId: 번호, error: 에러메시지 }
+ * 토큰을 해시합니다. (SHA256)
+ * @param {string} token - 해시할 원본 토큰
+ * @returns {string} 16진수 형식의 해시된 토큰
  */
-const validateAndRefreshTokens = async (refreshToken) => {
-  try {
-    // JWT 검증 및 DB 확인
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-
-    // JWT와 accountId가 일치하는 refreshToken를 DB에서 조회
-    const storedToken = await userPrisma.refreshToken.findUnique({
-      where: { accountId: decoded.accountId },
-      select: { token: true, expiresAt: true, createdAt: true },
-    });
-
-    // 토큰 유효성 검사
-    if (!storedToken || storedToken.token !== refreshToken) {
-      console.error('토큰이 탈취 또는 유출되었습니다.');
-      return { success: false };
-    }
-
-    // 만료 확인 (expiresAt 우선, 없으면 createdAt 기준)
-    const isExpired = storedToken.expiresAt
-      ? new Date() > new Date(storedToken.expiresAt)
-      : Date.now() - new Date(storedToken.createdAt).getTime() > TOKEN_EXPIRY.REFRESH_TOKEN_MS;
-
-    if (isExpired) {
-      await userPrisma.refreshToken.delete({ where: { accountId: decoded.accountId } });
-      return { success: false };
-    }
-
-    // 트랜잭션을 사용하여 DB에 저장 중이였던 기존 refresh token 삭제 및 새 access/refresh token 발급, 새 refresh token은 DB에 그 내용을 저장
-    const result = await userPrisma.$transaction(async (tx) => {
-      // 기존 refreshToken 삭제
-      await tx.refreshToken.delete({
-        where: { accountId: decoded.accountId },
-      });
-
-      // 새 토큰 발급
-      const newTokens = generateTokens(decoded.accountId);
-
-      // 새 refreshToken 생성
-      await tx.refreshToken.create({
-        data: {
-          accountId: decoded.accountId,
-          token: newTokens.refreshToken,
-          expiresAt: new Date(Date.now() + TOKEN_EXPIRY.REFRESH_TOKEN_MS),
-        },
-      });
-
-      return { success: true, tokens: newTokens, accountId: decoded.accountId };
-    });
-
-    return result;
-  } catch (error) {
-    console.error('토큰 갱신 에러:', error);
-    return { success: false };
-  }
+const hashToken = (token) => {
+  return crypto.createHash('sha256').update(token).digest('hex');
 };
 
 /**
- * 토큰을 안전한 쿠키로 클라이언트에 저장하는 함수
- *
- * 기존에 토큰이 존재했다면 덮어쓰기 처리
- *
- * 입력: res (응답 객체), accessToken, refreshToken
- * 보안: httpOnly(JS 접근 차단), secure(HTTPS만), sameSite(CSRF 방지)
+ * 세션 토큰을 안전한 쿠키로 클라이언트에 저장하는 함수
+ * @param {object} res - Express 응답 객체
+ * @param {string} token - 세션 토큰
  */
-const setTokenCookies = (res, accessToken, refreshToken) => {
-  res.cookie('accessToken', accessToken, {
-    httpOnly: true, // XSS 방지 (JavaScript 접근 차단)
-    secure: process.env.NODE_ENV === 'production', // HTTPS에서만 (프로덕션)
-    sameSite: 'strict', // CSRF 방지
-    maxAge: TOKEN_EXPIRY.ACCESS_TOKEN_MS,
-  });
-
-  res.cookie('refreshToken', refreshToken, {
-    httpOnly: true, // XSS 방지
-    secure: process.env.NODE_ENV === 'production', // HTTPS에서만 (프로덕션)
-    sameSite: 'strict', // CSRF 방지
-    maxAge: TOKEN_EXPIRY.REFRESH_TOKEN_MS,
+const setSessionCookie = (res, token) => {
+  res.cookie('sessionToken', token, {
+    httpOnly: true,
+    sameSite: 'strict',
+    maxAge: SESSION_DURATION_MINUTES * 60 * 1000, // 쿠키 만료는 세션 만료와 동기화
   });
 };
 
@@ -117,96 +42,54 @@ const signup = async (req, res) => {
   try {
     const { userId, email, password, confirmPassword } = req.body;
 
-    // 1-1. 입력값 존재 여부 확인
     if (!userId || !email || !password || !confirmPassword) {
-      return res.status(400).json({
-        message: 'userId, email, password, confirmPassword는 필수 입력값입니다.',
-      });
+      return res.status(400).json({ message: '모든 필드를 입력해주세요.' });
     }
-
-    // 1-2. 입력값 형식 검증 (정규표현식 사용)
     if (!validateInput.userId(userId)) {
-      return res.status(400).json({
-        message: 'userId는 4-20자의 영문, 숫자, 언더스코어만 사용 가능합니다.',
-      });
+      return res
+        .status(400)
+        .json({ message: 'userId는 4-20자의 영문, 숫자, 언더스코어만 사용 가능합니다.' });
     }
-
     if (!validateInput.email(email)) {
-      return res.status(400).json({
-        message: '올바른 이메일 형식이 아닙니다.',
-      });
+      return res.status(400).json({ message: '올바른 이메일 형식이 아닙니다.' });
     }
-
     if (!validateInput.password(password)) {
-      return res.status(400).json({
-        message: '비밀번호는 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.',
-      });
+      return res
+        .status(400)
+        .json({ message: '비밀번호는 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.' });
     }
-
-    // 1-3. 비밀번호 확인 검증
     if (password !== confirmPassword) {
-      return res.status(400).json({
-        message: '비밀번호와 비밀번호 확인이 일치하지 않습니다.',
-      });
+      return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' });
     }
 
-    // 1-4. 중복 확인 (userId, email 둘 다)
     const existingUser = await userPrisma.account.findFirst({
-      where: {
-        OR: [{ userId: userId }, { email: email }],
-      },
+      where: { OR: [{ userId }, { email }] },
     });
 
     if (existingUser) {
-      if (existingUser.userId === userId) {
-        return res.status(409).json({
-          message: '이미 사용 중인 userId입니다.',
-        });
-      }
-      if (existingUser.email === email) {
-        return res.status(409).json({
-          message: '이미 사용 중인 email입니다.',
-        });
-      }
+      return res.status(409).json({ message: '이미 사용 중인 userId 또는 email입니다.' });
     }
 
-    // 1-5. 비밀번호 해싱 (bcrypt 사용)
-    const saltRounds = 12;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
-    // 1-6. 계정 생성 (기본 cash: 10000)
     const newAccount = await userPrisma.account.create({
       data: {
         userId,
         email,
+        role: 'USER',
         password: hashedPassword,
-        cash: 10000, // 기본 지급 캐시
+        cash: 10000,
       },
-      select: {
-        accountId: true,
-        userId: true,
-        email: true,
-        cash: true,
-        createdAt: true,
-      },
+      select: { accountId: true, userId: true, email: true, cash: true, createdAt: true },
     });
 
-    // 1-7. 회원가입 완료 응답 (토큰 발급 없이)
     res.status(201).json({
       message: '회원가입이 완료되었습니다. 로그인을 진행해주세요.',
-      user: {
-        accountId: newAccount.accountId,
-        userId: newAccount.userId,
-        email: newAccount.email,
-        cash: newAccount.cash,
-        createdAt: newAccount.createdAt,
-      },
+      user: newAccount,
     });
   } catch (error) {
     console.error('회원가입 에러:', error);
-    res.status(500).json({
-      message: '서버 내부 오류가 발생했습니다.',
-    });
+    res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
   }
 };
 
@@ -217,60 +100,35 @@ const login = async (req, res) => {
   try {
     const { userId, password } = req.body;
 
-    // 2-1. 입력값 존재 여부 확인
     if (!userId || !password) {
-      return res.status(400).json({
-        message: 'userId와 password는 필수 입력값입니다.',
-      });
+      return res.status(400).json({ message: 'userId와 password는 필수 입력값입니다.' });
     }
 
-    // 2-2. 사용자 존재 여부 확인
     const account = await userPrisma.account.findUnique({
-      where: { userId: userId },
-      select: {
-        accountId: true,
-        userId: true,
-        email: true,
-        password: true,
-        cash: true,
-        role: true,
-        createdAt: true,
-      },
+      where: { userId },
     });
 
-    if (!account) {
-      return res.status(401).json({
-        message: '존재하지 않는 userId입니다.',
-      });
+    if (!account || !(await bcrypt.compare(password, account.password))) {
+      return res.status(401).json({ message: 'userId 또는 비밀번호가 올바르지 않습니다.' });
     }
 
-    // 2-3. 비밀번호 검증 (bcrypt.compare 사용)
-    const isPasswordValid = await bcrypt.compare(password, account.password);
+    const sessionToken = generateSessionToken();
+    const tokenHash = hashToken(sessionToken);
+    const expiresAt = new Date(Date.now() + SESSION_DURATION_MINUTES * 60 * 1000);
 
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        message: '비밀번호가 일치하지 않습니다.',
-      });
-    }
-
-    // 2-4. JWT 토큰 생성
-    const { accessToken, refreshToken } = generateTokens(account.accountId);
-
-    // 2-5. 트랜잭션을 사용하여 기존 Refresh Token 삭제 및 새 토큰 생성
-    const expiresAt = new Date(Date.now() + TOKEN_EXPIRY.REFRESH_TOKEN_MS);
-
+    // 트랜잭션으로 동시 로그인 처리 및 세션 생성
     await userPrisma.$transaction(async (tx) => {
-      // 기존 refreshToken 삭제 (있으면)
-      await tx.refreshToken.deleteMany({
+      // 기존 세션 무효화 (UPSERT 사용)
+      await tx.session.upsert({
         where: { accountId: account.accountId },
-      });
-
-      // 새 refreshToken 생성
-      await tx.refreshToken.create({
-        data: {
+        update: {
+          tokenHash,
+          expiresAt,
+        },
+        create: {
           accountId: account.accountId,
-          token: refreshToken,
-          expiresAt: expiresAt,
+          tokenHash,
+          expiresAt,
         },
       });
 
@@ -281,27 +139,20 @@ const login = async (req, res) => {
       });
     });
 
-    // 2-6. httpOnly 쿠키로 토큰 설정
-    setTokenCookies(res, accessToken, refreshToken);
+    // LRU 캐시에 세션 저장
+    const ttlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
+    cache.set(sessionToken, { accountId: account.accountId, expiresAt }, ttlSeconds);
 
-    // 2-7. 응답 (토큰은 쿠키로, 사용자 정보만 JSON으로)
+    setSessionCookie(res, sessionToken);
+
     const { password: _, ...userInfo } = account;
-
-    // 2-6. 마지막 로그인 시간 업데이트
-    await userPrisma.account.update({
-      where: { accountId: account.accountId },
-      data: { lastLoginAt: new Date() },
-    });
-
     res.status(200).json({
       message: '로그인이 완료되었습니다.',
       user: userInfo,
     });
   } catch (error) {
     console.error('로그인 에러:', error);
-    res.status(500).json({
-      message: '서버 내부 오류가 발생했습니다.',
-    });
+    res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
   }
 };
 
@@ -310,33 +161,23 @@ const login = async (req, res) => {
  */
 const logout = async (req, res) => {
   try {
-    const { accountId } = req.user;
+    const { sessionToken, accountId } = req.user; // authMiddleware에서 주입
 
-    // 4-1. DB에서 Refresh Token 삭제
-    await userPrisma.refreshToken.deleteMany({
-      where: { accountId: accountId },
+    // DB에서 세션 삭제
+    await userPrisma.session.deleteMany({
+      where: { accountId },
     });
 
-    // 4-2. 쿠키에서 토큰들 삭제
-    res.clearCookie('accessToken', {
-      httpOnly: true,
-      sameSite: 'strict',
-    });
+    // 캐시에서 세션 삭제
+    cache.del(sessionToken);
 
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      sameSite: 'strict',
-    });
+    // 쿠키 삭제
+    res.clearCookie('sessionToken');
 
-    // 4-3. 성공 응답
-    res.status(200).json({
-      message: '로그아웃이 완료되었습니다.',
-    });
+    res.status(200).json({ message: '로그아웃이 완료되었습니다.' });
   } catch (error) {
     console.error('로그아웃 에러:', error);
-    res.status(500).json({
-      message: '서버 내부 오류가 발생했습니다.',
-    });
+    res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
   }
 };
 
@@ -346,95 +187,50 @@ const logout = async (req, res) => {
 const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword, confirmNewPassword } = req.body;
-    const urlAccountId = parseInt(req.params.accountId);
+    const { accountId } = req.user;
 
-    // 1. 현재 비밀번호 확인
-    const account = await userPrisma.account.findUnique({
-      where: { accountId: urlAccountId },
-      select: { password: true },
-    });
-
-    if (!account) {
-      return res.status(404).json({
-        message: '계정을 찾을 수 없습니다.',
-      });
-    }
-
-    // 2. 권한 확인 (본인만 수정 가능)
-    if (req.user.accountId !== urlAccountId) {
-      return res.status(403).json({
-        message: '본인의 비밀번호만 수정할 수 있습니다.',
-      });
-    }
-
-    // 3. 입력값 존재 여부 확인
     if (!currentPassword || !newPassword || !confirmNewPassword) {
-      return res.status(400).json({
-        message: 'currentPassword, newPassword, confirmNewPassword는 필수 입력값입니다.',
-      });
+      return res.status(400).json({ message: '모든 비밀번호 필드를 입력해야 합니다.' });
     }
-
-    // 4. 새 비밀번호 형식 검증
-    if (!validateInput.password(newPassword)) {
-      return res.status(400).json({
-        message: '새 비밀번호는 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.',
-      });
-    }
-
-    // 5. 새 비밀번호 확인 검증
     if (newPassword !== confirmNewPassword) {
-      return res.status(400).json({
-        message: '새 비밀번호와 새 비밀번호 확인이 일치하지 않습니다.',
-      });
+      return res.status(400).json({ message: '새 비밀번호와 확인 비밀번호가 일치하지 않습니다.' });
+    }
+    if (!validateInput.password(newPassword)) {
+      return res
+        .status(400)
+        .json({ message: '새 비밀번호는 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.' });
     }
 
-    // 6. 현재 비밀번호 확인
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, account.password);
-    if (!isCurrentPasswordValid) {
-      return res.status(401).json({
-        message: '현재 비밀번호가 일치하지 않습니다.',
-      });
+    const account = await userPrisma.account.findUnique({ where: { accountId } });
+
+    if (!(await bcrypt.compare(currentPassword, account.password))) {
+      return res.status(401).json({ message: '현재 비밀번호가 일치하지 않습니다.' });
     }
 
-    // 7. 새 비밀번호 해싱 및 업데이트
-    const saltRounds = 12;
-    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+    const hashedNewPassword = await bcrypt.hash(newPassword, 12);
 
-    await userPrisma.account.update({
-      where: { accountId: urlAccountId },
-      data: { password: hashedNewPassword },
+    // 트랜잭션으로 비밀번호 변경 및 모든 세션 무효화
+    await userPrisma.$transaction(async (tx) => {
+      await tx.account.update({
+        where: { accountId },
+        data: { password: hashedNewPassword },
+      });
+      // 보안을 위해 모든 세션 삭제
+      await tx.session.deleteMany({ where: { accountId } });
     });
 
-    await userPrisma.refreshToken.update({
-      where: { accountId: urlAccountId },
-      data: { updatedAt: new Date() },
-    });
+    // 캐시에서 현재 세션 삭제 및 쿠키 클리어
+    if (account.sessionToken) {
+      cache.del(account.sessionToken);
+    }
+    res.clearCookie('sessionToken');
 
-    // 8. 보안을 위해 기존 Refresh Token 삭제
-    await userPrisma.refreshToken.deleteMany({
-      where: { accountId: urlAccountId },
-    });
-
-    // 9. 쿠키에서 토큰들 삭제
-    res.clearCookie('accessToken', {
-      httpOnly: true,
-      sameSite: 'strict',
-    });
-
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      sameSite: 'strict',
-    });
-
-    // 10. 성공 응답
-    res.status(200).json({
-      message: '비밀번호가 성공적으로 변경되었습니다. 보안을 위해 다시 로그인해주세요.',
-    });
+    res
+      .status(200)
+      .json({ message: '비밀번호가 성공적으로 변경되었습니다. 보안을 위해 다시 로그인해주세요.' });
   } catch (error) {
     console.error('비밀번호 변경 에러:', error);
-    res.status(500).json({
-      message: '서버 내부 오류가 발생했습니다.',
-    });
+    res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
   }
 };
 
@@ -443,77 +239,37 @@ const changePassword = async (req, res) => {
  */
 const deleteAccount = async (req, res) => {
   try {
-    const urlAccountId = parseInt(req.params.accountId);
+    const { accountId } = req.user;
 
-    // 1. 회원 탈퇴 권한 확인
-    if (req.user.accountId !== urlAccountId) {
-      return res.status(403).json({
-        message: '본인의 계정만 탈퇴할 수 있습니다.',
-      });
+    // onDelete: Cascade 설정으로 계정 삭제 시 관련 세션도 자동 삭제됨
+    await userPrisma.account.delete({ where: { accountId } });
+
+    if (req.user.sessionToken) {
+      cache.del(req.user.sessionToken);
     }
+    res.clearCookie('sessionToken');
 
-    // 2. 회원 탈퇴 처리, db에서 데이터 삭제 (Cascade로 자동 처리)
-    await userPrisma.account.delete({
-      where: { accountId: urlAccountId },
-    });
-
-    // 3. 쿠키에서 토큰들 삭제
-    res.clearCookie('accessToken', {
-      httpOnly: true,
-      sameSite: 'strict',
-    });
-
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      sameSite: 'strict',
-    });
-
-    // 4. 성공 응답
-    res.status(200).json({
-      message: '회원 탈퇴가 완료되었습니다.',
-    });
+    res.status(200).json({ message: '회원 탈퇴가 완료되었습니다.' });
   } catch (error) {
     console.error('회원 탈퇴 에러:', error);
-    res.status(500).json({
-      message: '서버 내부 오류가 발생했습니다.',
-    });
+    res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
   }
 };
 
 /**
  * auth/role 컨트롤러: 현재 로그인한 사용자 역할 조회
- *
- * 역할에 따른 프론트 분기 로직의 기준으로 활용할 수 있음
  */
 const getMyRole = async (req, res) => {
+  const { role } = await userPrisma.account.findUnique({
+    where: { accountId: req.user.accountId },
+    select: { role: true },
+  });
   try {
-    const { accountId } = req.user;
-    const account = await userPrisma.account.findUnique({
-      where: { accountId: accountId },
-      select: {
-        role: true,
-      },
-    });
-
-    res.status(200).json({
-      role: account.role,
-    });
+    res.status(200).json({ role });
   } catch (error) {
     console.error('getMyRole 에러:', error);
-    res.status(500).json({
-      message: '서버 내부 오류가 발생했습니다.',
-    });
+    res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
   }
 };
 
-export {
-  generateTokens,
-  validateAndRefreshTokens,
-  setTokenCookies,
-  signup,
-  login,
-  logout,
-  changePassword,
-  deleteAccount,
-  getMyRole,
-};
+export { signup, login, logout, changePassword, deleteAccount, getMyRole };
