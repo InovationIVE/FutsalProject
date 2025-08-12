@@ -40,9 +40,10 @@ model Session {
   createdAt DateTime @default(now())
   lastUsedAt DateTime @updatedAt
 
-  account   Account  @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
+  account   Account  @relation("session", fields: [accountId], references: [accountId], onDelete: Cascade)
 
   @@index([expiresAt])
+  @@map("Session")
 }
 
 model SquadMembers {
