@@ -24,10 +24,23 @@ model Account {
   MatchHistory                                        MatchHistory[]
   ownedPlayers                                        OwnedPlayers[]
   Rank                                                Rank?
-  refreshToken                                        RefreshToken?     @relation("refreshToken")
   squad                                               Squad?
+  sessions                                            Session[]
 
   @@map("Account")
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  accountId Int      @unique
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  lastUsedAt DateTime @updatedAt
+
+  account   Account  @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
+
+  @@index([expiresAt])
 }
 
 model SquadMembers {
@@ -71,17 +84,6 @@ model Squad {
   squadMembers SquadMembers[]
 
   @@map("Squad")
-}
-
-model RefreshToken {
-  refreshTokenId Int       @id @default(autoincrement())
-  accountId      Int       @unique
-  token          String
-  createdAt      DateTime  @default(now())
-  expiresAt      DateTime?
-  account        Account   @relation("refreshToken", fields: [accountId], references: [accountId])
-
-  @@map("Refreshtoken")
 }
 
 model Auction {
