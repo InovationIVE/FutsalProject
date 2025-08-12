@@ -27,6 +27,7 @@ model Account {
   refreshToken  RefreshToken?     @relation("refreshToken")
   squad         Squad?
   opponentMatch MatchHistory[] @relation("OpponentMatches")
+  bids      Bid[]
 
   @@map("Account")
 }
@@ -140,13 +141,30 @@ model Auction {
   status        AuctionStatus @default(open)
   createdAt     DateTime      @default(now())
   endsAt        DateTime
-  account       Account       @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
+  deletedAt     DateTime?
+  account       Account       @relation(fields: [accountId], references: [accountId])
   ownedPlayer   OwnedPlayers  @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
+  bid           Bid[]
 
   @@index([accountId], map: "Auction_accountId_fkey")
   @@index([ownedPlayerId], map: "Auction_ownedPlayerId_fkey")
   @@map("Auction")
 }
+
+model Bid {
+  bidId     Int      @id @default(autoincrement())
+  auctionId Int
+  accountId Int   // bidderId 대신 accountId로 표기
+  bidAmount Int
+  bidTime   DateTime @default(now())
+
+  auction Auction @relation(fields: [auctionId], references: [auctionId])
+  account Account @relation(fields: [accountId], references: [accountId]) // Account 테이블 참조
+
+  @@map("Bid")
+}
+
+
 
 enum GiftStatus {
   success
