@@ -69,8 +69,23 @@ const getUserDetail = async (req, res) => {
 };
 
 const getMe = async (req, res) => {
+  // 비밀번호를 제외한 account 정보를 db로부터 받아서 응답
+  const { accountId } = req.user;
+  const account = await userPrisma.account.findUnique({
+    where: { accountId: accountId },
+    select: {
+      accountId: true,
+      userId: true,
+      email: true,
+      role: true,
+      createdAt: true,
+      lastLoginAt: true,
+      cash: true,
+    },
+  });
+
   res.status(200).json({
-    account: req.user,
+    account: account,
   });
 };
 

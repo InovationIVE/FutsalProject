@@ -19,17 +19,31 @@ model Account {
   role          String            @default("USER")
   lastLoginAt   DateTime?
   auction       Auction[]
-  bids          Bid[]
   receivedGifts GiftTransaction[] @relation("ReceivedGifts")
   sentGifts     GiftTransaction[] @relation("SentGifts")
-  matchHistory  MatchHistory[]    @relation("MyMatches")
-  opponentMatch MatchHistory[]    @relation("OpponentMatches")
+  matchHistory  MatchHistory[] @relation("MyMatches")
   ownedPlayers  OwnedPlayers[]
   rank          Rank?             @relation("rank")
-  Session       Session?
+  session       Session?     @relation("session")
   squad         Squad?
+  opponentMatch MatchHistory[] @relation("OpponentMatches")
+  bids      Bid[]
 
   @@map("Account")
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  accountId Int      @unique
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  lastUsedAt DateTime @updatedAt
+
+  account   Account  @relation("session", fields: [accountId], references: [accountId], onDelete: Cascade)
+
+  @@index([expiresAt])
+  @@map("Session")
 }
 
 model SquadMembers {
@@ -80,10 +94,10 @@ model Rank {
   accountId Int      @unique
   rankScore Int      @default(1000)
   tier      String   @default("silver")
-  updatedAt DateTime @updatedAt
+  win       Int      @default(0)
   draw      Int      @default(0)
   lose      Int      @default(0)
-  win       Int      @default(0)
+  updatedAt DateTime @updatedAt
   account   Account  @relation("rank", fields: [accountId], references: [accountId])
 
   @@map("Rank")
@@ -92,17 +106,17 @@ model Rank {
 model MatchHistory {
   matchId      Int      @id @default(autoincrement())
   accountId    Int
+  opponentId   Int
   goalScore    Int      @default(0)
   passScore    Int      @default(0)
   shootScore   Int      @default(0)
   defenceScore Int      @default(0)
   createdAt    DateTime @default(now())
-  opponentId   Int
-  account      Account  @relation("MyMatches", fields: [accountId], references: [accountId])
-  opponent     Account  @relation("OpponentMatches", fields: [opponentId], references: [accountId])
+  account      Account  @relation("MyMatches", fields: [accountId], references: [accountId])
+  opponent     Account  @relation("OpponentMatches", fields: [opponentId], references: [accountId])
 
   @@index([accountId], map: "MatchHistory_accountId_fkey")
-  @@index([opponentId], map: "MatchHistory_opponentId_fkey")
+  @@index([opponentId], map:"MatchHistory_opponentId_fkey")
   @@map("MatchHistory")
 }
 
@@ -143,28 +157,17 @@ model Auction {
 model Bid {
   bidId     Int      @id @default(autoincrement())
   auctionId Int
-  accountId Int
+  accountId Int   // bidderId 대신 accountId로 표기
   bidAmount Int
   bidTime   DateTime @default(now())
-  account   Account  @relation(fields: [accountId], references: [accountId])
-  auction   Auction  @relation(fields: [auctionId], references: [auctionId])
 
-  @@index([accountId], map: "Bid_accountId_fkey")
-  @@index([auctionId], map: "Bid_auctionId_fkey")
+  auction Auction @relation(fields: [auctionId], references: [auctionId])
+  account Account @relation(fields: [accountId], references: [accountId]) // Account 테이블 참조
+
   @@map("Bid")
 }
 
-model Session {
-  id         Int      @id @default(autoincrement())
-  accountId  Int      @unique
-  tokenHash  String   @unique
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  lastUsedAt DateTime
-  Account    Account  @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
 
-  @@index([expiresAt])
-}
 
 enum GiftStatus {
   success
