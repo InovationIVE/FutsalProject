@@ -6,30 +6,35 @@ import { Prisma as GamePrisma } from '../../prisma/Game/generated/prisma/index.j
 export class GiftController {
   /**상품 선물하기 API controller
    * { receiverId, cash }
-   * 출력 : 201(성공)/400(잔액부족)/404(유저 미존재)/500(서버오류)
+   * 출력 : 201(성공)/400(선물불가)/404(유저 미존재)/500(서버오류)
    * **/
   async sendGift(req, res, next) {
     try {
       const { receiverId, cash } = req.body;
       const senderId = req.user.accountId;
 
-      //1.1 보내는 사람 존재 확인 및 잔액 조회
+      //1.1 자신에게 선물하기 차단
+      if (senderId === receiverId) {
+        return res.status(400).json({ message: '자신에게는 선물 할 수 없습니다.' });
+      }
+
+      //1.2 보내는 사람 존재 확인 및 잔액 조회
       const sender = await userPrisma.account.findUnique({ where: { accountId: senderId } });
       if (!sender) return res.status(404).json({ message: '보내는 유저가 존재하지 않습니다.' });
       if (sender.cash < cash) return res.status(400).json({ message: '잔액이 부족합니다.' });
 
-      //1.2 받는 사람 존재 확인
+      //1.3 받는 사람 존재 확인
       const receiver = await userPrisma.account.findUnique({ where: { accountId: receiverId } });
       if (!receiver) return res.status(404).json({ message: '받는 유저가 존재하지 않습니다.' });
 
-      //1.3 보내는 사람 잔액 차감
+      //1.4 보내는 사람 잔액 차감
       const gift = await userPrisma.$transaction(async (tx) => {
         await tx.account.update({
           where: { accountId: senderId },
           data: { cash: { decrement: cash } },
         });
 
-        //1.4 선물하기 기록 생성
+        //1.5 선물하기 기록 생성
         return await tx.giftTransaction.create({
           data: {
             senderId,
