@@ -260,16 +260,16 @@ const deleteAccount = async (req, res) => {
  * auth/role 컨트롤러: 현재 로그인한 사용자 역할 조회
  */
 const getMyRole = async (req, res) => {
-  const { role } = await userPrisma.account.findUnique({
-    where: { accountId: req.user.accountId },
-    select: { role: true },
-  });
-  try {
-    res.status(200).json({ role });
-  } catch (error) {
-    console.error('getMyRole 에러:', error);
-    res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
-  }
+    try {
+      const { role } = await userPrisma.account.findUnique({
+        where: { accountId: req.user.accountId },
+        select: { role: true },
+      });
+      res.status(200).json({ role });
+    } catch (error) {
+      console.error('getMyRole 에러:', error);
+      res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
+    }
 };
 
 export { signup, login, logout, changePassword, deleteAccount, getMyRole };
