@@ -1,11 +1,11 @@
 import { gamePrisma, userPrisma } from '../utils/prisma/index.js';
 import { Prisma as UserPrisma } from '../../prisma/User/generated/user/index.js';
 import cron from 'node-cron';
+import {getIo} from '../socket/socketManager.js';
 
 export class AuctionController {
   // 스케줄러를 시작하는 메서드
   static startScheduler() {
-    // 💡 `AuctionController._processSingleAuction`를 직접 호출하도록 수정
     cron.schedule('5 * * * *', async () => {
       console.log('경매 처리 작업 실행 중...');
       try {
@@ -34,6 +34,9 @@ export class AuctionController {
 
   // 단일 경매를 종료하고 처리하는 핵심 로직 (재사용을 위해 분리)
   static async _processSingleAuction(auctionId, accountId = null) {
+    
+    const io = getIo(); // 소켓 인스턴스 가져오기
+
     // accountId가 제공되면 소유권 확인, 아니면 스케줄러에 의해 실행되는 것으로 간주
     const whereClause = accountId ? { auctionId, accountId } : { auctionId };
 
@@ -74,15 +77,6 @@ export class AuctionController {
           where: { accountId: highestBid.accountId },
         });
 
-        if (!winnerAccount || winnerAccount.cash < highestBid.bidAmount) {
-          // 낙찰자 잔액 부족 시, 유찰 처리
-          await tx.ownedPlayers.update({
-            where: { ownedPlayerId: auction.ownedPlayer.ownedPlayerId },
-            data: { accountId: auction.accountId },
-          });
-          throw new Error('낙찰자의 잔액이 부족하여 경매가 유찰됩니다.');
-        }
-
         // 낙찰 처리
         await tx.ownedPlayers.update({
           where: { ownedPlayerId: auction.ownedPlayer.ownedPlayerId },
@@ -96,11 +90,26 @@ export class AuctionController {
           where: { accountId: auction.accountId },
           data: { cash: { increment: highestBid.bidAmount } },
         });
+
+        // 소켓을 통해 낙찰 정보를 모든 클라이언트에게 전송
+        io.emit('auctionClosed', {
+          auctionId,
+          status: 'closed',
+          winner: winnerAccount.userId,
+          price: highestBid.bidAmount,
+        });
+
       } else {
         // 유찰 처리
         await tx.ownedPlayers.update({
           where: { ownedPlayerId: auction.ownedPlayer.ownedPlayerId },
           data: { accountId: auction.accountId },
+        });
+         //유찰 시 소켓 이벤트 전송
+        io.emit('auctionClosed', {
+          auctionId: auctionId,
+          status: 'closed',
+          message: '유찰되었습니다. 입찰자가 없어 선수가 반환됩니다.',
         });
       }
     });
@@ -119,7 +128,7 @@ export class AuctionController {
       }
 
       // 트랜잭션 시작
-      const result = await userPrisma.$transaction(async (tx) => {
+      const newAuction = await userPrisma.$transaction(async (tx) => {
         // 1) OwnedPlayer가 account 소유인지 확인
         const ownedPlayer = await tx.ownedPlayers.findUnique({
           where: {
@@ -154,10 +163,32 @@ export class AuctionController {
           data: { accountId: null },
         });
 
-        return auction;
+        // 4) 새로 생성된 경매를 OwnedPlayer 데이터와 함께 다시 조회
+        const populatedAuction = await tx.auction.findUnique({
+          where: { auctionId: auction.auctionId },
+          include: {
+            ownedPlayer: {
+              select: {
+                name: true,
+                rarity: true,
+                level: true,
+                speed: true,
+                attack: true,
+                defence: true,
+              },
+            },
+          },
+        });
+
+        return populatedAuction;
       });
 
-      return res.status(201).json({ data: result });
+
+      // 소켓을 통해 새로운 경매 정보를 모든 클라이언트에게 전송
+      const io = getIo();
+      io.emit('auctionCreated', newAuction);
+
+      return res.status(201).json({ data: newAuction });
     } catch (err) {
       // 커스텀 에러 메시지 처리
       if (err.message === '내 소유의 선수만 경매에 등록할 수 있습니다.') {
@@ -325,6 +356,10 @@ export class AuctionController {
         data: { currentPrice: +bidAmount },
       });
 
+      //소켓을 통해 모든 클라이언트에게 입찰 업데이트를 알림
+      const io = getIo();
+      io.emit('auctionUpdate', { auctionId: +auctionId, newPrice: +bidAmount, bidderId: +accountId });
+
       return res.status(201).json({ message: '입찰이 성공적으로 등록되었습니다.', data: placeBid });
     } catch (err) {
       next(err);
@@ -354,9 +389,6 @@ export class AuctionController {
         err.message.includes('경매를 찾을 수 없거나') ||
         err.message.includes('진행 중이 아닙니다.')
       ) {
-        return res.status(400).json({ message: err.message });
-      }
-      if (err.message.includes('낙찰자의 잔액이 부족')) {
         return res.status(400).json({ message: err.message });
       }
       next(err);
@@ -408,6 +440,14 @@ export class AuctionController {
         await tx.bid.deleteMany({
           where: { auctionId: +auctionId },
         });
+      });
+
+      //취소 시 소켓 이벤트 전송
+      const io = getIo();
+      io.emit('auctionCancelled', {
+        auctionId: +auctionId,
+        status: 'cancelled',
+        message: '경매가 취소되었습니다.',
       });
 
       return res.status(200).json({ message: '경매가 성공적으로 취소되었습니다.' });
