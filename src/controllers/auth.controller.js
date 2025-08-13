@@ -14,7 +14,7 @@ const VERIFICATION_MINUTES = 5;
  * @returns {string} 16진수 형식의 토큰
  */
 
-const sha256 = (v) => crypto.createHash('sha256').update(String(v)).digest('hex');
+// const sha256 = (v) => crypto.createHash('sha256').update(String(v)).digest('hex'); // 없애고 hashToken 함수 사용하기
 const generateMailCode = () => String(Math.floor(100000 + Math.random() * 900000)); // 6자리 랜덤 코드
 const generateRandomToken = () => {
   return crypto.randomBytes(32).toString('hex');
@@ -91,7 +91,7 @@ const sendSignupCode = async (req, res) => {
 
     // 인증 코드 생성
     const code = generateMailCode();
-    const codeHash = sha256(code);
+    const codeHash = hashToken(code);
 
     // 비밀번호 해시
     const passwordHash = await bcrypt.hash(password, 12);
@@ -161,9 +161,9 @@ const verifySignupCode = async (req, res) => {
       verificationCache.delete(signupToken);
       res.clearCookie('signupToken', verificationCookieOptions);
       return res.status(429).json({ message: '시도 횟수 초과. 다시 진행하세요.' });
-    }
+    } 
 
-    if (sha256(code) !== cached.codeHash) {
+    if (hashToken(code) !== cached.codeHash) {
       cached.attempts += 1;
       verificationCache.set(signupToken, cached);
       return res.status(401).json({ message: '인증코드가 올바르지 않습니다.' });
@@ -190,7 +190,7 @@ const verifySignupCode = async (req, res) => {
       });
 
       const sessionToken = generateRandomToken();
-      const tokenHash = sha256(sessionToken);
+      const tokenHash = hashToken(sessionToken);
       const expiresAt = new Date(Date.now() + SESSION_DURATION_MINUTES * 60 * 1000);
 
       await tx.session.upsert({
