@@ -16,7 +16,7 @@ const VERIFICATION_MINUTES = 5;
 
 const sha256 = (v) => crypto.createHash('sha256').update(String(v)).digest('hex');
 const generateMailCode = () => String(Math.floor(100000 + Math.random() * 900000)); // 6자리 랜덤 코드
-const generateSessionToken = () => {
+const generateRandomToken = () => {
   return crypto.randomBytes(32).toString('hex');
 };
 
@@ -82,7 +82,7 @@ const sendSignupCode = async (req, res) => {
     });
     if (exists) return res.status(409).json({ message: '이미 가입된 이메일/아이디' });
 
-    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationToken = generateRandomToken();
     const cached = verificationCache.get(verificationToken);
 
     const now = Date.now();
@@ -192,7 +192,7 @@ const verifySignupCode = async (req, res) => {
         },
       });
 
-      const sessionToken = generateSessionToken();
+      const sessionToken = generateRandomToken();
       const tokenHash = sha256(sessionToken);
       const expiresAt = new Date(Date.now() + SESSION_DURATION_MINUTES * 60 * 1000);
 
@@ -304,7 +304,7 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'userId 또는 비밀번호가 올바르지 않습니다.' });
     }
 
-    const sessionToken = generateSessionToken();
+    const sessionToken = generateRandomToken();
     const tokenHash = hashToken(sessionToken);
     const expiresAt = new Date(Date.now() + SESSION_DURATION_MINUTES * 60 * 1000);
 
