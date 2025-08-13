@@ -5,10 +5,6 @@ export class ReinforceController{
         try{
             // const { accountId } = req.user;
             const { ownedplayerId } = req.params;
-            // const { just_do_it } = req.body;
-            // if(!just_do_it){ 
-            //     return res.status(200).json({ message : "강화 대기중.. "});
-            // }
 
             const toReinforce = await userPrisma.ownedPlayers.findUnique({
                 where : {ownedPlayerId : +ownedplayerId }
@@ -44,19 +40,6 @@ export class ReinforceController{
             res.status(500).json({ error: 'Internal Server Error' });
         }
     }
-
-    // /** 결과 도출? **/
-    // static async reinforceResult(req, res, next)  {
-    //     try{
-    //         // const { accountId } = req.user;
-    //         const { ownedplayerId } = req.params;
-
-            
-    //     } catch (error){
-    //         console.error('Error creating Player data:', error);
-    //         res.status(500).json({ error: 'Internal Server Error' });
-    //     }
-    // } 
 
     //** admin 계정 용 api**//
     /** 모든 강화 단계 조회 **/
