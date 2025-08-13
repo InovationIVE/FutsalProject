@@ -73,7 +73,7 @@ export class PlayerController{
         return res.status(404).json({ error: '해당 선수 데이터가 존재하지 않습니다' });
       }
       
-      /** 레어도 유효성 검사 **/
+      /** 레어도 유효성 검사 - 삭제 예정**/
       const rarity_check = await gamePrisma.statForRarity.findUnique({
        where: {rarity: rarity}
       });

@@ -19,6 +19,7 @@ export class OwnedPlayersController {
           // playerId: true,
           // profileImage: true,
           name: true,
+          level:true,
           rarity: true,
         },
       });
@@ -76,10 +77,11 @@ export class OwnedPlayersController {
         select: {
           ownedPlayerId: true,
           name: true,
+          level: true,
+          rarity: true,
           speed: true,
           attack: true,
           defence: true,
-          rarity: true,
           createdAt: true,
           updatedAt: true,
         },

@@ -6,31 +6,99 @@ export class ReinforceController{
             // const { accountId } = req.user;
             const { ownedplayerId } = req.params;
 
+            /** 강화할 선수 ; 보유선수에서 선택 **/
             const toReinforce = await userPrisma.ownedPlayers.findUnique({
                 where : {ownedPlayerId : +ownedplayerId }
             });
+
+            /** 강화할 선수의 레벨에 맞는 강화 단계 **/
             const ReinforceLv = await gamePrisma.reinforce.findUnique({
                 where: { level : toReinforce.level }
             });
 
+            /** 강화비용 청구를 위한 계정 참조 **/
+            const toReinforceOwner = await userPrisma.account.findUnique({
+                where : { accountId : toReinforce.accountId}
+            });
+
+            /** 결제 후 캐시 잔액 **/
+            const cashAfterPayment = toReinforceOwner.cash - ReinforceLv.cost;
+            await userPrisma.account.update({
+                where : { accountId : toReinforce.accountId },
+                data : {cash : cashAfterPayment}
+            });
+
+            const stay_cutline = ReinforceLv.prob_success + ReinforceLv.prob_stay; /** 유지 확률 커트라인 **/
+            const regl_cutline = stay_cutline + ReinforceLv.prob_reglation; /** 강등 확률 커트라인 **/
+
+            /** 강화 실행시 결정되는 확률 **/
             const your_prob = Math.random() * 100;
-            if( your_prob <= ReinforceLv.probability){
-                toReinforce.attack += ReinforceLv.attackIncrement;
-                toReinforce.defence += ReinforceLv.defenceIncrement;
-                toReinforce.speed += ReinforceLv.speedIncrement;
+            /** 강화 성공 시 **/
+            if( your_prob < ReinforceLv.prob_success){
+                const level = toReinforce.level + 1;
+                const attack = toReinforce.attack + ReinforceLv.attackIncrement;
+                const defence = toReinforce.defence + ReinforceLv.defenceIncrement;
+                const speed = toReinforce.speed + ReinforceLv.speedIncrement;
+
+                const ReinforceSuccess = await userPrisma.ownedPlayers.update({
+                    where: {ownedPlayerId : +ownedplayerId },
+                    data: {
+                    level: level, 
+                    attack: attack,
+                    defence: defence,
+                    speed: speed
+                    }
+                });
 
                 res.status(200).json({ 
                     message: "강화 성공!",
-                    stat : { toReinforce }
+                    남은금액: { cashAfterPayment },
+                    stat : { ReinforceSuccess }
                 });
             }
-            else{
-                // await userPrisma.ownedPlayers.delete({
-                //     where: { ownedPlayerId }
-                // });
+            //** 강화 실패 시 **//
+            //** 강화 단계 유지 **//
+            else if(your_prob < stay_cutline){
+                res.status(200).json({
+                    message: "강화 실패.",
+                    남은금액: { cashAfterPayment }
+                });
+            }
+            //** 강화 단계 강등 **/
+            else if(your_prob < regl_cutline){
+                const reglation = await gamePrisma.reinforce.findUnique({
+                where: { level : (toReinforce.level -1) }
+                });
+                const level = toReinforce.level - 1;
+                const attack = toReinforce.attack - ReinforceLv.attackIncrement;
+                const defence = toReinforce.defence - ReinforceLv.defenceIncrement;
+                const speed = toReinforce.speed - ReinforceLv.speedIncrement;
+
+                const ReinforceReglation = await userPrisma.ownedPlayers.update({
+                    where: {ownedPlayerId : +ownedplayerId },
+                    data: {
+                    level: level, 
+                    attack: attack,
+                    defence: defence,
+                    speed: speed
+                    }
+                });
 
                 res.status(200).json({
-                    message: "강화 실패!" //로 캐릭터가 파괴되었습니다."
+                    message: "강화 실패로 인하여 선수의 레벨이 내려갑니다.",
+                    남은금액: { cashAfterPayment },
+                    stat : { ReinforceReglation }
+                });
+            }
+            /** 선수 카드 파괴 **/
+            else{
+                await userPrisma.ownedPlayers.delete({
+                    where: { ownedplayerId }
+                });
+
+                res.status(200).json({
+                    message: "강화 실패로 캐릭터가 파괴되었습니다.",
+                    남은금액: { cashAfterPayment },
                 });
             }
 
@@ -49,9 +117,9 @@ export class ReinforceController{
                 select: {
                     reinforceId : true,
                     level : true,
-                    probability: true,
+                    prob_success: true,
 
-                    coast : true,
+                    cost : true,
 
                 }
             });
@@ -76,11 +144,13 @@ export class ReinforceController{
                 select: {
                     reinforceId : true,
                     level : true,
-                    probability: true,
+                    prob_success: true,
+                    prob_stay: true,
+                    prob_reglation: true,
                     attackIncrement: true,
                     defenceIncrement: true,
                     speedIncrement: true,
-                    coast: true,
+                    cost: true,
                     createdAt : true,
                     updatedAt: true
  
@@ -97,18 +167,20 @@ export class ReinforceController{
     /** 강화단계 추가 **/
     static async createReinforcement(req, res, next) {
         try{
-            const {level, probability, attackIncrement, defenceIncrement, speedIncrement, coast} = req.body;
+            const {level, prob_success, prob_stay, prob_reglation, attackIncrement, defenceIncrement, speedIncrement, cost} = req.body;
 
             /** 중복 검사 보류 **/
 
             const createdReinforcement = await gamePrisma.reinforce.create({
                 data: {
                     level,
-                    probability,
+                    prob_success,
+                    prob_stay,
+                    prob_reglation,
                     attackIncrement,
                     defenceIncrement,
                     speedIncrement,
-                    coast
+                    cost
                 }
             });
 
@@ -127,7 +199,7 @@ export class ReinforceController{
     static async updateReinforcement(req, res, next) {
         try{
             const { reinforceId } = req.params;
-            const {level, probability, attackIncrement, defenceIncrement, speedIncrement, coast} = req.body;
+            const {level, prob_success, prob_stay, prob_reglation, attackIncrement, defenceIncrement, speedIncrement, cost} = req.body;
 
             if(!reinforceId){ /** 수정하려는 강화방식이 존재하지 않을 경우 **/
                 return res.status(404).json({error : "없는 강화 단계입니다"});
@@ -137,11 +209,13 @@ export class ReinforceController{
                 where: { reinforceId : +reinforceId },
                 data: {
                     level, 
-                    probability, 
+                    prob_success,
+                    prob_stay,
+                    prob_reglation, 
                     attackIncrement, 
                     defenceIncrement, 
                     speedIncrement, 
-                    coast
+                    cost
                 }
             });
 
