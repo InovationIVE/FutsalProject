@@ -7,6 +7,8 @@ import { validateInput } from '../utils/validation.js';
 import { cache } from '../utils/sessionCache.js';
 import { SESSION_DURATION_MINUTES } from '../middleWares/auth.middleware.js';
 
+const VERIFICATION_MINUTES = 5;
+
 /**
  * 안전한 랜덤 토큰을 생성합니다.
  * @returns {string} 16진수 형식의 토큰
@@ -16,6 +18,18 @@ const sha256 = (v) => crypto.createHash('sha256').update(String(v)).digest('hex'
 const generateMailCode = () => String(Math.floor(100000 + Math.random() * 900000)); // 6자리 랜덤 코드
 const generateSessionToken = () => {
   return crypto.randomBytes(32).toString('hex');
+};
+
+const sessionCookieOptions = {
+  httpOnly: true,
+  sameSite: 'strict',
+  maxAge: SESSION_DURATION_MINUTES * 60 * 1000, // 쿠키 만료는 세션 만료와 동기화
+};
+
+const verificationCookieOptions = {
+  httpOnly: true,
+  sameSite: 'strict',
+  maxAge: VERIFICATION_MINUTES * 60 * 1000, 
 };
 
 /**
@@ -33,11 +47,7 @@ const hashToken = (token) => {
  * @param {string} token - 세션 토큰
  */
 const setSessionCookie = (res, token) => {
-  res.cookie('sessionToken', token, {
-    httpOnly: true,
-    sameSite: 'strict',
-    maxAge: SESSION_DURATION_MINUTES * 60 * 1000, // 쿠키 만료는 세션 만료와 동기화
-  });
+  res.cookie('sessionToken', token, sessionCookieOptions);
 };
 
 /**
@@ -123,11 +133,7 @@ const sendSignupCode = async (req, res) => {
   `,
     });
 
-    res.cookie('verificationToken', verificationToken, {
-      httpOnly: true,
-      sameSite: 'strict',
-      maxAge: 5 * 60 * 1000,
-    });
+    res.cookie('verificationToken', verificationToken, verificationCookieOptions);
 
     return res.status(200).json({ message: '인증코드를 이메일로 전송했습니다(유효 5분).' });
   } catch (err) {
@@ -156,7 +162,7 @@ const verifySignupCode = async (req, res) => {
 
     if (cached.attempts >= 5) {
       verificationCache.delete(verificationToken);
-      res.clearCookie('verificationToken');
+      res.clearCookie('verificationToken', verificationCookieOptions);
       return res.status(429).json({ message: '시도 횟수 초과. 다시 진행하세요.' });
     }
 
@@ -209,7 +215,7 @@ const verifySignupCode = async (req, res) => {
 
     setSessionCookie(res, result.sessionToken);
     verificationCache.delete(verificationToken);
-    res.clearCookie('verificationToken');
+    res.clearCookie('verificationToken', verificationCookieOptions);
 
     return res.status(201).json({
       message: '회원가입 및 로그인 완료',
@@ -358,7 +364,7 @@ const logout = async (req, res) => {
     cache.del(sessionToken);
 
     // 쿠키 삭제
-    res.clearCookie('sessionToken');
+    res.clearCookie('sessionToken', sessionCookieOptions);
 
     res.status(200).json({ message: '로그아웃이 완료되었습니다.' });
   } catch (error) {
@@ -409,7 +415,7 @@ const changePassword = async (req, res) => {
     if (req.user.sessionToken) {
       cache.del(req.user.sessionToken);
     }
-    res.clearCookie('sessionToken');
+    res.clearCookie('sessionToken', sessionCookieOptions);
 
     res
       .status(200)
@@ -433,7 +439,7 @@ const deleteAccount = async (req, res) => {
     if (req.user.sessionToken) {
       cache.del(req.user.sessionToken);
     }
-    res.clearCookie('sessionToken');
+    res.clearCookie('sessionToken', sessionCookieOptions);
 
     res.status(200).json({ message: '회원 탈퇴가 완료되었습니다.' });
   } catch (error) {
@@ -447,7 +453,6 @@ const deleteAccount = async (req, res) => {
  */
 const getMyRole = async (req, res) => {
   try {
-    console.log(req.user);
     const { role } = await userPrisma.account.findUnique({
       where: { accountId: req.user.accountId },
       select: { role: true },
