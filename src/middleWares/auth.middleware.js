@@ -19,12 +19,6 @@ const hashToken = (token) => {
  * 인증 미들웨어 - 세션 토큰 검증 및 사용자 정보 주입
  */
 const authMiddleware = async (req, res, next) => {
-  // 로그인 요청, 회원가입 요청은 인증 미들웨어 적용 안함
-  const excludedRoutes = ['/auth/login', '/auth/signup'];
-
-  if (excludedRoutes.includes(req.path)) {
-    return next();
-  }
 
   // 1. 토큰 추출 (Authorization 헤더 우선, 다음으로 쿠키)
   let sessionToken = '';
@@ -137,12 +131,14 @@ async function handleSlidingExpiration(req, res, next, expiresAt) {
 /**
  * 관리자 권한이 필요한 API용 미들웨어
  */
-const requireAdmin = (req, res, next) => {
+const requireAdmin = async (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ message: '인증이 필요합니다.' });
   }
 
-  if (req.user.role !== 'ADMIN') {
+  const { role } = await userPrisma.account.findUnique({ where: { accountId: req.user.accountId }, select: { role: true } });
+
+  if (role !== 'ADMIN') {
     return res.status(403).json({ message: '관리자 권한이 필요합니다.' });
   }
 
