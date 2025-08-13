@@ -72,14 +72,6 @@ export class PlayerController{
       if (!exists) {
         return res.status(404).json({ error: '해당 선수 데이터가 존재하지 않습니다' });
       }
-      
-      /** 레어도 유효성 검사 - 삭제 예정**/
-      const rarity_check = await gamePrisma.statForRarity.findUnique({
-       where: {rarity: rarity}
-      });
-      if(!rarity_check){
-        return res.status(500).json( {error: "잘못된 레어도 입력입니다"});
-      }
 
       const updatedPlayer = await PlayerModel.update(playerId, {
         soccerPlayerId,

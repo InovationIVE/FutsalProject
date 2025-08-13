@@ -40,7 +40,8 @@ export class ReinforceController{
                 const defence = toReinforce.defence + ReinforceLv.defenceIncrement;
                 const speed = toReinforce.speed + ReinforceLv.speedIncrement;
 
-                const ReinforceSuccess = await userPrisma.ownedPlayers.update({
+                //const ReinforceSuccess = 
+                await userPrisma.ownedPlayers.update({
                     where: {ownedPlayerId : +ownedplayerId },
                     data: {
                     level: level, 
@@ -53,7 +54,12 @@ export class ReinforceController{
                 res.status(200).json({ 
                     message: "강화 성공!",
                     남은금액: { cashAfterPayment },
-                    stat : { ReinforceSuccess }
+                    강화결과 : { 
+                        level,
+                        attack,
+                        defence,
+                        speed 
+                    }
                 });
             }
             //** 강화 실패 시 **//
@@ -70,11 +76,12 @@ export class ReinforceController{
                 where: { level : (toReinforce.level -1) }
                 });
                 const level = toReinforce.level - 1;
-                const attack = toReinforce.attack - ReinforceLv.attackIncrement;
-                const defence = toReinforce.defence - ReinforceLv.defenceIncrement;
-                const speed = toReinforce.speed - ReinforceLv.speedIncrement;
+                const attack = toReinforce.attack - reglation.attackIncrement;
+                const defence = toReinforce.defence - reglation.defenceIncrement;
+                const speed = toReinforce.speed - reglation.speedIncrement;
 
-                const ReinforceReglation = await userPrisma.ownedPlayers.update({
+                //const ReinforceReglation = 
+                await userPrisma.ownedPlayers.update({
                     where: {ownedPlayerId : +ownedplayerId },
                     data: {
                     level: level, 
@@ -87,7 +94,12 @@ export class ReinforceController{
                 res.status(200).json({
                     message: "강화 실패로 인하여 선수의 레벨이 내려갑니다.",
                     남은금액: { cashAfterPayment },
-                    stat : { ReinforceReglation }
+                    강등결과 : { 
+                        level,
+                        attack,
+                        defence,
+                        speed
+                    }
                 });
             }
             /** 선수 카드 파괴 **/
