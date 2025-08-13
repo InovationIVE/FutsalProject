@@ -4,3 +4,6 @@ node_modules
 
 prisma/Game/generated/** 
 prisma/User/generated/** 
+
+# vscode 에디터로 디버깅할때 생기는 파일
+.vscode
