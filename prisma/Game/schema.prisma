@@ -48,14 +48,16 @@ model Gacha {
 
 model Reinforce {
   reinforceId      Int      @id @default(autoincrement())
-  level            Int      @default(0)
-  probability      Int      @default(0)
+  level            Int      @unique @default(0)
   attackIncrement  Int      @default(0)
   defenceIncrement Int      @default(0)
   speedIncrement   Int      @default(0)
-  coast            Int      @default(0)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  cost             Int      @default(0)
+  prob_reglation   Int      @default(0)
+  prob_stay        Int      @default(0)
+  prob_success     Int      @default(0)
 
   @@map("Reinforce")
 }
