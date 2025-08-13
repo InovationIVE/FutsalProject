@@ -23,7 +23,6 @@ export class AuctionController {
           return;
         }
 
-        // `this` 대신 클래스 이름으로 정적 메서드를 직접 호출합니다.
         for (const auction of expiredAuctions) {
           await AuctionController._processSingleAuction(auction.auctionId);
         }
