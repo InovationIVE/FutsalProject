@@ -8,13 +8,13 @@ const MAX_ITEMS = 5000; // 캐시에 저장할 최대 항목 수
 // --- 캐시 인스턴스 ---
 
 // 세션 정보를 저장하는 기본 캐시
-const sessionCache = new LRUCache({
+export const sessionCache = new LRUCache({
   max: MAX_ITEMS,
   ttl: LRU_TTL_SECONDS * 1000, // TTL은 밀리초 단위로 설정
 });
 
 // 유효하지 않은 토큰 정보를 잠시 저장하는 네거티브 캐시
-const negativeCache = new LRUCache({
+export const negativeCache = new LRUCache({
   max: MAX_ITEMS,
   ttl: NEGATIVE_CACHE_TTL_SECONDS * 1000,
 });

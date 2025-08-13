@@ -1,10 +1,10 @@
 import { mailer } from '../utils/mailer.js';
-import { verificationCache, keyFor } from '../utils/verificationCache.js';
+import { verificationCache } from '../utils/verificationCache.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { userPrisma } from '../utils/prisma/index.js';
 import { validateInput } from '../utils/validation.js';
-import { sessionCache, negativeCache } from '../utils/sessionCache.js';
+import { cache } from '../utils/sessionCache.js';
 import { SESSION_DURATION_MINUTES } from '../middleWares/auth.middleware.js';
 
 /**
@@ -72,8 +72,8 @@ const sendSignupCode = async (req, res) => {
     });
     if (exists) return res.status(409).json({ message: '이미 가입된 이메일/아이디' });
 
-    const k = keyFor(email);
-    const cached = verificationCache.get(k);
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const cached = verificationCache.get(verificationToken);
 
     const now = Date.now();
     // 이메일 인증 코드 재전송 제한
@@ -90,7 +90,7 @@ const sendSignupCode = async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 12);
 
     // 인증 코드 포함 생성할 계정 정보 캐시 저장
-    verificationCache.set(k, {
+    verificationCache.set(verificationToken, {
       email,
       userId,
       passwordHash,
@@ -99,7 +99,7 @@ const sendSignupCode = async (req, res) => {
       resendAt: now + 60 * 1000, // 60초 후 재전송 가능
     });
 
-    // 인증 코드 이메일 전송 
+    // 인증 코드 이메일 전송
     await mailer.sendMail({
       to: email,
       from: process.env.NODEMAILER_USER,
@@ -123,6 +123,12 @@ const sendSignupCode = async (req, res) => {
   `,
     });
 
+    res.cookie('verificationToken', verificationToken, {
+      httpOnly: true,
+      sameSite: 'strict',
+      maxAge: 5 * 60 * 1000,
+    });
+
     return res.status(200).json({ message: '인증코드를 이메일로 전송했습니다(유효 5분).' });
   } catch (err) {
     console.error(err);
@@ -135,24 +141,28 @@ const sendSignupCode = async (req, res) => {
  */
 const verifySignupCode = async (req, res) => {
   try {
-    let { email, code, userId } = req.body;
-    if (!email || !code || !userId) {
-      return res.status(400).json({ message: '필수값 누락' });
-    }
-    email = email.toLowerCase().trim();
+    const { code } = req.body;
+    const { verificationToken } = req.cookies;
 
-    const k = keyFor(email);
-    const cached = verificationCache.get(k);
+    if (!verificationToken) {
+      return res.status(401).json({ message: '인증 토큰이 없습니다. 다시 시도해주세요.' });
+    }
+    if (!code) {
+      return res.status(400).json({ message: '인증코드를 입력해주세요.' });
+    }
+
+    const cached = verificationCache.get(verificationToken);
     if (!cached) return res.status(410).json({ message: '인증 세션 만료. 다시 요청하세요.' });
 
     if (cached.attempts >= 5) {
-      verificationCache.delete(k);
+      verificationCache.delete(verificationToken);
+      res.clearCookie('verificationToken');
       return res.status(429).json({ message: '시도 횟수 초과. 다시 진행하세요.' });
     }
 
     if (sha256(code) !== cached.codeHash) {
       cached.attempts += 1;
-      verificationCache.set(k, cached);
+      verificationCache.set(verificationToken, cached);
       return res.status(401).json({ message: '인증코드가 올바르지 않습니다.' });
     }
 
@@ -160,7 +170,7 @@ const verifySignupCode = async (req, res) => {
     const result = await userPrisma.$transaction(async (tx) => {
       const account = await tx.account.create({
         data: {
-          userId,
+          userId: cached.userId,
           email: cached.email,
           password: cached.passwordHash,
           role: 'USER',
@@ -192,13 +202,14 @@ const verifySignupCode = async (req, res) => {
       });
 
       const ttlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
-      sessionCache.set(sessionToken, { accountId: account.accountId, expiresAt }, ttlSeconds);
+      cache.set(sessionToken, { accountId: account.accountId, expiresAt }, ttlSeconds);
 
       return { account, sessionToken };
     });
 
     setSessionCookie(res, result.sessionToken);
-    verificationCache.delete(k);
+    verificationCache.delete(verificationToken);
+    res.clearCookie('verificationToken');
 
     return res.status(201).json({
       message: '회원가입 및 로그인 완료',
@@ -316,7 +327,7 @@ const login = async (req, res) => {
 
     // LRU 캐시에 세션 저장
     const ttlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
-    sessionCache.set(sessionToken, { accountId: account.accountId, expiresAt }, ttlSeconds);
+    cache.set(sessionToken, { accountId: account.accountId, expiresAt }, ttlSeconds);
 
     setSessionCookie(res, sessionToken);
 
@@ -344,7 +355,7 @@ const logout = async (req, res) => {
     });
 
     // 캐시에서 세션 삭제
-    sessionCache.del(sessionToken);
+    cache.del(sessionToken);
 
     // 쿠키 삭제
     res.clearCookie('sessionToken');
@@ -395,8 +406,8 @@ const changePassword = async (req, res) => {
     });
 
     // 캐시에서 현재 세션 삭제 및 쿠키 클리어
-    if (account.sessionToken) {
-      sessionCache.del(account.sessionToken);
+    if (req.user.sessionToken) {
+      cache.del(req.user.sessionToken);
     }
     res.clearCookie('sessionToken');
 
@@ -420,7 +431,7 @@ const deleteAccount = async (req, res) => {
     await userPrisma.account.delete({ where: { accountId } });
 
     if (req.user.sessionToken) {
-      sessionCache.del(req.user.sessionToken);
+      cache.del(req.user.sessionToken);
     }
     res.clearCookie('sessionToken');
 
@@ -436,6 +447,7 @@ const deleteAccount = async (req, res) => {
  */
 const getMyRole = async (req, res) => {
   try {
+    console.log(req.user);
     const { role } = await userPrisma.account.findUnique({
       where: { accountId: req.user.accountId },
       select: { role: true },
