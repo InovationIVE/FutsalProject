@@ -19,18 +19,15 @@ const hashToken = (token) => {
  * 인증 미들웨어 - 세션 토큰 검증 및 사용자 정보 주입
  */
 const authMiddleware = async (req, res, next) => {
-
-  // 1. 토큰 추출 (Authorization 헤더 우선, 다음으로 쿠키)
-  let sessionToken = '';
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-    sessionToken = req.headers.authorization.split(' ')[1];
-  } else if (req.cookies.sessionToken) {
-    sessionToken = req.cookies.sessionToken;
+  const excludedRoutes = ['/auth/login', '/auth/signup', '/auth/signup/code', '/auth/signup/code/verify'];
+  if (excludedRoutes.includes(req.path)) {
+    return next();
   }
 
-  // 토큰이 없으면 인증되지 않은 사용자로 처리 (라우트에서 개별 처리)
-  if (!sessionToken) {
-    return next();
+  // 1. 토큰 추출 (Authorization 헤더 우선, 다음으로 쿠키)
+  let sessionToken;
+  if (req.cookies.sessionToken) {
+    sessionToken = req.cookies.sessionToken;
   }
 
   try {
