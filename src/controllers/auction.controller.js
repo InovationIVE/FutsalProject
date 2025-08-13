@@ -1,7 +1,115 @@
 import { gamePrisma, userPrisma } from '../utils/prisma/index.js';
 import { Prisma as UserPrisma } from '../../prisma/User/generated/user/index.js';
+import cron from 'node-cron';
 
 export class AuctionController {
+      // 스케줄러를 시작하는 메서드
+  static startScheduler() {
+    // 💡 `AuctionController._processSingleAuction`를 직접 호출하도록 수정
+    cron.schedule('5 * * * *', async () => {
+      console.log('경매 처리 작업 실행 중...');
+      try {
+        const expiredAuctions = await userPrisma.auction.findMany({
+          where: {
+            status: 'open',
+            endsAt: {
+              lt: new Date(),
+            },
+          },
+        });
+
+        if (expiredAuctions.length === 0) {
+          console.log('만료된 경매가 없습니다.');
+          return;
+        }
+
+        // `this` 대신 클래스 이름으로 정적 메서드를 직접 호출합니다.
+        for (const auction of expiredAuctions) {
+          await AuctionController._processSingleAuction(auction.auctionId);
+        }
+      } catch (err) {
+        console.error('예약된 경매 작업에 오류가 발생했습니다.:', err);
+      }
+    });
+  }
+
+  // 단일 경매를 종료하고 처리하는 핵심 로직 (재사용을 위해 분리)
+  static async _processSingleAuction(auctionId, accountId = null) {
+    // accountId가 제공되면 소유권 확인, 아니면 스케줄러에 의해 실행되는 것으로 간주
+    const whereClause = accountId ? { auctionId, accountId } : { auctionId };
+
+    const auction = await userPrisma.auction.findUnique({
+      where: whereClause,
+      include: {
+        ownedPlayer: {
+          select: { ownedPlayerId: true },
+        },
+      },
+    });
+
+    if (!auction) {
+      if (accountId) {
+        throw new Error('해당 경매를 찾을 수 없거나, 종료할 권한이 없습니다.');
+      }
+      // 스케줄러의 경우, 경매가 없으면 조용히 넘어감
+      return;
+    }
+
+    if (auction.status !== 'open') {
+      throw new Error('현재 경매는 진행 중이 아닙니다.');
+    }
+
+    const highestBid = await userPrisma.bid.findFirst({
+      where: { auctionId },
+      orderBy: { bidAmount: 'desc' },
+    });
+
+    await userPrisma.$transaction(async (tx) => {
+      await tx.auction.update({
+        where: { auctionId },
+        data: { status: 'closed' },
+      });
+
+      if (highestBid) {
+        const winnerAccount = await tx.account.findUnique({
+          where: { accountId: highestBid.accountId },
+        });
+
+        if (!winnerAccount || winnerAccount.cash < highestBid.bidAmount) {
+          // 낙찰자 잔액 부족 시, 유찰 처리
+          await tx.ownedPlayers.update({
+            where: { ownedPlayerId: auction.ownedPlayer.ownedPlayerId },
+            data: { accountId: auction.accountId },
+          });
+          throw new Error('낙찰자의 잔액이 부족하여 경매가 유찰됩니다.');
+        }
+
+        // 낙찰 처리
+        await tx.ownedPlayers.update({
+          where: { ownedPlayerId: auction.ownedPlayer.ownedPlayerId },
+          data: { accountId: highestBid.accountId },
+        });
+        await tx.account.update({
+          where: { accountId: highestBid.accountId },
+          data: { cash: { decrement: highestBid.bidAmount } },
+        });
+        await tx.account.update({
+          where: { accountId: auction.accountId },
+          data: { cash: { increment: highestBid.bidAmount } },
+        });
+      } else {
+        // 유찰 처리
+        await tx.ownedPlayers.update({
+          where: { ownedPlayerId: auction.ownedPlayer.ownedPlayerId },
+          data: { accountId: auction.accountId },
+        });
+      }
+    });
+
+    return { highestBid };
+  }
+
+    //경매 등록 API
   static async createAuction(req, res, next) {
     try {
       const { accountId } = req.user;
@@ -225,100 +333,27 @@ export class AuctionController {
   }
 
   // 경매 종료 및 낙찰 처리 (추가 기능)
+  // 경매 종료 및 낙찰 처리 API (수동 종료)
   static async endAuction(req, res, next) {
     try {
       const { auctionId } = req.params;
       const { accountId } = req.user;
 
-      // 1) 경매 존재 확인 및 판매자 일치 여부 검증
-      // 경매를 올린 ownedPlayer의 playerId도 함께 가져옵니다.
-      const auction = await userPrisma.auction.findUnique({
-        where: { auctionId: +auctionId, accountId: +accountId },
-        include: {
-          ownedPlayer: {
-            select: {
-              ownedPlayerId: true,
-              playerId: true,
-            },
-          },
-        },
-      });
-
-      if (!auction) {
-        return res
-          .status(404)
-          .json({ message: '해당 경매를 찾을 수 없거나, 종료할 권한이 없습니다.' });
-      }
-
-      // 2) 경매 상태 확인
-      if (auction.status !== 'open') {
-        return res.status(400).json({ message: '현재 경매는 진행 중이 아닙니다.' });
-      }
-
-      // 3) 낙찰자 정보 조회 (가장 높은 입찰가)
-      const highestBid = await userPrisma.bid.findFirst({
-        where: { auctionId: +auctionId },
-        orderBy: { bidAmount: 'desc' },
-      });
-
-      // 모든 데이터베이스 작업을 트랜잭션으로 묶어 원자성을 보장
-      await userPrisma.$transaction(async (tx) => {
-        // 경매 상태를 'closed'로 업데이트
-        await tx.auction.update({
-          where: { auctionId: +auctionId },
-          data: { status: 'closed' },
+      const result = await AuctionController._processSingleAuction(+auctionId, +accountId);
+      
+      if (result.highestBid) {
+        return res.status(200).json({
+          message: '경매가 성공적으로 종료되었습니다.',
+          낙찰금액: result.highestBid.bidAmount,
         });
-
-        // 4) 최고 입찰자가 있는 경우 낙찰 처리
-        if (highestBid) {
-          // 낙찰자 계정 정보 조회 (잔액 확인을 위해)
-          const winnerAccount = await tx.account.findUnique({
-            where: { accountId: highestBid.accountId },
-          });
-
-          if (!winnerAccount || winnerAccount.cash < highestBid.bidAmount) {
-            throw new Error('낙찰자의 잔액이 부족합니다. 경매를 취소합니다.');
-          }
-
-          // 4-1) 낙찰자의 잔액 차감
-          await tx.account.update({
-            where: { accountId: highestBid.accountId },
-            data: { cash: { decrement: highestBid.bidAmount } },
-          });
-
-          // 4-2) 판매자에게 낙찰 금액 지급
-          await tx.account.update({
-            where: { accountId: auction.accountId },
-            data: { cash: { increment: highestBid.bidAmount } },
-          });
-
-          // 4-3) 선수의 소유권 이전 (기존 ownedPlayer 업데이트)
-          await tx.ownedPlayers.update({
-            where: { ownedPlayerId: auction.ownedPlayer.ownedPlayerId },
-            data: { accountId: highestBid.accountId },
-          });
-
-          return res.status(200).json({
-            message: '경매가 성공적으로 종료되었습니다.',
-            낙찰자: winnerAccount.userId,
-            낙찰금액: highestBid.bidAmount,
-          });
-        } else {
-          // 5) 입찰자가 없는 경우 (유찰)
-          // 선수의 소유권을 원래 판매자에게 다시 이전
-          await tx.ownedPlayers.update({
-            where: { ownedPlayerId: auction.ownedPlayer.ownedPlayerId },
-            data: { accountId: auction.accountId },
-          });
-
-          return res
-            .status(200)
-            .json({ message: '경매가 유찰되었습니다. 입찰자가 없어 선수가 반환됩니다.' });
-        }
-      });
+      } else {
+        return res.status(200).json({ message: '경매가 유찰되었습니다. 입찰자가 없어 선수가 반환됩니다.' });
+      }
     } catch (err) {
-      // 트랜잭션 내에서 발생한 에러를 처리
-      if (err.message === '낙찰자의 잔액이 부족합니다. 경매를 취소합니다.') {
+      if (err.message.includes('경매를 찾을 수 없거나') || err.message.includes('진행 중이 아닙니다.')) {
+        return res.status(400).json({ message: err.message });
+      }
+      if (err.message.includes('낙찰자의 잔액이 부족')) {
         return res.status(400).json({ message: err.message });
       }
       next(err);

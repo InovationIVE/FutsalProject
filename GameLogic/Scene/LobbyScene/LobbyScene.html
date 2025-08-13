@@ -7,19 +7,20 @@
     <link rel="stylesheet" href="LobbyScene.css" />
   </head>
   <body>
-    <div class="toolbar">
-      <div><button class="topButton" id="cashShop">캐시</button></div>
-      <div><button class="topButton" id="gacha">선수뽑기</button></div>
-      <div><button class="topButton" id="mtTeam">마이팀</button></div>
-      <div><button class="topButton" id="squad">마이스쿼트</button></div>
-      <div><button class="topButton" id="gamePlay">게임플레이</button></div>
+    <!-- 상단 네비게이션 -->
+    <div class="navbar">
+      <div class="nav-left">
+        <a href="../CashShopScene/CashShopScene.html" class="cashShopBtn">캐쉬 상점</a>
+        <a href="../GachaScene/GachaScene.html" class="gachaBtn">가챠 뽑기</a>
+        <a href="../OwnedScene/OwnedScene.html" class="MyPlayerBtn">My Player</a>
+        <a href="../SquadScene/SquadScene.html" class="MysquadBtn">My 스쿼드</a>
+      </div>
+      <div class="nav-right">
+        <div class="cash">보유 캐시 <strong>100,000,000</strong></div>
+        <a href="../LobbyScene/LobbyScene.html" class="logout">로그인</a>
+        <button class="gamePlayBtn">게임시작</button>
+      </div>
     </div>
-
-    <div id="user-info">
-        <span>유저 ID: <span id="user-id-display"></span></span>
-        <span>보유 캐시: <span id="user-cash-display"></span></span>
-    </div>
-
     <script src="LobbyScript.js"></script>
   </body>
 </html>

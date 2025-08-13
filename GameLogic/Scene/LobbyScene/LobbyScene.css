@@ -1,34 +1,47 @@
-.toolbar {
+body {
+  margin: 0;
+  font-family: pretendard, sans-serif;
+background: rgba( 255, 255, 255, 0.15 );}
+
+/* 상단 네비게이션 */
+.navbar {
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  background-color: #f0f0f0;
-  border-bottom: 5px solid #000000;
-}
-
-.toolbar .topButton{
+  align-items: center;
+  background-color: black;
+  color: white;
   padding: 10px 20px;
-  background-color: #ffffff;
-  border: 2px solid #000000;
-  border-radius: 1px;
+  justify-content: space-between;
+}
+.nav-left, .nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.nav-left a {
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+.nav-left a.active {
+  background-color: #1a1a1a;
+}
+.cash {
+  font-size: 14px;
+}
+
+.logout {
+  font-size: small;
+  color:white;
+  text-decoration:none;
+}
+
+.gamePlayBtn {
+  background-color: #00c853;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 25px;
   cursor: pointer;
-
-  width: 150px;
-  height: 50px;
-
-  transition: background-color 0.3s ease, transform 0.3s ease;
-
+  font-size: 14px;
 }
-
-
-.toolbar .topButton:hover {
-  /* 배경색을 회색으로 변경 */
-  background-color: #f0f0f0;
-
-  /* 버튼을 살짝 확대 */
-  transform: scale(1.05);
-
-  /* 그림자 효과 추가 (버튼이 떠오르는 느낌) */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-

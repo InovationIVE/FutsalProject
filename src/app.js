@@ -20,6 +20,7 @@ import auctionRouter from './routes/auction.router.js';
 //import reinforceRouter from './routes/reinforce.router.js';
 import { authMiddleware } from './middleWares/auth.middleware.js';
 import { platform } from 'os';
+import { AuctionController } from './controllers/auction.controller.js';
 
 
 
@@ -35,11 +36,13 @@ dotenv.config();
 const app = express();
 
 
+
 const PORT = 3018;
 
 // http 서버 생성 및 socket.io 서버 초기화
 const server = http.createServer(app);
 const io = new Server(server);
+AuctionController.startScheduler();
 
 // GameLogic 폴더를 정적 파일 경로로 설정
 app.use(express.static(path.join(__dirname, '..', 'GameLogic')));
