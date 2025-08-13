@@ -3,7 +3,7 @@ import { Prisma as UserPrisma } from '../../prisma/User/generated/user/index.js'
 import cron from 'node-cron';
 
 export class AuctionController {
-      // 스케줄러를 시작하는 메서드
+  // 스케줄러를 시작하는 메서드
   static startScheduler() {
     // 💡 `AuctionController._processSingleAuction`를 직접 호출하도록 수정
     cron.schedule('5 * * * *', async () => {
@@ -108,7 +108,7 @@ export class AuctionController {
     return { highestBid };
   }
 
-    //경매 등록 API
+  //경매 등록 API
   static async createAuction(req, res, next) {
     try {
       const { accountId } = req.user;
@@ -331,7 +331,6 @@ export class AuctionController {
     }
   }
 
-  // 경매 종료 및 낙찰 처리 (추가 기능)
   // 경매 종료 및 낙찰 처리 API (수동 종료)
   static async endAuction(req, res, next) {
     try {
@@ -339,22 +338,80 @@ export class AuctionController {
       const { accountId } = req.user;
 
       const result = await AuctionController._processSingleAuction(+auctionId, +accountId);
-      
+
       if (result.highestBid) {
         return res.status(200).json({
           message: '경매가 성공적으로 종료되었습니다.',
           낙찰금액: result.highestBid.bidAmount,
         });
       } else {
-        return res.status(200).json({ message: '경매가 유찰되었습니다. 입찰자가 없어 선수가 반환됩니다.' });
+        return res
+          .status(200)
+          .json({ message: '경매가 유찰되었습니다. 입찰자가 없어 선수가 반환됩니다.' });
       }
     } catch (err) {
-      if (err.message.includes('경매를 찾을 수 없거나') || err.message.includes('진행 중이 아닙니다.')) {
+      if (
+        err.message.includes('경매를 찾을 수 없거나') ||
+        err.message.includes('진행 중이 아닙니다.')
+      ) {
         return res.status(400).json({ message: err.message });
       }
       if (err.message.includes('낙찰자의 잔액이 부족')) {
         return res.status(400).json({ message: err.message });
       }
+      next(err);
+    }
+  }
+
+  //경매 취소 API
+  static async cancelAuction(req, res, next) {
+    try {
+      const { auctionId } = req.params;
+      const { accountId } = req.user;
+
+      // 1. 해당 경매를 찾고, 로그인한 사용자가 경매 판매자인지 확인
+      const auction = await userPrisma.auction.findUnique({
+        where: {
+          auctionId: +auctionId,
+          accountId: +accountId, //판매자 본인인지 확인
+        },
+        include: {
+          ownedPlayer: {
+            select: { ownedPlayerId: true },
+          },
+        },
+      });
+
+      if (!auction) {
+        return res.status(404).json({ message: '해당 경매를 찾을 수 없거나, 취소할 권한이 없습니다.' });
+      }
+
+      if (auction.status !== 'open') {
+        return res.status(400).json({ message: '진행 중인 경매만 취소할 수 있습니다.' });
+      }
+
+      // 2. 트랜잭션을 사용하여 경매 상태 변경 및 선수 소유권 반환
+      await userPrisma.$transaction(async (tx) => {
+        //경매 상태를 'cancelled'로 업데이트
+        await tx.auction.update({
+          where: { auctionId: +auctionId },
+          data: { status: 'cancelled' },
+        });
+
+        //선수의 소유권을 원래 판매자에게 반환
+        await tx.ownedPlayers.update({
+          where: { ownedPlayerId: auction.ownedPlayer.ownedPlayerId },
+          data: { accountId: auction.accountId },
+        });
+
+        //해당 경매의 모든 입찰 기록 삭제 (선택 사항: 비즈니스 로직에 따라)
+        await tx.bid.deleteMany({
+          where: { auctionId: +auctionId },
+        });
+      });
+
+      return res.status(200).json({ message: '경매가 성공적으로 취소되었습니다.' });
+    } catch (err) {
       next(err);
     }
   }
