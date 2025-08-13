@@ -74,6 +74,24 @@ h2 {
   white-space: pre-line; /* 줄바꿈 유지 */
 }
 
+/* 캐시 상품 카드 스타일 */
+.cash-goods {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.cash-goods:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
 /* 구매 폼 스타일 */
 form {
   margin-top: 20px;
@@ -119,4 +137,76 @@ button[type='submit']:hover {
   border-radius: 8px;
   min-height: 60px;
   font-weight: 600;
+}
+
+/* 선물하기 섹션 스타일 */
+.gift-section {
+  margin-top: 40px;
+  border-top: 1px solid #ddd;
+  padding-top: 30px;
+}
+
+.gift-section h2 {
+  margin-bottom: 20px;
+}
+
+.gift-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.gift-form label {
+  font-weight: 600;
+  min-width: 90px;
+}
+
+.gift-form input[type='text'],
+.gift-form input[type='number'] {
+  flex-grow: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.gift-form button {
+  background-color: #2196f3;
+  border: none;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.gift-form button:hover {
+  background-color: #1769aa;
+}
+
+#gift-result {
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  background-color: #e3f2fd;
+  padding: 15px;
+  border-radius: 8px;
+  min-height: 60px;
+  font-weight: 600;
+  color: #0d47a1;
+  white-space: pre-line;
+}
+
+/* 받은 선물 리스트 */
+#received-gifts {
+  margin-top: 30px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  background-color: #f1f8e9;
+  padding: 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  white-space: pre-line;
 }
