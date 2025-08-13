@@ -19,7 +19,7 @@ const hashToken = (token) => {
  * 인증 미들웨어 - 세션 토큰 검증 및 사용자 정보 주입
  */
 const authMiddleware = async (req, res, next) => {
-  const excludedRoutes = ['/auth/login', '/auth/signup', '/auth/signup/code', '/auth/signup/code/verify'];
+  const excludedRoutes = ['/auth/login', '/auth/signup', '/auth/signup/code', '/auth/signup/code/verify', '/auth/reset-password/link', '/auth/reset-password/code/verify', '/auth/reset-password', '/auth/find-id', '/auth/find-password', '/auth/reset-password-with-token'];
   if (excludedRoutes.includes(req.path)) {
     return next();
   }
@@ -30,18 +30,25 @@ const authMiddleware = async (req, res, next) => {
     sessionToken = req.cookies.sessionToken;
   }
 
+  // sessionToken이 없으면(로그인하지 않았으면) 더 진행하지 않고 바로 401 에러를 반환합니다.
+  if (!sessionToken) {
+    return res.status(401).json({ message: '로그인이 필요합니다.' });
+  }
+
   try {
+    const sessionTokenHash = hashToken(sessionToken);
+
     // 2. 네거티브 캐시 확인
-    if (cache.isNegative(sessionToken)) {
+    if (cache.isNegative(sessionTokenHash)) {
       return res.status(401).json({ message: '유효하지 않은 세션입니다.' });
     }
 
     // 3. LRU 캐시 확인
-    const cachedSession = cache.get(sessionToken);
+    const cachedSession = cache.get(sessionTokenHash);
     if (cachedSession) {
       // 캐시된 세션이 만료되었는지 확인
       if (new Date(cachedSession.expiresAt) < new Date()) {
-        cache.del(sessionToken);
+        cache.del(sessionTokenHash);
         // DB에서도 삭제 시도 (정합성 유지)
         await userPrisma.session.deleteMany({ where: { accountId: cachedSession.accountId } });
         return res.status(401).json({ message: '세션이 만료되었습니다.' });
@@ -54,15 +61,14 @@ const authMiddleware = async (req, res, next) => {
     }
 
     // 4. DB 확인 (캐시 미스)
-    const tokenHash = hashToken(sessionToken);
     const dbSession = await userPrisma.session.findUnique({
-      where: { tokenHash },
+      where: { tokenHash: sessionTokenHash },
       include: { account: true }, // 사용자 정보 함께 조회
     });
 
     // DB에 세션이 없거나 만료된 경우
     if (!dbSession || new Date(dbSession.expiresAt) < new Date()) {
-      cache.setNegative(sessionToken); // 네거티브 캐시에 추가
+      cache.setNegative(sessionTokenHash); // 네거티브 캐시에 추가
       if (dbSession) {
         await userPrisma.session.delete({ where: { id: dbSession.id } });
       }
@@ -72,7 +78,7 @@ const authMiddleware = async (req, res, next) => {
     // 5. 캐시에 세션 정보 저장
     const ttlSeconds = Math.floor((new Date(dbSession.expiresAt).getTime() - Date.now()) / 1000);
     if (ttlSeconds > 0) {
-        cache.set(sessionToken, { accountId: dbSession.accountId, expiresAt: dbSession.expiresAt }, ttlSeconds);
+        cache.set(sessionTokenHash, { accountId: dbSession.accountId, expiresAt: dbSession.expiresAt }, ttlSeconds);
     }
 
     // 사용자 정보 주입
@@ -113,7 +119,8 @@ async function handleSlidingExpiration(req, res, next, expiresAt) {
 
       // 캐시 갱신
       const ttlSeconds = Math.floor((newExpiresAt.getTime() - now.getTime()) / 1000);
-      cache.set(req.user.sessionToken, { accountId: req.user.accountId, expiresAt: newExpiresAt }, ttlSeconds);
+      const sessionTokenHash = hashToken(req.user.sessionToken);
+      cache.set(sessionTokenHash, { accountId: req.user.accountId, expiresAt: newExpiresAt }, ttlSeconds);
 
     } catch (dbError) {
         console.error('세션 갱신 중 DB 오류:', dbError);
