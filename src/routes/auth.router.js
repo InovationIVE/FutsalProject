@@ -5,7 +5,9 @@ import {
   logout, 
   changePassword, 
   deleteAccount,
-  getMyRole
+  getMyRole,
+  sendSignupCode,
+  verifySignupCode
 } from '../controllers/auth.controller.js';
 
 const router = express.Router();
@@ -13,7 +15,9 @@ const router = express.Router();
 /**
  * 회원가입 API
  */
-router.post('/signup', signup);
+// router.post('/signup', signup); email 인증 없이 직접 가입 (outdated)
+router.post('/signup/code', sendSignupCode);
+router.post('/signup/code/verify', verifySignupCode);
 
 /**
  * 로그인 API

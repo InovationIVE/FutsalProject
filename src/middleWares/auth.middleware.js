@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { userPrisma } from '../utils/prisma/index.js';
-import { cache } from '../utils/sessionCache.js';
+import { sessionCache, negativeCache } from '../utils/sessionCache.js';
 
 // --- 정책 상수 ---
 export const SESSION_DURATION_MINUTES = 60;
@@ -35,16 +35,16 @@ const authMiddleware = async (req, res, next) => {
 
   try {
     // 2. 네거티브 캐시 확인
-    if (cache.isNegative(sessionToken)) {
+    if (negativeCache.isNegative(sessionToken)) {
       return res.status(401).json({ message: '유효하지 않은 세션입니다.' });
     }
 
     // 3. LRU 캐시 확인
-    const cachedSession = cache.get(sessionToken);
+    const cachedSession = sessionCache.get(sessionToken);
     if (cachedSession) {
       // 캐시된 세션이 만료되었는지 확인
       if (new Date(cachedSession.expiresAt) < new Date()) {
-        cache.del(sessionToken);
+        sessionCache.del(sessionToken);
         // DB에서도 삭제 시도 (정합성 유지)
         await userPrisma.session.deleteMany({ where: { accountId: cachedSession.accountId } });
         return res.status(401).json({ message: '세션이 만료되었습니다.' });
@@ -65,7 +65,7 @@ const authMiddleware = async (req, res, next) => {
 
     // DB에 세션이 없거나 만료된 경우
     if (!dbSession || new Date(dbSession.expiresAt) < new Date()) {
-      cache.setNegative(sessionToken); // 네거티브 캐시에 추가
+      negativeCache.setNegative(sessionToken); // 네거티브 캐시에 추가
       if (dbSession) {
         await userPrisma.session.delete({ where: { id: dbSession.id } });
       }
@@ -75,7 +75,7 @@ const authMiddleware = async (req, res, next) => {
     // 5. 캐시에 세션 정보 저장
     const ttlSeconds = Math.floor((new Date(dbSession.expiresAt).getTime() - Date.now()) / 1000);
     if (ttlSeconds > 0) {
-        cache.set(sessionToken, { accountId: dbSession.accountId, expiresAt: dbSession.expiresAt }, ttlSeconds);
+        sessionCache.set(sessionToken, { accountId: dbSession.accountId, expiresAt: dbSession.expiresAt }, ttlSeconds);
     }
 
     // 사용자 정보 주입
@@ -116,7 +116,7 @@ async function handleSlidingExpiration(req, res, next, expiresAt) {
 
       // 캐시 갱신
       const ttlSeconds = Math.floor((newExpiresAt.getTime() - now.getTime()) / 1000);
-      cache.set(req.user.sessionToken, { accountId: req.user.accountId, expiresAt: newExpiresAt }, ttlSeconds);
+      sessionCache.set(req.user.sessionToken, { accountId: req.user.accountId, expiresAt: newExpiresAt }, ttlSeconds);
 
     } catch (dbError) {
         console.error('세션 갱신 중 DB 오류:', dbError);

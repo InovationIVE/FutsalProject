@@ -1,14 +1,19 @@
+import { mailer } from '../utils/mailer.js';
+import { verificationCache, keyFor } from '../utils/verificationCache.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { userPrisma } from '../utils/prisma/index.js';
 import { validateInput } from '../utils/validation.js';
-import { cache } from '../utils/sessionCache.js';
+import { sessionCache, negativeCache } from '../utils/sessionCache.js';
 import { SESSION_DURATION_MINUTES } from '../middleWares/auth.middleware.js';
 
 /**
  * 안전한 랜덤 토큰을 생성합니다.
  * @returns {string} 16진수 형식의 토큰
  */
+
+const sha256 = (v) => crypto.createHash('sha256').update(String(v)).digest('hex');
+const generateMailCode = () => String(Math.floor(100000 + Math.random() * 900000)); // 6자리 랜덤 코드
 const generateSessionToken = () => {
   return crypto.randomBytes(32).toString('hex');
 };
@@ -33,6 +38,176 @@ const setSessionCookie = (res, token) => {
     sameSite: 'strict',
     maxAge: SESSION_DURATION_MINUTES * 60 * 1000, // 쿠키 만료는 세션 만료와 동기화
   });
+};
+
+/**
+ * 회원가입 코드 전송
+ */
+const sendSignupCode = async (req, res) => {
+  try {
+    let { email, userId, password, confirmPassword } = req.body;
+
+    if (!userId || !email || !password || !confirmPassword) {
+      return res.status(400).json({ message: '모든 필드를 입력해주세요.' });
+    }
+    if (!validateInput.userId(userId)) {
+      return res
+        .status(400)
+        .json({ message: 'userId는 4-20자의 영문, 숫자, 언더스코어만 사용 가능합니다.' });
+    }
+    if (!validateInput.email(email)) {
+      return res.status(400).json({ message: '올바른 이메일 형식이 아닙니다.' });
+    }
+    if (!validateInput.password(password)) {
+      return res
+        .status(400)
+        .json({ message: '비밀번호는 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.' });
+    }
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' });
+    }
+
+    const exists = await userPrisma.account.findFirst({
+      where: { OR: [{ email }, { userId }] },
+    });
+    if (exists) return res.status(409).json({ message: '이미 가입된 이메일/아이디' });
+
+    const k = keyFor(email);
+    const cached = verificationCache.get(k);
+
+    const now = Date.now();
+    // 이메일 인증 코드 재전송 제한
+    if (cached && cached.resendAt && cached.resendAt > now) {
+      const wait = Math.ceil((cached.resendAt - now) / 1000);
+      return res.status(429).json({ message: `잠시 후 재시도 (${wait}s)` });
+    }
+
+    // 인증 코드 생성
+    const code = generateMailCode();
+    const codeHash = sha256(code);
+
+    // 비밀번호 해시
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    // 인증 코드 포함 생성할 계정 정보 캐시 저장
+    verificationCache.set(k, {
+      email,
+      userId,
+      passwordHash,
+      codeHash,
+      attempts: 0,
+      resendAt: now + 60 * 1000, // 60초 후 재전송 가능
+    });
+
+    // 인증 코드 이메일 전송 
+    await mailer.sendMail({
+      to: email,
+      from: process.env.NODEMAILER_USER,
+      subject: '[Futsal] 회원가입 인증코드',
+      html: `
+    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; background-color: #fafafa;">
+      <h2 style="color: #333; text-align: center;">⚽ Futsal 회원가입 인증</h2>
+      <p style="font-size: 15px; color: #555;">
+        안녕하세요!<br/>
+        아래의 <strong style="color: #000;">인증코드</strong>를 회원가입 화면에 입력해주세요.
+      </p>
+      <div style="margin: 20px 0; padding: 15px; text-align: center; background: #f0f4ff; border-radius: 6px; font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #2b3a67;">
+        ${code}
+      </div>
+      <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;" />
+      <p style="font-size: 12px; color: #999; text-align: center;">
+        본 메일은 발신전용입니다.<br/>
+        잘못 수신하셨다면 죄송합니다;;
+      </p>
+    </div>
+  `,
+    });
+
+    return res.status(200).json({ message: '인증코드를 이메일로 전송했습니다(유효 5분).' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: '메일 전송 실패' });
+  }
+};
+
+/**
+ * 회원가입 코드 인증
+ */
+const verifySignupCode = async (req, res) => {
+  try {
+    let { email, code, userId } = req.body;
+    if (!email || !code || !userId) {
+      return res.status(400).json({ message: '필수값 누락' });
+    }
+    email = email.toLowerCase().trim();
+
+    const k = keyFor(email);
+    const cached = verificationCache.get(k);
+    if (!cached) return res.status(410).json({ message: '인증 세션 만료. 다시 요청하세요.' });
+
+    if (cached.attempts >= 5) {
+      verificationCache.delete(k);
+      return res.status(429).json({ message: '시도 횟수 초과. 다시 진행하세요.' });
+    }
+
+    if (sha256(code) !== cached.codeHash) {
+      cached.attempts += 1;
+      verificationCache.set(k, cached);
+      return res.status(401).json({ message: '인증코드가 올바르지 않습니다.' });
+    }
+
+    // DB 트랜잭션: 계정 생성 + 세션 생성
+    const result = await userPrisma.$transaction(async (tx) => {
+      const account = await tx.account.create({
+        data: {
+          userId,
+          email: cached.email,
+          password: cached.passwordHash,
+          role: 'USER',
+          cash: 10000,
+        },
+        select: {
+          accountId: true,
+          userId: true,
+          email: true,
+          role: true,
+          cash: true,
+          createdAt: true,
+        },
+      });
+
+      const sessionToken = generateSessionToken();
+      const tokenHash = sha256(sessionToken);
+      const expiresAt = new Date(Date.now() + SESSION_DURATION_MINUTES * 60 * 1000);
+
+      await tx.session.upsert({
+        where: { accountId: account.accountId },
+        update: { tokenHash, expiresAt },
+        create: { accountId: account.accountId, tokenHash, expiresAt },
+      });
+
+      await tx.account.update({
+        where: { accountId: account.accountId },
+        data: { lastLoginAt: new Date() },
+      });
+
+      const ttlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
+      sessionCache.set(sessionToken, { accountId: account.accountId, expiresAt }, ttlSeconds);
+
+      return { account, sessionToken };
+    });
+
+    setSessionCookie(res, result.sessionToken);
+    verificationCache.delete(k);
+
+    return res.status(201).json({
+      message: '회원가입 및 로그인 완료',
+      user: result.account,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: '가입/로그인 처리 실패' });
+  }
 };
 
 /**
@@ -141,7 +316,7 @@ const login = async (req, res) => {
 
     // LRU 캐시에 세션 저장
     const ttlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
-    cache.set(sessionToken, { accountId: account.accountId, expiresAt }, ttlSeconds);
+    sessionCache.set(sessionToken, { accountId: account.accountId, expiresAt }, ttlSeconds);
 
     setSessionCookie(res, sessionToken);
 
@@ -169,7 +344,7 @@ const logout = async (req, res) => {
     });
 
     // 캐시에서 세션 삭제
-    cache.del(sessionToken);
+    sessionCache.del(sessionToken);
 
     // 쿠키 삭제
     res.clearCookie('sessionToken');
@@ -221,7 +396,7 @@ const changePassword = async (req, res) => {
 
     // 캐시에서 현재 세션 삭제 및 쿠키 클리어
     if (account.sessionToken) {
-      cache.del(account.sessionToken);
+      sessionCache.del(account.sessionToken);
     }
     res.clearCookie('sessionToken');
 
@@ -245,7 +420,7 @@ const deleteAccount = async (req, res) => {
     await userPrisma.account.delete({ where: { accountId } });
 
     if (req.user.sessionToken) {
-      cache.del(req.user.sessionToken);
+      sessionCache.del(req.user.sessionToken);
     }
     res.clearCookie('sessionToken');
 
@@ -260,16 +435,25 @@ const deleteAccount = async (req, res) => {
  * auth/role 컨트롤러: 현재 로그인한 사용자 역할 조회
  */
 const getMyRole = async (req, res) => {
-    try {
-      const { role } = await userPrisma.account.findUnique({
-        where: { accountId: req.user.accountId },
-        select: { role: true },
-      });
-      res.status(200).json({ role });
-    } catch (error) {
-      console.error('getMyRole 에러:', error);
-      res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
-    }
+  try {
+    const { role } = await userPrisma.account.findUnique({
+      where: { accountId: req.user.accountId },
+      select: { role: true },
+    });
+    res.status(200).json({ role });
+  } catch (error) {
+    console.error('getMyRole 에러:', error);
+    res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
+  }
 };
 
-export { signup, login, logout, changePassword, deleteAccount, getMyRole };
+export {
+  signup,
+  login,
+  logout,
+  changePassword,
+  deleteAccount,
+  getMyRole,
+  sendSignupCode,
+  verifySignupCode,
+};
