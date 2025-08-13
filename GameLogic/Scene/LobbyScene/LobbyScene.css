@@ -30,6 +30,13 @@ background: rgba( 255, 255, 255, 0.15 );}
   font-size: 14px;
 }
 
+.login {
+  font-size: small;
+  color:white;
+  text-decoration:none;
+}
+
+
 .logout {
   font-size: small;
   color:white;

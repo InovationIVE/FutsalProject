@@ -20,6 +20,7 @@ export class OwnedPlayersController {
           // profileImage: true,
           name: true,
           rarity: true,
+          level: true,
         },
       });
 
@@ -179,8 +180,8 @@ export class OwnedPlayersController {
 
       return res.status(200).json({
         message: '선수판매 완료',
-        판매금액: gain,
-        남은금액: updated.cash,
+        sales: gain,
+        remain: updated.cash,
       });
     } catch (err) {
       next(err);

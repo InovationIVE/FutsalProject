@@ -25,3 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = '../client/index.html';
 });
 });
+
+  // 페이지 로드 시 초기화 함수 호출
+  document.addEventListener('DOMContentLoaded', initialize);  

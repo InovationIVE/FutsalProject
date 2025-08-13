@@ -3,12 +3,12 @@ import { OwnedPlayersController } from '../controllers/ownedPlayers.controller.j
 const router = express.Router();
 
 //내 선수 조회
-router.get('/ownedplayers', OwnedPlayersController.myPlayersList);
+router.get('/ownedPlayers/list', OwnedPlayersController.myPlayersList);
 
 //내 선수 상세 조회
-router.get('/ownedplayers/:ownedPlayerId', OwnedPlayersController.myPlayer);
+router.get('/ownedPlayers/:ownedPlayerId', OwnedPlayersController.myPlayer);
 
 //내 선수 판매
-router.post('/ownedplayers/sales', OwnedPlayersController.playerSale);
+router.post('/ownedPlayers/sales', OwnedPlayersController.playerSale);
 
 export default router;
