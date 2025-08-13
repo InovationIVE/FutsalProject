@@ -59,19 +59,20 @@ export class Player {
     }
   }
 
-  shoot(goal, ball) {
+  shoot(goal, ball, log) {
     if (ball.owner !== this) {
-      log(`${this.name}가 공을 가지고 있지 않습니다.`);
+      log.push(`${this.name}가 공을 가지고 있지 않습니다.`);
       return false;
     }
     const distance =
       Math.abs(this.position.x - goal.position.x) + Math.abs(this.position.y - goal.position.y);
 
-    const successRate = Math.max(10, 80 - distance * 10 + this.attack * 2);
+    const successRate = Math.max(10, 80 - distance * 10 + this.attack/10);
     const roll = Math.random() * 100;
 
     this.shootNum += 1;
-
+    log.push("뽑은 숫자"+roll);
+    log.push(" 성공할 확률" +successRate);
     if (roll <= successRate) {
       return true;
     } else {

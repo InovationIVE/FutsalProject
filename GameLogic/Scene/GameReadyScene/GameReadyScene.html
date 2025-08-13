@@ -1,53 +1,68 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Game Ready - Futsal Manager</title>
-    <link rel="stylesheet" href="GameReadyScene.css">
-</head>
-<body>
+    <link rel="stylesheet" href="GameReadyScene.css" />
+  </head>
+  <body>
+    <!-- 상단 네비게이션 -->
+    <div class="navbar">
+      <div class="nav-left">
+        <a href="../CashShopScene/CashShopScene.html" class="cashShopBtn">캐쉬 상점</a>
+        <a href="../GachaScene/GachaScene.html" class="gachaBtn">가챠 뽑기</a>
+        <a href="../OwnedScene/OwnedScene.html" class="MyPlayerBtn">My Player</a>
+        <a href="../SquadScene/SquadScene.html" class="MysquadBtn">My 스쿼드</a>
+      </div>
+      <div class="nav-right">
+        <div class="cash">보유 캐시 <strong>100,000,000</strong></div>
+        <a href="#" class="logout">로그아웃</a>
+        <button class="gamePlayBtn">게임시작</button>
+      </div>
+    </div>
+
     <div id="loading-overlay" class="hidden">
-        <div class="spinner"></div>
-        <p id="loading-message">상대를 찾고 있습니다...</p>
-        <p id="match-timer">00:00</p>
+      <div class="spinner"></div>
+      <p id="loading-message">상대를 찾고 있습니다...</p>
+      <p id="match-timer">00:00</p>
     </div>
 
     <div class="container">
-        <header>
-            <h1>Futsal Manager</h1>
-        </header>
+      <header>
+        <h1>Waiting Room</h1>
+      </header>
 
-        <main class="main-content">
-            <!-- Left Panel: My Squad -->
-            <section class="squad-panel">
-                <h2>My Squad</h2>
-                <div id="squad-list" class="squad-list">
-                    <!-- Player cards will be dynamically inserted here -->
-                </div>
-                <button id="game-start-btn" class="game-start-btn">게임 시작</button>
-            </section>
+      <main class="main-content">
+        <!-- Left Panel: My Squad -->
+        <section class="squad-panel">
+          <h2>My Squad</h2>
+          <div id="squad-list" class="squad-list">
+            <!-- Player cards will be dynamically inserted here -->
+          </div>
+          <button id="game-start-btn" class="game-start-btn">게임 시작</button>
+        </section>
 
-            <!-- Right Panel: Ranking -->
-            <aside class="ranking-panel">
-                <h2>Ranking</h2>
-                <table id="ranking-table">
-                    <thead>
-                        <tr>
-                            <th>순위</th>
-                            <th>유저명</th>
-                            <th>점수</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Ranking data will be dynamically inserted here -->
-                    </tbody>
-                </table>
-            </aside>
-        </main>
+        <!-- Right Panel: Ranking -->
+        <aside class="ranking-panel">
+          <h2>Ranking</h2>
+          <table id="ranking-table">
+            <thead>
+              <tr>
+                <th>순위</th>
+                <th>유저명</th>
+                <th>점수</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Ranking data will be dynamically inserted here -->
+            </tbody>
+          </table>
+        </aside>
+      </main>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="GameReadyScript.js"></script>
-</body>
+    <script src="GameReadyScript.js" type="module"></script>
+  </body>
 </html>

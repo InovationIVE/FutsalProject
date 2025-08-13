@@ -9,9 +9,9 @@ import { userPrisma } from '../utils/prisma/index.js';
 
 export default class GameService {
   static async initGame(player1SocketId, player2SocketId ,accountId1, accountId2) {
-    const gameMap = new MapData(7, 5);
-    const goalA = new GoalPost({ x: 0, y: 2 });
-    const goalB = new GoalPost({ x: 6, y: 2 });
+    const gameMap = new MapData(15, 11);
+    const goalA = new GoalPost({ x: 0, y: 5 });
+    const goalB = new GoalPost({ x: 14, y: 5 });
     const ball = new Ball();
 
     const teamAPlayers = await createTeamPlayer(accountId1, 'teamA');
@@ -22,13 +22,13 @@ export default class GameService {
     }
 
     // TODO: Replace with actual player data from DB
-    teamAPlayers[0].position = { x: 2, y: 2 };
-    teamAPlayers[1].position = { x: 1, y: 1 };
-    teamAPlayers[2].position = { x: 1, y: 3 };
+    teamAPlayers[0].position = { x: 6, y: 5 };
+    teamAPlayers[1].position = { x: 3, y: 3 };
+    teamAPlayers[2].position = { x: 3, y: 7  };
 
-    teamBPlayers[0].position = { x: 4, y: 2 };
-    teamBPlayers[1].position = { x: 5, y: 1 };
-    teamBPlayers[2].position = { x: 5, y: 3 };
+    teamBPlayers[0].position = { x: 8, y: 5 };
+    teamBPlayers[1].position = { x: 11, y: 3 };
+    teamBPlayers[2].position = { x: 11, y: 7 };
 
     const teamA = new Team('Team A', teamAPlayers, player1SocketId ,accountId1);
     const teamB = new Team('Team B', teamBPlayers, player2SocketId ,accountId2);

@@ -15,52 +15,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const passBtn = document.getElementById('pass-btn');
   const tackleBtn = document.getElementById('tackle-btn');
   const getBallBtn = document.getElementById('get-ball-btn');
+  const gameReadyBtn = document.getElementById('game-ready-btn');
   const logList = document.getElementById('log-list');
-  const ReadyBtn = document.getElementById('find-match-btn'); // Assuming you add this button to your HTML
-
-  // const urlParams = new URLSearchParams(window.location.search);
-  // const opponents = urlParams.get('opponents');
 
   socket.emit('join_game_room');
 
   // --- Game State ---
   let selectedPlayer = null;
   let game = null; // Game state will be received from the server
-  let matchmakingTimer = null;
 
   // --- Socket Event Handlers ---
-  ReadyBtn.addEventListener('click', () => {
-    log('상대방을 기다리는 중...');
-    socket.emit('find_match');
-    ReadyBtn.disabled = true;
-  });
-
-  socket.on('waiting_for_match', (data) => {
-    // Start a timer and display it.
-    if (matchmakingTimer) clearInterval(matchmakingTimer);
-
-    let startTime = Date.now();
-    const timerLogElement = log(`경과 시간: 00:00`);
-
-    matchmakingTimer = setInterval(() => {
-      const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-      const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
-      const seconds = String(elapsedTime % 60).padStart(2, '0');
-      timerLogElement.textContent = `경과 시간: ${minutes}:${seconds}`;
-    }, 1000);
-  });
-
-  socket.on('already_in_queue', (data) => {
-    log(data.message);
-    ReadyBtn.disabled = false; // Re-enable button if they are already in queue somehow
-  });
-
-  socket.on('matchmaking_error', (data) => {
-    log(`매칭 오류: ${data.message}`);
-    if (matchmakingTimer) clearInterval(matchmakingTimer);
-    ReadyBtn.disabled = false;
-  });
-
   socket.on('game_start', (data) => {
     log('게임 시작!');
     game = data.gameState;
@@ -121,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateUI() {
     if (!game) return;
-    console.log('들어옴');
     // Update scores, turn counters etc.
     teamAScoreEl.textContent = game.teams[0].score;
     teamBScoreEl.textContent = game.teams[1].score;
@@ -272,17 +235,17 @@ document.addEventListener('DOMContentLoaded', () => {
       log(logs[i]);
     }
 
+    if (game.isGameOver) {
+      gameReadyBtn.style.display = 'block';
+      gameReadyBtn.onclick = () => {
+        window.location.href = '../GameReadyScene/GameReadyScene.html';
+      };
+    }
+
     render();
     updateUI();
   });
 
-  socket.on('process_game_end', (data) => {
-    socket.emit('process_game_end', { roomId: data.roomId });
-  });
-
-  socket.on('game_ended', (data) => {
-    log(data.result);
-  });
 
   socket.on('action_error', (data) => {
     log(`Error: ${data.message}`);

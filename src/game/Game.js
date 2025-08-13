@@ -78,13 +78,13 @@ export class Game {
         const playerX = selectedPlayer.position.x;
 
         // Check if the player is in the opponent's half
-        if ((isTeamA && playerX <= 3) || (!isTeamA && playerX >= 3)) {
+        if ((isTeamA && playerX <=6 ) || (!isTeamA && playerX >= 8)) {
           this.log.push('상대 진영에서만 슛을 할 수 있습니다.');
           return; // Do not proceed with the shot, and don't end the turn.
         }
 
         const opponentGoal = isTeamA ? this.goalB : this.goalA;
-        if (selectedPlayer.shoot(opponentGoal, this.ball)) {
+        if (selectedPlayer.shoot(opponentGoal, this.ball, this.log)) {
           this.currentTeam.score++;
           this.log.push(`${this.currentTeam.name}이(가) 득점했습니다!`);
           this.resetPositions(); // Reset positions after a goal
@@ -114,7 +114,7 @@ export class Game {
         const { x, y } = params;
         const distance =
           Math.abs(selectedPlayer.position.x - x) + Math.abs(selectedPlayer.position.y - y);
-        if (distance <= selectedPlayer.moveStat) {
+        if (distance <= selectedPlayer.moveStat/20) {
           selectedPlayer.move(x, y);
         } else {
           this.log.push('이동할 수 없는 거리입니다.');

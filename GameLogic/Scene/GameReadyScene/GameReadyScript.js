@@ -1,4 +1,8 @@
+import GameManager from "../../Manager/GameManager.js";
+
 document.addEventListener('DOMContentLoaded', () => {
+  GameManager.setupNavigation();
+
   const socket = io();
 
   // --- DOM Elements ---
@@ -30,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const squad = await response.json();
       renderSquad(squad);
     } catch (error) {
@@ -141,11 +144,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
   });
 
-  socket.on('match_found', (data) => {
+  socket.on('match_found', () => {
     if (matchmakingTimer) clearInterval(matchmakingTimer);
     // Redirect to the game play scene
     // The server will emit 'game_start' which should be handled by the gameplay script.
-    window.location.href = `../GamePlayScene/GamePlayScene.html?opponents=${data.opponents}`; // Adjust this URL if needed
+    window.location.href = `../GamePlayScene/GamePlayScene.html`; // Adjust this URL if needed
   });
 
   socket.on('matchmaking_error', (data) => {
@@ -163,3 +166,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initialize();
 });
+
