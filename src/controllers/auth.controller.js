@@ -39,13 +39,15 @@ const sendSignupCode = async (req, res) => {
         .json({ message: '비밀번호는 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.' });
     }
 
-    const exists = await userPrisma.account.findFirst({
+    const exists = await userPrisma.account.findFirst({ // 이미 가입된 이메일/아이디 조회
       where: { OR: [{ email }, { userId }] },
     });
     if (exists) return res.status(409).json({ message: '이미 가입된 이메일/아이디' });
 
     const signupToken = generateRandomToken();
-    const cached = verificationCache.get(signupToken);
+    const signupTokenHash = hashToken(signupToken);
+
+    const cached = verificationCache.get(signupTokenHash); // 이메일 인증 코드 검증용 캐시 (중복 요청 방지)
 
     const now = Date.now();
     // 이메일 인증 코드 재전송 제한
@@ -61,8 +63,8 @@ const sendSignupCode = async (req, res) => {
     // 비밀번호 해시
     const passwordHash = await bcrypt.hash(password, 12);
 
-    // 인증 코드 포함 생성할 계정 정보 캐시 저장
-    verificationCache.set(signupToken, {
+    // 헤쉬된 인증 코드 포함 생성할 계정 정보 캐시 저장, 5분 동안 유효 
+    verificationCache.set(signupTokenHash, {
       email,
       userId,
       passwordHash,
@@ -95,7 +97,7 @@ const sendSignupCode = async (req, res) => {
   `,
     });
 
-    setVerificationCookie(res, signupToken);
+    setVerificationCookie(res, signupToken); // 이메일 인증용 쿠키 설정 (클라이언트에 저장)
 
     return res.status(200).json({ message: '인증코드를 이메일로 전송했습니다(유효 5분).' });
   } catch (err) {
@@ -119,30 +121,36 @@ const verifySignupCode = async (req, res) => {
       return res.status(400).json({ message: '인증코드를 입력해주세요.' });
     }
 
-    const cached = verificationCache.get(signupToken);
+    const signupTokenHash = hashToken(signupToken);
+    const cached = verificationCache.get(signupTokenHash);
     if (!cached) return res.status(410).json({ message: '인증 세션 만료. 다시 요청하세요.' });
 
     if (cached.attempts >= 5) {
-      verificationCache.delete(signupToken);
+      verificationCache.delete(signupTokenHash);
       clearVerificationCookie(res);
       return res.status(429).json({ message: '시도 횟수 초과. 다시 진행하세요.' });
     } 
 
     if (hashToken(code) !== cached.codeHash) {
       cached.attempts += 1;
-      verificationCache.set(signupToken, cached);
+      verificationCache.set(signupTokenHash, cached);
       return res.status(401).json({ message: '인증코드가 올바르지 않습니다.' });
     }
 
+    verificationCache.delete(signupTokenHash); // 인증 캐시 삭제
+    clearVerificationCookie(res); // 인증 쿠키 삭제
+
     // DB 트랜잭션: 계정 생성 + 세션 생성
     const {account, sessionToken} = await userPrisma.$transaction(async (tx) => {
+
+      // 계정 생성
       const account = await tx.account.create({
         data: {
           userId: cached.userId,
           email: cached.email,
           password: cached.passwordHash,
           role: 'USER',
-          cash: 10000,
+          cash: 10000, // default amount
         },
         select: {
           accountId: true,
@@ -154,30 +162,31 @@ const verifySignupCode = async (req, res) => {
         },
       });
 
-      const sessionToken = generateRandomToken();
-      const tokenHash = hashToken(sessionToken);
-      const expiresAt = new Date(Date.now() + SESSION_DURATION_MINUTES * 60 * 1000);
+      // 세션 생성
+      const sessionToken = generateRandomToken(); // 세션 토큰 생성
+      const tokenHash = hashToken(sessionToken); // 세션 토큰 해시화화
+      const expiresAt = new Date(Date.now() + SESSION_DURATION_MINUTES * 60 * 1000); // 세션 만료 시각
 
-      await tx.session.upsert({
+      await tx.session.upsert({ // 세션 생성 또는 업데이트
         where: { accountId: account.accountId },
         update: { tokenHash, expiresAt },
         create: { accountId: account.accountId, tokenHash, expiresAt },
       });
 
-      await tx.account.update({
+      // 마지막 로그인 시간 업데이트
+      await tx.account.update({ 
         where: { accountId: account.accountId },
         data: { lastLoginAt: new Date() },
       });
 
-      const ttlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
-      sessionCache.setWithTTL(hashToken(sessionToken), { accountId: account.accountId, expiresAt }, ttlSeconds);
+      // 세션 캐시메모리에 저장 (LRU 캐시)
+      const ttlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000); // 세션 만료 시각까지의 남은 시간(초)
+      sessionCache.setWithTTL(hashToken(sessionToken), { accountId: account.accountId, expiresAt }, ttlSeconds); // 세션 캐시 저장 (LRU 캐시)
 
       return { account, sessionToken };
     });
 
-    setSessionCookie(res, sessionToken);
-    verificationCache.delete(signupToken);
-    clearVerificationCookie(res);
+    setSessionCookie(res, sessionToken); // 세션 쿠키 설정 (클라이언트에 저장)
 
     return res.status(201).json({
       message: '회원가입 및 로그인 완료',
@@ -192,57 +201,57 @@ const verifySignupCode = async (req, res) => {
 /**
  * 회원가입 컨트롤러
  */
-const signup = async (req, res) => {
-  try {
-    const { userId, email, password } = req.body;
+// const signup = async (req, res) => {
+//   try {
+//     const { userId, email, password } = req.body;
 
-    if (!userId || !email || !password) {
-      return res.status(400).json({ message: '모든 필드를 입력해주세요.' });
-    }
-    if (!validateInput.userId(userId)) {
-      return res
-        .status(400)
-        .json({ message: 'userId는 4-20자의 영문, 숫자, 언더스코어만 사용 가능합니다.' });
-    }
-    if (!validateInput.email(email)) {
-      return res.status(400).json({ message: '올바른 이메일 형식이 아닙니다.' });
-    }
-    if (!validateInput.password(password)) {
-      return res
-        .status(400)
-        .json({ message: '비밀번호는 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.' });
-    }
+//     if (!userId || !email || !password) {
+//       return res.status(400).json({ message: '모든 필드를 입력해주세요.' });
+//     }
+//     if (!validateInput.userId(userId)) {
+//       return res
+//         .status(400)
+//         .json({ message: 'userId는 4-20자의 영문, 숫자, 언더스코어만 사용 가능합니다.' });
+//     }
+//     if (!validateInput.email(email)) {
+//       return res.status(400).json({ message: '올바른 이메일 형식이 아닙니다.' });
+//     }
+//     if (!validateInput.password(password)) {
+//       return res
+//         .status(400)
+//         .json({ message: '비밀번호는 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.' });
+//     }
 
-    const existingUser = await userPrisma.account.findFirst({
-      where: { OR: [{ userId }, { email }] },
-    });
+//     const existingUser = await userPrisma.account.findFirst({
+//       where: { OR: [{ userId }, { email }] },
+//     });
 
-    if (existingUser) {
-      return res.status(409).json({ message: '이미 사용 중인 userId 또는 email입니다.' });
-    }
+//     if (existingUser) {
+//       return res.status(409).json({ message: '이미 사용 중인 userId 또는 email입니다.' });
+//     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+//     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const newAccount = await userPrisma.account.create({
-      data: {
-        userId,
-        email,
-        role: 'USER',
-        password: hashedPassword,
-        cash: 10000,
-      },
-      select: { accountId: true, userId: true, email: true, cash: true, createdAt: true },
-    });
+//     const newAccount = await userPrisma.account.create({
+//       data: {
+//         userId,
+//         email,
+//         role: 'USER',
+//         password: hashedPassword,
+//         cash: 10000,
+//       },
+//       select: { accountId: true, userId: true, email: true, cash: true, createdAt: true },
+//     });
 
-    res.status(201).json({
-      message: '회원가입이 완료되었습니다. 로그인을 진행해주세요.',
-      user: newAccount,
-    });
-  } catch (error) {
-    console.error('회원가입 에러:', error);
-    res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
-  }
-};
+//     res.status(201).json({
+//       message: '회원가입이 완료되었습니다. 로그인을 진행해주세요.',
+//       user: newAccount,
+//     });
+//   } catch (error) {
+//     console.error('회원가입 에러:', error);
+//     res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
+//   }
+// };
 
 /**
  * 로그인 컨트롤러
@@ -412,10 +421,11 @@ const sendPasswordResetLink = async (req, res) => {
     }
 
     const resetToken = generateRandomToken();
+    const resetTokenHash = hashToken(resetToken);
     const MAGIC_LINK_TTL_MINUTES = 15;
 
     verificationCache.set(
-      resetToken,
+      resetTokenHash,
       { accountId: account.accountId },
       MAGIC_LINK_TTL_MINUTES * 60,
     );
@@ -470,7 +480,8 @@ const resetPasswordWithToken = async (req, res) => {
       return res.status(400).json({ message: '필수 정보가 누락되었습니다.' });
     }
 
-    const cached = verificationCache.get(token);
+    const tokenHash = hashToken(token);
+    const cached = verificationCache.get(tokenHash);
     if (!cached) {
       return res.status(410).json({ message: '만료되었거나 유효하지 않은 링크입니다. 다시 요청해주세요.' });
     }
@@ -504,7 +515,7 @@ const resetPasswordWithToken = async (req, res) => {
     });
 
     // 사용된 토큰은 즉시 캐시에서 삭제
-    verificationCache.delete(token);
+    verificationCache.delete(tokenHash);
 
     res.status(200).json({ message: '비밀번호가 성공적으로 변경되었습니다. 새 비밀번호로 로그인해주세요.' });
   } catch (error) {

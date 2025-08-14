@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-  signup,
+  //signup,
   login,
   logout,
   changePassword,
