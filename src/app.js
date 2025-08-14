@@ -86,7 +86,6 @@ app.use('/auth', [authRouter]);
 
 // Express 미들웨어를 Socket.IO 미들웨어로 변환하여 사용
 const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next);
-const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next);
 
 io.use(wrap(cookieParser()));
 io.use(wrap(authMiddleware));
