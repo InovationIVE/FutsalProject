@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             ownedPlayers.forEach(player => {
                 const listItem = document.createElement('li');
-                const levelText = player.level ? `Lv.${player.level}` : '';
+                const levelText = player.level ? `+${player.level}강` : '';
                 listItem.textContent = `${player.name} (${player.rarity}) ${levelText}`;
                 listItem.dataset.ownedPlayerId = player.ownedPlayerId;
                 //클릭된 요소의 data 속성에서 ID를 가져오는 방식으로 변경
@@ -56,16 +56,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('선수 상세 정보를 가져오는 데 실패했습니다.');
             }
             const result = await response.json();
-            const playerDetails = result.data;
+            const playerDetails = result; // API 응답 구조에 맞게 수정
 
             // 카드 정보 업데이트
             card.style.display = 'flex'; // 카드 보이기
             card.querySelector('.profileImage').style.backgroundImage = `url('${playerDetails.profileImage || 'https://placehold.co/150x200/808080/FFFFFF?text=No+Image'}')`;
-            card.querySelector('.stats div:nth-child(1)').textContent = `선수이름: ${playerDetails.name}`;
-            card.querySelector('.stats div:nth-child(2)').textContent = `등급: ${playerDetails.rarity}`;
-            card.querySelector('.stats div:nth-child(3)').textContent = `ATK: ${playerDetails.attack}`;
-            card.querySelector('.stats div:nth-child(4)').textContent = `DEF: ${playerDetails.defence}`;
-            card.querySelector('.stats div:nth-child(5)').textContent = `SPD: ${playerDetails.speed}`;
+            
+            // id를 사용하여 요소를 선택
+            document.getElementById('name').textContent = `${playerDetails.name}`;
+            document.getElementById('rarity').textContent = `${playerDetails.rarity}`;
+            document.getElementById('attack').textContent = `ATK: ${playerDetails.attack}`;
+            document.getElementById('defense').textContent = `DEF: ${playerDetails.defence}`;
+            document.getElementById('speed').textContent = `SPD: ${playerDetails.speed}`;
 
         } catch (error) {
             console.error('Error fetching player details:', error);
@@ -73,7 +75,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // 보유 캐시 정보를 업데이트하는 함수
+    // 선수 판매 버튼 클릭 이벤트 핸들러
+    document.querySelector('.saleBtn').addEventListener('click', async () => {
+        try {
+            const selectedPlayer = document.querySelector('.card');
+            if (!selectedPlayer) {
+                alert('판매할 선수를 선택해주세요.');
+                return;
+            }       
+            // 선택된 선수의 ID 가져오기
+             const ownedPlayerId = selectedPlayer.querySelector('.profileImage').dataset.ownedPlayerId;
+             if (!ownedPlayerId) {
+            alert('유효한 선수 ID가 없습니다.');
+            return;
+           }
+
+            // 선수 판매 API 호출
+            const response = await fetch(`/api/ownedPlayers/sell/${ownedPlayerId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error('선수 판매에 실패했습니다.');
+            }
+            const result = await response.json();
+            alert(`${result.message} 판매가 완료되었습니다.`);
+            // 선수 목록과 캐시 업데이트
+            await fetchOwnedPlayers();
+            await updateCash();
+            card.style.display = 'none'; // 카드 숨기기
+        } catch (error) {
+            console.error('Error selling player:', error);
+            alert('선수 판매 중 오류가 발생했습니다.');
+        }
+    });     
+
+        
+
+         // 보유 캐시 정보를 업데이트하는 함수
     async function updateCash() {
         try {
             const response = await fetch('/api/user/me');
