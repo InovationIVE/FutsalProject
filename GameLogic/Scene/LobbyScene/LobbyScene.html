@@ -4,13 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>풋살 온라인</title>
+    <!-- LobbyScene 고유의 스타일 -->
     <link rel="stylesheet" href="LobbyScene.css" />
-    <!-- 공용 네비게이션 스타일시트 추가 -->
-    <link rel="stylesheet" href="../Shared/nav.css" />
+    <!-- 공용 네비게이션 스타일시트 추가 (경로 수정) -->
+    <link rel="stylesheet" href="../../Shared/nav.css" />
   </head>
   <body>
     <!-- 상단 네비게이션 -->
-    <div class="navbar">
+    <nav class="navbar">
       <div class="nav-left">
         <a href="../CashShopScene/CashShopScene.html" class="cashShopBtn">캐쉬 상점</a>
         <a href="../GachaScene/GachaScene.html" class="gachaBtn">가챠 뽑기</a>
@@ -18,9 +19,9 @@
         <a href="../SquadScene/SquadScene.html" class="MysquadBtn">My 스쿼드</a>
       </div>
       <div class="nav-right">
-        <!-- 이 부분은 LobbyScript.js에 의해 동적으로 채워집니다. -->
+        <!-- 이 부분은 nav.js에 의해 동적으로 채워집니다. -->
       </div>
-    </div>
+    </nav>
 
     <!-- 비밀번호 변경 Modal (숨겨져 있음) -->
     <div id="change-password-modal" class="modal">
@@ -40,12 +41,12 @@
             <label for="confirm-password">새 비밀번호 확인</label>
             <input type="password" id="confirm-password" required />
           </div>
-          <button type="submit">
+          <button type="submit" class="btn">
             <span class="btn-text">변경하기</span>
             <div class="loader"></div>
           </button>
         </form>
-        <p id="change-password-message" class="modal-message"></p>
+        <div id="change-password-message" class="modal-message"></div>
       </div>
     </div>
 
@@ -63,7 +64,7 @@
     </div>
 
     <script type="module" src="LobbyScript.js"></script>
-    <!-- 공용 네비게이션 스크립트 추가 -->
-    <script type="module" src="../Shared/nav.js"></script>
+    <!-- 공용 네비게이션 스크립트 추가 (경로 수정) -->
+    <script type="module" src="../../Shared/nav.js"></script>
   </body>
 </html>
