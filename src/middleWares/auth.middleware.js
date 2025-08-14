@@ -21,6 +21,7 @@ const authMiddleware = async (req, res, next) => {
     '/auth/find-id',
     '/auth/find-password',
     '/auth/reset-password-with-token',
+    '/auth/find-id-by-email',
   ];
 
   // 인증이 필요 없는 경로는 바로 next()
