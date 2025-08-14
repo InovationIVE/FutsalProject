@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const card = document.querySelector('.card');
     const cashElement = document.querySelector('.nav-right .cash strong');
 
+    /** 강화 페이지 이동 버튼 */
+    const toReinforceBtn = document.querySelector('.toReinforceBtn');
+
     // 초기 상태에서 카드 숨기기
     card.style.display = 'none';
 
@@ -69,6 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('defense').textContent = `DEF: ${playerDetails.defence}`;
             document.getElementById('speed').textContent = `SPD: ${playerDetails.speed}`;
 
+            // 강화 버튼에 현재 선택된 선수의 ID를 data 속성으로 저장
+            toReinforceBtn.dataset.ownedPlayerId = playerDetails.ownedPlayerId;
+
+
         } catch (error) {
             console.error('Error fetching player details:', error);
             console.log('Error Message:', error.message);
@@ -110,7 +117,16 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error selling player:', error);
             alert('선수 판매 중 오류가 발생했습니다.');
         }
-    });     
+    });
+
+    /** 강화 페이지 이동 버튼 */
+    toReinforceBtn.addEventListener('click', () => {
+        // 버튼에 저장된 ownedPlayerId를 가져옵니다.
+        const ownedPlayerId = toReinforceBtn.dataset.ownedPlayerId;
+        /** 강화 페이지로 이동 **/
+        window.location.href = `../ReinforceScene/ReinforceScene.html?ownedPlayerId=${ownedPlayerId}`;
+
+    });
 
         
 
