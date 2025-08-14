@@ -131,11 +131,6 @@ export class OwnedPlayersController {
         return res.status(404).json({ message: '해당 선수를 찾을 수 없습니다.' });
       }
 
-      // 카운트 삭제로 인한 주석처리
-      // if (ownedPlayer.count < count) {
-      //   return res.status(400).json({ message: '보유 수량보다 많이 판매할 수 없습니다.' });
-      // }
-
       /** 레어도에 따른 가격 책정 **/
       const ownedPlayerInfo = await PlayerModel.getSome(ownedPlayer.playerId);
       const own_rarity_price = await gamePrisma.rarityPrice.findUnique({
