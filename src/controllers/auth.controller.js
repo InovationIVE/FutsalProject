@@ -430,8 +430,8 @@ const sendPasswordResetLink = async (req, res) => {
       MAGIC_LINK_TTL_MINUTES * 60,
     );
 
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const magicLink = `${frontendUrl}/auth/reset-password?token=${resetToken}`; // query string 형식으로 전달, 브라우저가 이 주소를 요청하면, 프론트엔드는 /reset-password 경로에 해당하는 '새 비밀번호 설정 페이지' 컴포넌트를 사용자에게 보여줍니다. 이 페이지가 로드될 때, 프론트엔드의 JavaScript 코드는 URL에서 token 값을 읽어와서 내부 변수에 저장합니다.
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3018';
+    const magicLink = `${frontendUrl}/Scene/ResetPasswordScene/ResetPassword.html?token=${resetToken}`;
 
     await mailer.sendMail({
       to: email,
