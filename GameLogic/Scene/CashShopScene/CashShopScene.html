@@ -1,42 +1,70 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Game Scene</title>
     <link rel="stylesheet" href="CashShopScene.css" />
   </head>
   <body>
-    <div class="toolbar">
-      <div><button class="topButton" id="cashShop">캐시</button></div>
-      <div><button class="topButton" id="gacha">선수뽑기</button></div>
-      <div><button class="topButton" id="mtTeam">마이팀</button></div>
-      <div><button class="topButton" id="squad">마이스쿼트</button></div>
-      <div><button class="topButton" id="gamePlay">게임플레이</button></div>
+    <!--상단 네비게이션-->
+    <div class="navbar">
+      <div class="nav-left">
+        <a id="cashShop" href="../CashShopScene/CashShopScene.html" class="cashShopBtn"
+          >캐쉬 상점</a
+        >
+        <a id="gacha" href="../GachaScene/GachaScene.html" class="gachaBtn">가챠 뽑기</a>
+        <a id="mtTeam" href="../OwnedScene/OwnedScene.html" class="MyPlayerBtn">My Player</a>
+        <a id="squad" href="../SquadScene/SquadScene.html" class="MysquadBtn">My 스쿼드</a>
+      </div>
+      <div class="nav-right">
+        <div class="cash">보유 캐시 <strong id="user-cash-display">-</strong></div>
+        <a href="#" class="logout">로그아웃</a>
+        <button id="gamePlay" class="gamePlayBtn">게임시작</button>
+      </div>
     </div>
 
-    <div id="user-info">
-        <span>유저 ID: <span id="user-id-display"></span></span>
-        <span>보유 캐시: <span id="user-cash-display"></span></span>
-    </div>
-
+    <!-- 상품 구매 영역 + 선물하기 영역 모두 container에 포함 -->
     <div class="container">
       <h1>캐시샵</h1>
-      <div id="cash-item-list" class="item-container">
-        <!-- 캐시 아이템 목록이 여기에 표시됩니다. -->
-      </div>
+      <div id="cash-item-list" style="margin-top: 20px; font-weight: 600"></div>
+
       <hr />
+
+      <!--아이템 구매 영역-->
       <h2>아이템 구매</h2>
       <form id="purchase-item-form">
-        <label for="item-id">아이템 ID:</label>
-        <input type="text" id="item-id" name="item-id" required />
+        <label for="goods-id">아이템 ID:</label>
+        <input type="text" id="goods-id" name="goods-id" required />
         <button type="submit">구매</button>
       </form>
+
       <h2>결과</h2>
-      <div id="cash-shop-result" class="result-container">
-        <!-- 캐시샵 결과가 여기에 표시됩니다. -->
+      <div id="cash-shop-result" style="font-weight: 600; min-height: 60px"></div>
+
+      <hr />
+
+      <!--선물하기 영역-->
+      <div class="gift-section">
+        <h2>선물하기</h2>
+        <form id="gift-form" class="gift-form">
+          <label for="receiver-id">받는 사람 Id:</label>
+          <input type="text" id="receiver-id" name="receiver-id" required />
+
+          <label for="gift-cash">선물금액:</label>
+          <input type="number" id="gift-cash" name="gift-cash" min="1" required />
+
+          <button type="submit">선물하기</button>
+        </form>
+
+        <div id="gift-result"></div>
+
+        <h2>내가 받은 선물</h2>
+        <div id="received-gifts">받은 선물이 없습니다.</div>
       </div>
+    </div>
 
     <script src="CashShopScript.js"></script>
+    <script src="giftTransactionScript.js"></script>
   </body>
 </html>

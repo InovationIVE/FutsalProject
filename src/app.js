@@ -14,6 +14,7 @@ import goodsRouter from './routes/goods.router.js';
 import PlayerRouter from './routes/player.router.js';
 import squadRouter from './routes/squad.router.js';
 import userRouter from './routes/user.router.js';
+import giftTransactionRouter from './routes/giftTransaction.router.js';
 import gameRouter from './routes/game.router.js';
 import rankRouter from './routes/rank.router.js';
 import auctionRouter from './routes/auction.router.js';
@@ -75,6 +76,7 @@ app.use('/api', [
   squadRouter,
   ownedPlayersRouter,
   userRouter,
+  giftTransactionRouter,
   gameRouter,
   auctionRouter,
   rankRouter,
@@ -83,6 +85,7 @@ app.use('/api', [
 app.use('/auth', [authRouter]);
 
 // Express 미들웨어를 Socket.IO 미들웨어로 변환하여 사용
+const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next);
 const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next);
 
 io.use(wrap(cookieParser()));

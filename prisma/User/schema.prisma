@@ -70,7 +70,7 @@ model OwnedPlayers {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   auctions      Auction[]
-  account       Account?        @relation(fields: [accountId], references: [accountId], onDelete:SetNull)
+  account       Account?       @relation(fields: [accountId], references: [accountId])
   squadMembers  SquadMembers[]
 
   @@index([accountId], map: "OwnedPlayers_accountId_fkey")
@@ -166,7 +166,6 @@ model Bid {
   @@index([auctionId], map: "Bid_auctionId_fkey")
   @@map("Bid")
 }
-
 
 enum GiftStatus {
   success

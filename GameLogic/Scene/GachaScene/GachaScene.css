@@ -1,36 +1,76 @@
-.toolbar {
+* {
+  box-sizing: border-box;
+}
+
+body {
+    position: relative; /* 가상 요소의 기준 위치 설정 */
+    min-height: 100vh; /* body가 최소한 뷰포트 높이만큼은 차지하도록 설정 */
+    margin: 0; /* body 기본 마진 제거 */
+    padding: 0; /* body 기본 패딩 제거 */
+    z-index: 1; /* body 내용물이 가상 요소 위에 오도록 설정 */
+}
+
+body::before {
+    content: ""; /* 가상 요소를 생성하려면 필수 */
+    position: absolute; /* body를 기준으로 절대 위치 설정 */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../../Image/LobbyImage.png'); /* 여기에 배경 이미지 경로 지정 */
+    background-size: cover; /* 이미지가 요소 전체를 덮도록 조절 */
+    background-position: center; /* 이미지를 중앙에 배치 */
+    background-repeat: no-repeat; /* 이미지 반복 방지 */
+    opacity: 0.5; /* 투명도 조절 (0.0은 완전 투명, 1.0은 완전 불투명) */
+    z-index: -1; /* body 내용물 뒤에 배치 */
+}
+
+
+
+/* 상단 네비게이션 */
+.navbar {
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  background-color: #f0f0f0;
-  border-bottom: 5px solid #000000;
-}
-
-.toolbar .topButton {
+  align-items: center;
+  background-color: black;
+  color: white;
   padding: 10px 20px;
-  background-color: #ffffff;
-  border: 2px solid #000000;
-  border-radius: 1px;
+  justify-content: space-between;
+}
+.nav-left,
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.nav-left a {
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+.nav-left a.active {
+  background-color: #1a1a1a;
+}
+.cash {
+  font-size: 14px;
+}
+
+.logout {
+  font-size: small;
+  color: white;
+  text-decoration: none;
+}
+
+.gamePlayBtn {
+  background-color: #00c853;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 25px;
   cursor: pointer;
-
-  width: 150px;
-  height: 50px;
-
-  transition:
-    background-color 0.3s ease,
-    transform 0.3s ease;
+  font-size: 14px;
 }
 
-.toolbar .topButton:hover {
-  /* 배경색을 회색으로 변경 */
-  background-color: #f0f0f0;
-
-  /* 버튼을 살짝 확대 */
-  transform: scale(1.05);
-
-  /* 그림자 효과 추가 (버튼이 떠오르는 느낌) */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
 
 .pack-container {
   display: flex;
@@ -41,11 +81,159 @@
 
 .card-container {
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
+  flex-wrap: wrap; /* Allow cards to wrap to the next line */
+  gap: 16px; /* Add some space between cards */
+  perspective: 1000px; /* Set the perspective for the 3D effect */
 }
 
 .gacha-pack{
-  border: solid #0fd63a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: solid #000000;
+  padding: 10px;
+  background-image: url('../../Image/LobbyImage.png'); /* Placeholder image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 200px; /* Example width */
+  height: 250px; /* Example height */
 }
 
+.card {
+  width: 150px;
+  height: 200px;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.card.is-flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 10px;
+}
+
+.card-front {
+  background-color: #bbb;
+  color: black;
+  /* You can add a background image for the card back here */
+  background-image: url('../../Image/CardBack.png');
+  background-size: cover;
+}
+
+.card-back {
+  background-color: #f0f0f0;
+  color: black;
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  word-wrap: break-word;
+}
+
+.card-back h3 {
+  font-size: 1.1em;
+  margin-bottom: 5px;
+}
+
+.card-back p {
+  font-size: 0.85em;
+  margin-bottom: 3px;
+}
+
+/* Rarity styles */
+.rarity-n { border: 5px solid #cd7f32; }
+.rarity-r { border: 5px solid #c0c0c0; }
+.rarity-sr { border: 5px solid #ffd700; }
+.rarity-ssr { border: 5px solid #e5e4e2; }
+.rarity-ur { border: 5px solid #b9f2ff; }
+
+/* Modal Styles */
+.modal {
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.close-btn {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+
+/* Button Styles */
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.draw-btn {
+  background-color: #00c853; /* Green */
+  color: white;
+  margin-right: 10px;
+}
+
+#back-to-lobby-btn {
+  background-color: #2196f3; /* Blue */
+  color: white;
+}
+
+#gacha-option-list .btn {
+  background-color: #ff9800; /* Orange */
+  color: white;
+  margin-right: 10px;
+}
