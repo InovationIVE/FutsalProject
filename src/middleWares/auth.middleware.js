@@ -5,87 +5,93 @@ import { hashToken } from '../utils/token.utils.js';
 import { setSessionCookie } from '../utils/cookie.utils.js';
 import { SESSION_DURATION_MINUTES, RENEWAL_THRESHOLD_MINUTES } from '../constants/auth.constants.js';
 
-// --- 정책 상수 ---
-// export const SESSION_DURATION_MINUTES = 60; // 이동됨
-// const RENEWAL_THRESHOLD_MINUTES = 10; // 세션 만료 5분 전부터 갱신 시도 // 이동됨
-
 
 /**
- * 인증 미들웨어 - 세션 토큰 검증 및 사용자 정보 주입
+ * 인증 미들웨어 (전역) - 세션 토큰 검증 및 사용자 정보 주입
  */
+
 const authMiddleware = async (req, res, next) => {
-  const excludedRoutes = ['/auth/login', '/auth/signup', '/auth/signup/code', '/auth/signup/code/verify', '/auth/reset-password/link', '/auth/reset-password/code/verify', '/auth/reset-password', '/auth/find-id', '/auth/find-password', '/auth/reset-password-with-token'];
+  const excludedRoutes = [
+    '/auth/login',
+    '/auth/signup/code',
+    '/auth/signup/code/verify',
+    '/auth/reset-password/link',
+    '/auth/reset-password/code/verify',
+    '/auth/reset-password',
+    '/auth/find-id',
+    '/auth/find-password',
+    '/auth/reset-password-with-token',
+  ];
+
+  // 인증이 필요 없는 경로는 바로 next()
   if (excludedRoutes.includes(req.path)) {
     return next();
   }
 
-  // 1. 요청 쿠키에서 세션토큰 추출 
-  let sessionToken;
-  if (req.cookies.sessionToken) {
-    sessionToken = req.cookies.sessionToken;
-  }
+  // 1. 요청 쿠키에서 세션토큰 추출
+  const sessionToken = req.cookies.sessionToken;
 
-  // 클라이언트가 세션토큰을 쿠키로 전달하지 않았으면 더 진행하지 않고 바로 401 에러를 반환합니다.
-  if (!sessionToken) {                
+  // 세션토큰이 없으면 인증 불가
+  if (!sessionToken) {
     return res.status(401).json({ message: '로그인이 필요합니다.' });
   }
 
   try {
-    // 서버 측에 저장된 헤시된 세션토큰과 비교를 위해 클라이언트가 전달한 세션토큰을 해시화
+    // 2. 세션토큰 해시화
     const sessionTokenHash = hashToken(sessionToken);
 
-    // 2. 네거티브 캐시 확인 (유효하지 않은 세션토큰인 경우 인지 판단)
+    // 3. 네거티브 캐시(유효하지 않은 세션) 확인
     if (negativeSessionCache.isNegative(sessionTokenHash)) {
       return res.status(401).json({ message: '유효하지 않은 세션입니다 (캐시됨).' });
     }
 
-    // 3. 세션 캐시 확인
+    // 4. 세션 캐시 확인
     const cachedSession = sessionCache.get(sessionTokenHash);
+
     if (cachedSession) {
-      // 캐시된 세션의 만료 시간 확인
+      // 4-1. 캐시된 세션이 만료되었는지 확인
       if (new Date(cachedSession.expiresAt) < new Date()) {
-        sessionCache.del(sessionTokenHash); // 만료된 세션 캐시에서 제거
-        // 비동기적으로 DB에서도 정확히 해당 세션만 제거
+        // 만료된 세션은 캐시/DB/네거티브 캐시 처리 후 401 반환
+        sessionCache.del(sessionTokenHash);
         userPrisma.session.delete({ where: { sessionTokenHash } }).catch();
+        negativeSessionCache.setNegative(sessionTokenHash);
         return res.status(401).json({ message: '세션이 만료되었습니다 (캐시 확인).' });
+      } else {
+        // 4-2. 캐시된 세션이 유효하면 사용자 정보 주입 후 슬라이딩 만료 미들웨어로 이동
+        req.user = { accountId: cachedSession.accountId, sessionToken };
+        return await handleSlidingExpiration(req, res, next, cachedSession.expiresAt);
       }
+    } else {
+      // 5. 캐시에 없으면 DB에서 세션 조회
+      const dbSession = await userPrisma.session.findUnique({
+        where: { tokenHash: sessionTokenHash },
+      });
 
-      req.user = { accountId: cachedSession.accountId, sessionToken };
-      // 슬라이딩 만료 처리
-      return await handleSlidingExpiration(req, res, next, cachedSession.expiresAt);
+      if (!dbSession) {
+        // 5-1. DB에도 없으면 네거티브 캐시에 추가 후 401 반환
+        negativeSessionCache.setNegative(sessionTokenHash);
+        return res.status(401).json({ message: '세션이 존재하지 않습니다.' });
+      } else if (new Date(dbSession.expiresAt) < new Date()) {
+        // 5-2. DB 세션이 만료된 경우 DB/네거티브 캐시 처리 후 401 반환
+        userPrisma.session.delete({ where: { sessionTokenHash } }).catch();
+        negativeSessionCache.setNegative(sessionTokenHash);
+        return res.status(401).json({ message: '세션이 만료되었습니다.' });
+      } else {
+        // 5-3. (서버 재시동 시 캐시에 저장된 세션이 만료되어 있는 경우) DB 세션이 유효하면면 캐시에 저장, 사용자 정보 주입, 슬라이딩 만료 처리
+        req.user = { accountId: dbSession.accountId, sessionToken };
+        const ttlSeconds = Math.floor(
+          (new Date(dbSession.expiresAt).getTime() - Date.now()) / 1000,
+        );
+        if (ttlSeconds > 0) {
+          sessionCache.setWithTTL(
+            sessionTokenHash,
+            { accountId: dbSession.accountId, expiresAt: dbSession.expiresAt },
+            ttlSeconds,
+          );
+        }
+        return await handleSlidingExpiration(req, res, next, dbSession.expiresAt);
+      }
     }
-
-    // 3. DB에서 세션 조회
-    const dbSession = await userPrisma.session.findUnique({
-      where: { tokenHash: sessionTokenHash },
-    });
-
-    if (!dbSession) {
-      negativeSessionCache.setNegative(sessionTokenHash); // 네거티브 캐시에 추가
-      return res.status(401).json({ message: '세션이 존재하지 않습니다.' });
-    }
-
-    if (new Date(dbSession.expiresAt) < new Date()) {
-      // DB에서 만료된 세션 삭제 (비동기)
-      userPrisma.session.delete({ where: { sessionTokenHash } }).catch();
-      negativeSessionCache.setNegative(sessionTokenHash);
-      return res.status(401).json({ message: '세션이 만료되었습니다.' });
-    }
-
-    // --- 세션이 유효한 경우 ---
-    req.user = { accountId: dbSession.accountId, sessionToken };
-    const ttlSeconds = Math.floor((new Date(dbSession.expiresAt).getTime() - Date.now()) / 1000);
-    if (ttlSeconds > 0) {
-      sessionCache.setWithTTL(
-        sessionTokenHash,
-        { accountId: dbSession.accountId, expiresAt: dbSession.expiresAt },
-        ttlSeconds,
-      );
-    }
-
-    // 슬라이딩 만료 처리
-    return await handleSlidingExpiration(req, res, next, dbSession.expiresAt);
-
   } catch (error) {
     console.error('인증 미들웨어 오류:', error);
     return res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
@@ -100,7 +106,7 @@ async function handleSlidingExpiration(req, res, next, expiresAt) {
   const remainingTime = new Date(expiresAt).getTime() - now.getTime();
   const renewalThreshold = RENEWAL_THRESHOLD_MINUTES * 60 * 1000;
 
-  // 남은 시간이 임계값보다 적으면 갱신 시도
+  // 남은 시간이 임계값보다 적으면 만료시각 갱신
   if (remainingTime < renewalThreshold) {
     try {
       const newExpiresAt = new Date(Date.now() + SESSION_DURATION_MINUTES * 60 * 1000);
