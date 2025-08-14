@@ -16,11 +16,37 @@
         <a href="../SquadScene/SquadScene.html" class="MysquadBtn">My 스쿼드</a>
       </div>
       <div class="nav-right">
-        <div class="cash">보유 캐시 <strong>100,000,000</strong></div>
-        <a href="../LoginScene/LoginScene.html" class="login">로그인</a>
-        <button class="gamePlayBtn">게임시작</button>
+        <!-- 이 부분은 LobbyScript.js에 의해 동적으로 채워집니다. -->
       </div>
     </div>
-    <script src="LobbyScript.js"></script>
+
+    <!-- 비밀번호 변경 Modal (숨겨져 있음) -->
+    <div id="change-password-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>비밀번호 변경</h2>
+        <form id="change-password-form">
+          <div class="input-group">
+            <label for="current-password">현재 비밀번호</label>
+            <input type="password" id="current-password" required />
+          </div>
+          <div class="input-group">
+            <label for="new-password">새 비밀번호</label>
+            <input type="password" id="new-password" required />
+          </div>
+          <div class="input-group">
+            <label for="confirm-password">새 비밀번호 확인</label>
+            <input type="password" id="confirm-password" required />
+          </div>
+          <button type="submit">
+            <span class="btn-text">변경하기</span>
+            <div class="loader"></div>
+          </button>
+        </form>
+        <p id="change-password-message" class="modal-message"></p>
+      </div>
+    </div>
+
+    <script type="module" src="LobbyScript.js"></script>
   </body>
 </html>
