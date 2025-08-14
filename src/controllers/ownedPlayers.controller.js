@@ -115,7 +115,8 @@ export class OwnedPlayersController {
       next(err);
     }
   }
-  //보유 선수 판매
+
+  // 보유 선수 판매
   static async playerSale(req, res, next) {
     try {
       const { ownedPlayerId } = req.body;
@@ -140,24 +141,36 @@ export class OwnedPlayersController {
       /** 레어도 비용 에 (보유선수레벨*10)% 만큼 가산 후, 100의 자리수에서 버림**/
       const gain =
         Math.floor((own_rarity_price.priceForRarity * (ownedPlayer.level / 10 + 1)) / 100) * 100;
+
       await userPrisma.$transaction(
-        async (tx) => {
-          await tx.account.update({
-            where: { accountId: +accountId },
-            data: { cash: { increment: gain } },
-          });
-          await tx.ownedPlayers.delete({
-            where: { ownedPlayerId: ownedPlayer.ownedPlayerId },
-          });
-        },
-        {
-          isolationLevel: UserPrisma.TransactionIsolationLevel.ReadCommitted,
-        },
-      );
+      async (tx) => {
+        // 2. SquadMembers 테이블에서 해당 선수를 제거합니다. (onDelete: Cascade 설정에 따라)
+        await tx.squadMembers.deleteMany({
+          where: { ownedPlayerId: ownedPlayer.ownedPlayerId },
+        });
+
+        // 3. 계정의 캐시를 업데이트합니다.
+        await tx.account.update({
+          where: { accountId: +accountId },
+          data: { cash: { increment: gain } },
+        });
+
+        // 4. ownedPlayers 레코드를 삭제합니다.
+        //    Auction의 ownedPlayerId는 onDelete: SetNull에 의해 자동으로 null이 됩니다.
+        await tx.ownedPlayers.delete({
+          where: { ownedPlayerId: ownedPlayer.ownedPlayerId },
+        });
+      },
+      {
+        isolationLevel: UserPrisma.TransactionIsolationLevel.ReadCommitted,
+      },
+    );
+
       const updated = await userPrisma.account.findUnique({
         where: { accountId: +accountId },
         select: { cash: true },
       });
+
       return res.status(200).json({
         message: '선수판매 완료',
         sales: gain,
