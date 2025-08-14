@@ -62,6 +62,8 @@ h1 {
 }
 #auction-list {
     list-style-type: none; 
+    max-height: 600px; /* 스크롤을 위한 최대 높이 설정 */
+    overflow-y: auto; /* 내용이 넘칠 경우 스크롤바 표시 */
     padding: 0; 
 }
 .auction-item {
