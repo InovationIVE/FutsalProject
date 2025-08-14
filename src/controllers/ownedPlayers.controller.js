@@ -21,6 +21,7 @@ export class OwnedPlayersController {
           name: true,
           level:true,
           rarity: true,
+          level: true,
         },
       });
 
@@ -75,6 +76,7 @@ export class OwnedPlayersController {
           ownedPlayerId: +ownedPlayerId,
         },
         select: {
+          playerId: true,
           ownedPlayerId: true,
           name: true,
           level: true,
@@ -91,25 +93,18 @@ export class OwnedPlayersController {
         return res.status(404).json({ message: '해당 선수를 보유하고 있지 않습니다.' });
       }
 
-      // // 2. Game DB에서 Player 상세정보 조회
-      // const player = await gamePrisma.player.findUnique({
-      //   where: {
-      //     playerId: ownedPlayer.playerId,
-      //   },
-      //   select: {
-      //     playerId: true,
-      //     soccerPlayerId: true,
-      //     name: true,
-      //     speed: true,
-      //     attack: true,
-      //     defence: true,
-      //     rarity: true,
-      //     profileImage: true,
-      //   },
-      // });
+      // 2. Game DB에서 Player 상세정보 조회
+      const player = await gamePrisma.player.findUnique({
+        where: {
+          playerId: ownedPlayer.playerId,
+        },
+        select: {
+          profileImage: true,
+        },
+      });
 
       // 3. 응답 조합
-      return res.status(200).json({message:`${ownedPlayer.name}의 세부정보입니다.`, ...ownedPlayer});
+      return res.status(200).json({message:`${ownedPlayer.name}의 세부정보입니다.`, ...ownedPlayer, profileImage: player?.profileImage || 'null' });
     } catch (err) {
       next(err);
     }
@@ -181,8 +176,8 @@ export class OwnedPlayersController {
 
       return res.status(200).json({
         message: '선수판매 완료',
-        판매금액: gain,
-        남은금액: updated.cash,
+        sales: gain,
+        remain: updated.cash,
       });
     } catch (err) {
       next(err);

@@ -9,6 +9,7 @@ router.get('/auctions', AuctionController.getAuctions);
 router.get('/auctions/:auctionId', AuctionController.getAuctionDetails);
 router.post('/auctions/:auctionId/bid', AuctionController.placeBid);
 router.patch('/auctions/:auctionId/end', AuctionController.endAuction);
+router.patch('/auctions/:auctionId/cancel', AuctionController.cancelAuction);
 
 
 

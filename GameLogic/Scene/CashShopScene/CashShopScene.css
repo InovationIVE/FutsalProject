@@ -1,33 +1,212 @@
-.toolbar {
+body {
+  margin: 0;
+  font-family: pretendard, sans-serif;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* 상단 네비게이션 */
+.navbar {
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  background-color: #f0f0f0;
-  border-bottom: 5px solid #000000;
-}
-
-.toolbar .topButton{
+  align-items: center;
+  background-color: black;
+  color: white;
   padding: 10px 20px;
-  background-color: #ffffff;
-  border: 2px solid #000000;
-  border-radius: 1px;
-  cursor: pointer;
-
-  width: 150px;
-  height: 50px;
-
-  transition: background-color 0.3s ease, transform 0.3s ease;
-
+  justify-content: space-between;
+}
+.nav-left,
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.nav-left a {
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+.nav-left a.active {
+  background-color: #1a1a1a;
+}
+.cash {
+  font-size: 14px;
 }
 
+.logout {
+  font-size: small;
+  color: white;
+  text-decoration: none;
+}
 
-.toolbar .topButton:hover {
-  /* 배경색을 회색으로 변경 */
-  background-color: #f0f0f0;
+.gamePlayBtn {
+  background-color: #00c853;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+}
 
-  /* 버튼을 살짝 확대 */
-  transform: scale(1.05);
+/* 컨테이너 영역 */
+.container {
+  max-width: 800px;
+  margin: 40px auto;
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
 
-  /* 그림자 효과 추가 (버튼이 떠오르는 느낌) */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+h1,
+h2 {
+  margin-top: 0;
+}
+
+/* 캐시 상품 목록 스타일 */
+#cash-item-list {
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: pre-line; /* 줄바꿈 유지 */
+}
+
+/* 캐시 상품 카드 스타일 */
+.cash-goods {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.cash-goods:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* 구매 폼 스타일 */
+form {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+label {
+  font-weight: 600;
+  min-width: 70px;
+}
+
+input[type='text'] {
+  flex-grow: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+button[type='submit'] {
+  background-color: #00c853;
+  border: none;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+button[type='submit']:hover {
+  background-color: #009624;
+}
+
+/* 결과 표시 영역 */
+#cash-shop-result {
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  min-height: 60px;
+  font-weight: 600;
+}
+
+/* 선물하기 섹션 스타일 */
+.gift-section {
+  margin-top: 40px;
+  border-top: 1px solid #ddd;
+  padding-top: 30px;
+}
+
+.gift-section h2 {
+  margin-bottom: 20px;
+}
+
+.gift-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.gift-form label {
+  font-weight: 600;
+  min-width: 90px;
+}
+
+.gift-form input[type='text'],
+.gift-form input[type='number'] {
+  flex-grow: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.gift-form button {
+  background-color: #2196f3;
+  border: none;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.gift-form button:hover {
+  background-color: #1769aa;
+}
+
+#gift-result {
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  background-color: #e3f2fd;
+  padding: 15px;
+  border-radius: 8px;
+  min-height: 60px;
+  font-weight: 600;
+  color: #0d47a1;
+  white-space: pre-line;
+}
+
+/* 받은 선물 리스트 */
+#received-gifts {
+  margin-top: 30px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  background-color: #f1f8e9;
+  padding: 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  white-space: pre-line;
 }

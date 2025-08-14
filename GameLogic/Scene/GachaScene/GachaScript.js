@@ -1,49 +1,74 @@
+import GameManager from '../../Manager/GameManager.js';
+
 document.addEventListener('DOMContentLoaded', () => {
-  const cashShopBtn = document.getElementById('cashShop');
-  const gachaBtn = document.getElementById('gacha');
-  const mtTeamBtn = document.getElementById('mtTeam');
-  const squadBtn = document.getElementById('squad');
-  const gamePlayBtn = document.getElementById('gamePlay');
+  GameManager.setupNavigation();
+
   const gachaPackList = document.getElementById('gacha-pack-list');
   const cardDisplayArea = document.getElementById('card-display-area');
   const backToLobbyBtn = document.getElementById('back-to-lobby-btn');
   const optionBtnList = document.getElementById('gacha-option-list');
+  const gamePlayBtn = document.querySelector('.gamePlayBtn');
+  const modal = document.getElementById('edit-gacha-modal');
+  const closeBtn = document.querySelector('.close-btn');
+  const editForm = document.getElementById('edit-gacha-form');
+
+  closeBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  window.addEventListener('click', (event) => {
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
+  });
+
+  editForm.addEventListener('submit', async (event) => {
+    const clickedBtn = event.target;
+    const btnId = clickedBtn.id;
+
+    event.preventDefault(); //페이지 새로고침 없이 비동기적으로 폼 데이터를 처리
+
+    const gachaId = document.getElementById('edit-gacha-id').value;
+    const cardName = document.getElementById('edit-cardName').value;
+    const price = parseInt(document.getElementById('edit-price').value, 10);
+    const bronze = parseInt(document.getElementById('edit-bronze').value, 10);
+    const silver = parseInt(document.getElementById('edit-silver').value, 10);
+    const gold = parseInt(document.getElementById('edit-gold').value, 10);
+    const platinum = parseInt(document.getElementById('edit-platinum').value, 10);
+    const diamond = parseInt(document.getElementById('edit-diamond').value, 10);
+
+    switch (btnId) {
+      case 'edit-card':
+        await UpdateGachaCard(gachaId, cardName, price, bronze, silver, gold, platinum, diamond);
+        break;
+      case 'create-card':
+        break;
+    }
+
+    modal.style.display = 'none';
+  });
+
+  gamePlayBtn.addEventListener('click', async () => {
+    window.location.href = '../GameReadyScene/GameReadyScene.html';
+    await createRank();
+  });
 
   const allowedPackNames = ['BronzePack', 'SilverPack', 'GoldPack', 'PlatinumPack', 'DiamondPack'];
+  initializePage();
 
-  cashShopBtn.addEventListener('click', () => {
-    window.location.href = '../CashShopScene/CashSHopScene.html';
-  });
-
-  gachaBtn.addEventListener('click', () => {
-    window.location.href = '../GachaScene/GachaScene.html';
-  });
-
-  mtTeamBtn.addEventListener('click', () => {
-    window.location.href = '../OwnedScene/OwnedScene.html';
-  });
-
-  squadBtn.addEventListener('click', () => {
-    window.location.href = '../SquadScene/SquadScene.html';
-  });
-
-  gamePlayBtn.addEventListener('click', () => {
-    window.location.href = '../GamePlayScene/GamePlayScene.html';
-  });
-
-
-
-  // 페이지 로드 시 가챠 팩 목록을 불러옵니다.
-  loadGachaPacks();
-
-  
-
+  async function initializePage() {
+    const userRole = await getAdminCheck();
+    if (userRole !== 'ADMIN') {
+      optionBtnList.style.display = 'none';
+    }
+    loadGachaPacks();
+  }
 
   backToLobbyBtn.addEventListener('click', () => {
     window.location.href = '../LobbyScene/LobbyScene.html';
   });
 
-  optionBtnList.addEventListener('click', (event) => {
+  optionBtnList.addEventListener('click', async (event) => {
     const clickedBtn = event.target;
 
     // 클릭된 요소가 button일 때만 처리
@@ -58,12 +83,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         case 'gacha-modify-btn':
           console.log('수정 버튼 클릭');
-          modifyGacha();
+          await modifyGacha();
           break;
 
         case 'gacha-create-btn':
           console.log('생성 버튼 클릭');
-          // createGacha();
+          await createGacha();
           break;
 
         case 'gacha-view-btn':
@@ -77,27 +102,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
- async function modifyGacha() {
+  async function modifyGacha() {
     const gachaId = prompt('수정할 가챠 카드의 ID를 입력하세요:');
     if (!gachaId) {
       alert('가챠 카드 ID를 입력하지 않았습니다.');
       return;
     }
 
-    const cardName = prompt('새로운 카드 이름을 입력하세요:');
-    const price = parseInt(prompt('새로운 가격을 입력하세요:'), 10);
-    const bronze = parseInt(prompt('새로운 브론즈 확률을 입력하세요:'), 10);
-    const silver = parseInt(prompt('새로운 실버 확률을 입력하세요:'), 10);
-    const gold = parseInt(prompt('새로운 골드 확률을 입력하세요:'), 10);
-    const platinum = parseInt(prompt('새로운 플래티넘 확률을 입력하세요:'), 10);
-    const diamond = parseInt(prompt('새로운 다이아몬드 확률을 입력하세요:'), 10);
+    try {
+      const response = await fetch(`/api/admin/gacha/${gachaId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // 인증 쿠키를 보내기 위해 필요
+      });
+      if (!response.ok) {
+        throw new Error('Gacha pack not found');
+      }
+      const pack = await response.json();
 
-    if (!cardName || isNaN(price) || isNaN(bronze) || isNaN(silver) || isNaN(gold) || isNaN(platinum) || isNaN(diamond)) {
-      alert('모든 필드를 올바르게 입력해야 합니다.');
-      return;
+      document.getElementById('edit-gacha-id').value = pack.gachaId;
+      document.getElementById('edit-cardName').value = pack.cardName;
+      document.getElementById('edit-price').value = pack.price;
+      document.getElementById('edit-bronze').value = pack.bronze;
+      document.getElementById('edit-silver').value = pack.silver;
+      document.getElementById('edit-gold').value = pack.gold;
+      document.getElementById('edit-platinum').value = pack.platinum;
+      document.getElementById('edit-diamond').value = pack.diamond;
+
+      modal.style.display = 'block';
+    } catch (error) {
+      alert(error.error);
     }
+  }
 
-    await UpdateGachaCard(gachaId, cardName, price, bronze, silver, gold, platinum, diamond);
+  /*가챠 카드 생성 */
+  async function createGacha() {
+    modal.style.display = 'block';
   }
 
   /**
@@ -116,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || '카드팩 목록을 불러오는데 실패했습니다.');
+        throw new Error(errorData.error || '카드팩 목록을 불러오는데 실패했습니다.');
       }
       const packs = await response.json();
       displayGachaPacks(packs);
@@ -138,8 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
     diamond,
   ) {
     try {
-      const response = await fetch(`/api/gacha/${gachaId}`, {
-        method: 'POST',
+      const response = await fetch(`/api/admin/gacha/${gachaId}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -154,9 +196,10 @@ document.addEventListener('DOMContentLoaded', () => {
           diamond,
         }),
       }); // 서버에 카드팩 수정 요청
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || '카드팩 수정에 실패했습니다.');
+        throw new Error(errorData.error || '카드팩 수정에 실패했습니다.');
       }
       const updatedCard = await response.json();
       console.log('카드팩 수정 성공:', updatedCard);
@@ -164,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
       loadGachaPacks(); // 수정 후 카드팩 목록을 다시 불러옵니다
     } catch (error) {
       console.error('Error updating gacha card:', error);
-      alert(`카드팩 수정 실패: ${error.message}`);
+      alert(`카드팩 수정 실패: ${error}`);
     }
   }
 
@@ -186,11 +229,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const packElement = document.createElement('div');
       packElement.className = 'gacha-pack';
       packElement.innerHTML = `
-        <h3>${pack.cardName}</h3>
-        <p>가격: ${pack.price} 캐시</p>
-        <button class="draw-btn" data-gachaid="${pack.gachaId}" data-count="1">1회 뽑기</button>
-        <button class="draw-btn" data-gachaid="${pack.gachaId}" data-count="10">10회 뽑기</button>
+        <h3 style="color: #ffffffff;">${pack.cardName}</h3>
+        <p style="color: #ffffffff;">가격: ${pack.price} 캐시</p>
+        <button class="draw-btn btn" data-gachaid="${pack.gachaId}" data-count="1">1회 뽑기</button>
+        <button class="draw-btn btn" data-gachaid="${pack.gachaId}" data-count="10">10회 뽑기</button>
       `;
+      packElement.style.backgroundImage = `url('../../Image/${pack.cardName}.png')`;
+      console.log(packElement.style.backgroundImage);
       gachaPackList.appendChild(packElement);
     });
 
@@ -230,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
         displayDrawnCards(drawnCards);
       } else {
         const errorData = await response.json();
-        cardDisplayArea.innerHTML = `<p>오류: ${errorData.message || '선수 뽑기에 실패했습니다.'}</p>`;
+        cardDisplayArea.innerHTML = `<p>오류: ${errorData.error || '선수 뽑기에 실패했습니다.'}</p>`;
       }
     } catch (error) {
       console.error('Error drawing cards:', error);
@@ -252,15 +297,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
     cards.forEach((card) => {
       const cardElement = document.createElement('div');
-      cardElement.className = `card rarity-${card.rarity.toLowerCase()}`;
-      cardElement.innerHTML = `
+      cardElement.className = 'card';
+
+      const cardInner = document.createElement('div');
+      cardInner.className = 'card-inner';
+
+      const cardFront = document.createElement('div');
+      cardFront.className = 'card-front';
+
+      const cardBack = document.createElement('div');
+      cardBack.className = `card-back rarity-${card.rarity.toLowerCase()}`;
+      cardBack.innerHTML = `
         <h3>${card.name}</h3>
         <p>희귀도: ${card.rarity}</p>
         <p>공격: ${card.attack}</p>
         <p>수비: ${card.defence}</p>
         <p>속도: ${card.speed}</p>
       `;
+
+      cardInner.appendChild(cardFront);
+      cardInner.appendChild(cardBack);
+      cardElement.appendChild(cardInner);
+
+      cardElement.addEventListener('click', () => {
+        cardElement.classList.toggle('is-flipped');
+      });
+
       cardDisplayArea.appendChild(cardElement);
     });
   }
+
+  // 계정이 admin인지 확인
+  async function getAdminCheck() {
+    try {
+      const response = await fetch('/auth/role', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      const isRole = await response.json();
+      return isRole.role;
+    } catch (error) {
+      console.error('Error drawing cards:', error);
+      cardDisplayArea.innerHTML = '<p>서버와 통신 중 오류가 발생했습니다.</p>';
+    }
+  }
 });
+
+async function createRank() {
+  try {
+    const response = await fetch('/api/rank', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // 인증 쿠키를 보내기 위해 필요
+    });
+  } catch (error) {
+    console.error('Error drawing cards:', error);
+    cardDisplayArea.innerHTML = '<p>서버와 통신 중 오류가 발생했습니다.</p>';
+  }
+}

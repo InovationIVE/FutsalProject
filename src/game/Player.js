@@ -7,6 +7,10 @@ export class Player {
     this.moveStat = move;
     this.teamName = teamName;
     this.position = { x: 0, y: 0 };
+    this.shootNum = 0;
+    this.passNum = 0;
+    this.tackleNum = 0;
+    this.hasBall = 0;
   }
 
   move(x, y) {
@@ -27,6 +31,7 @@ export class Player {
     if (roll <= successRate) {
       ball.owner = targetPlayer;
       log.push(`${this.name}가 ${targetPlayer.name}에게 패스 성공!`);
+      this.passNum += 1;
       return true;
     } else {
       ball.owner = null;
@@ -46,6 +51,7 @@ export class Player {
     if (roll <= successRate) {
       ball.owner = this;
       log.push(`${this.name}가 ${opponent.name}의 공을 가로챘습니다!`);
+      this.tackleNum += 1;
       return true;
     } else {
       log.push(`${this.name}의 공 탈취 실패!`);
@@ -53,17 +59,20 @@ export class Player {
     }
   }
 
-  shoot(goal, ball) {
+  shoot(goal, ball, log) {
     if (ball.owner !== this) {
-      log(`${this.name}가 공을 가지고 있지 않습니다.`);
+      log.push(`${this.name}가 공을 가지고 있지 않습니다.`);
       return false;
     }
     const distance =
       Math.abs(this.position.x - goal.position.x) + Math.abs(this.position.y - goal.position.y);
 
-    const successRate = Math.max(10, 80 - distance * 10 + this.attack * 2);
+    const successRate = Math.max(10, 80 - distance * 10 + this.attack/10);
     const roll = Math.random() * 100;
 
+    this.shootNum += 1;
+    log.push("뽑은 숫자"+roll);
+    log.push(" 성공할 확률" +successRate);
     if (roll <= successRate) {
       return true;
     } else {
