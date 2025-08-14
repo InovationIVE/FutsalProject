@@ -6,7 +6,7 @@ body {
     display: flex; /* Changed from 'float: center;' */
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    height: 100vh; /** 뷰포인트 기준 100 확보*/
     margin: 0;
 }
 
@@ -18,7 +18,7 @@ body {
     color: white;
     padding: 10px 20px;
     justify-content: space-between;
-    width: 100%; /* Add this to make the navbar full width */
+    width: 98%; /* Add this to make the navbar full width */
     position: fixed; /* Add this to keep the navbar at the top */
     top: 0; /* Add this to keep the navbar at the top */
     left: 0; /* Add this to keep the navbar at the top */
@@ -80,7 +80,7 @@ body {
     height: 60%;
     max-width: 500px;
     margin-top: 60px; /* Add this to push the container down below the fixed navbar */
-    margin: 40px;
+    margin: 40px; /* 가장자리로 부터 40px 확보 */
 }
 
 h1 {
