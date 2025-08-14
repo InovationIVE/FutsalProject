@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
 
       if (response.ok) {
+        // 로그인 성공 시 accountId를 sessionStorage에 저장
+        sessionStorage.setItem('accountId', data.user.accountId);
+
         // 로그인 성공 시 로비 씬으로 이동
         window.location.href = '/Scene/LobbyScene/LobbyScene.html';
       } else {

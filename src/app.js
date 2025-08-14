@@ -14,14 +14,13 @@ import goodsRouter from './routes/goods.router.js';
 import PlayerRouter from './routes/player.router.js';
 import squadRouter from './routes/squad.router.js';
 import userRouter from './routes/user.router.js';
+import giftTransactionRouter from './routes/giftTransaction.router.js';
 import gameRouter from './routes/game.router.js';
 import rankRouter from './routes/rank.router.js';
 import auctionRouter from './routes/auction.router.js';
 //import reinforceRouter from './routes/reinforce.router.js';
 import { authMiddleware } from './middleWares/auth.middleware.js';
 import { platform } from 'os';
-
-
 
 // --- Game Classes ---
 import initSocketEvents from './socket/index.js';
@@ -31,9 +30,7 @@ const __dirname = path.dirname(__filename); // 현재 디렉토리 경로를 가
 
 dotenv.config();
 
-
 const app = express();
-
 
 const PORT = 3018;
 
@@ -56,21 +53,20 @@ app.use('/api', [
   squadRouter,
   ownedPlayersRouter,
   userRouter,
+  giftTransactionRouter,
   gameRouter,
   auctionRouter,
   rankRouter,
   //reinforceRouter,
-
 ]);
 app.use('/auth', [authRouter]);
 
 // Express 미들웨어를 Socket.IO 미들웨어로 변환하여 사용
-const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
+const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next);
 
 io.use(wrap(cookieParser()));
 io.use(wrap(authMiddleware));
 initSocketEvents(io);
-
 
 app.use(ErrorHandlingMiddleware);
 

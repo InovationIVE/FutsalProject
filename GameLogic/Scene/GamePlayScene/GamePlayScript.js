@@ -1,5 +1,3 @@
-
-
 document.addEventListener('DOMContentLoaded', () => {
   const socket = io();
 
@@ -17,31 +15,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const passBtn = document.getElementById('pass-btn');
   const tackleBtn = document.getElementById('tackle-btn');
   const getBallBtn = document.getElementById('get-ball-btn');
+  const gameReadyBtn = document.getElementById('game-ready-btn');
   const logList = document.getElementById('log-list');
-  const findMatchBtn = document.getElementById('find-match-btn'); // Assuming you add this button to your HTML
+
+  socket.emit('join_game_room');
 
   // --- Game State ---
   let selectedPlayer = null;
   let game = null; // Game state will be received from the server
 
   // --- Socket Event Handlers ---
-  findMatchBtn.addEventListener('click', () => {
-    log('Looking for a match...');
-    socket.emit('find_match');
-    findMatchBtn.disabled = true;
-  });
-
-  socket.on('waiting_for_match', (data) => {
-    log(data.message);
-  });
-
-  socket.on('match_found', (data) => {
-    log(`Match found! Opponent: ${data.opponentId}. Room: ${data.roomId}`);
-    log('Waiting for game to start...');
-  });
-
   socket.on('game_start', (data) => {
-    log('Game is starting!');
+    log('게임 시작!');
     game = data.gameState;
     const allPlayers = [...game.teams[0].players, ...game.teams[1].players];
     const ballOwner = allPlayers.find((p) => p.id === game.ball.ownerId);
@@ -100,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateUI() {
     if (!game) return;
-
     // Update scores, turn counters etc.
     teamAScoreEl.textContent = game.teams[0].score;
     teamBScoreEl.textContent = game.teams[1].score;
@@ -148,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     li.textContent = message;
     logList.appendChild(li);
     logList.scrollTop = logList.scrollHeight; // Auto-scroll
+    return li; // Return the created element
   }
 
   function getCell(x, y) {
@@ -250,20 +235,19 @@ document.addEventListener('DOMContentLoaded', () => {
       log(logs[i]);
     }
 
+    if (game.isGameOver) {
+      gameReadyBtn.style.display = 'block';
+      gameReadyBtn.onclick = () => {
+        window.location.href = '../GameReadyScene/GameReadyScene.html';
+      };
+    }
+
     render();
     updateUI();
   });
 
-  socket.on('process_game_end', (data) =>{
-    socket.emit('process_game_end', { roomId: data.roomId})
-  });
-
-  socket.on('game_ended', (data) =>{
-    log(data.result);
-  });
 
   socket.on('action_error', (data) => {
     log(`Error: ${data.message}`);
   });
-
 });
