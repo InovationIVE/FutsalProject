@@ -34,13 +34,14 @@ export class PlayerController{
     try {
       const { soccerPlayerId, name, profileImage, rarity } = req.body;
 
-      const exists = await PlayerModel.existsBySoccerId(soccerPlayerId);
+      /** 중복 여부 유효성 검사 **/
+      const exists = await PlayerModel.existsBySoccerId(soccerPlayerId); 
       if (exists) {
         return res.status(409).json({ error: '해당 선수 데이터가 이미 존재합니다' });
       }
 
       /** 레어도 유효성 검사 **/
-      const rarity_check = await gamePrisma.statForRarity.findUnique({
+      const rarity_check = await gamePrisma.statForRarity.findUnique({ //statForRarity 테이블에 등록되지 않은 레어도일 경우 등록 거부
        where: {rarity: rarity}
       });
       if(!rarity_check){
@@ -66,17 +67,10 @@ export class PlayerController{
       const { playerId } = req.params;
       const { soccerPlayerId, name, speed, attack, defence, profileImage, rarity } = req.body;
 
+      /** 존재 여부 유효성 검증 **/
       const exists = await PlayerModel.existsByPlayerId(playerId);
       if (!exists) {
         return res.status(404).json({ error: '해당 선수 데이터가 존재하지 않습니다' });
-      }
-      
-      /** 레어도 유효성 검사 **/
-      const rarity_check = await gamePrisma.statForRarity.findUnique({
-       where: {rarity: rarity}
-      });
-      if(!rarity_check){
-        return res.status(500).json( {error: "잘못된 레어도 입력입니다"});
       }
 
       const updatedPlayer = await PlayerModel.update(playerId, {
@@ -101,6 +95,7 @@ export class PlayerController{
     try {
       const { playerId } = req.params;
 
+      /** 존재 여부 유효성 검증 **/
       const exists = await PlayerModel.existsByPlayerId(playerId);
       if (!exists) {
         return res.status(404).json({ error: '해당 선수 데이터가 존재하지 않습니다' });
