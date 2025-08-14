@@ -623,7 +623,7 @@ const findUserIdByEmail = async (req, res) => {
 };
 
 export {
-  signup,
+  //signup,
   login,
   logout,
   changePassword,
