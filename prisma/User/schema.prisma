@@ -49,8 +49,8 @@ model SquadMembers {
   id            Int          @id @default(autoincrement())
   squadId       Int
   ownedPlayerId Int
-  ownedPlayer   OwnedPlayers @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
-  squad         Squad        @relation(fields: [squadId], references: [squadId])
+  ownedPlayer   OwnedPlayers @relation(fields: [ownedPlayerId], references: [ownedPlayerId], onDelete: Cascade)
+  squad         Squad        @relation(fields: [squadId], references: [squadId], onDelete: Cascade)
 
   @@unique([squadId, ownedPlayerId])
   @@index([ownedPlayerId], map: "squadMembers_ownedPlayerId_fkey")
@@ -111,6 +111,7 @@ model MatchHistory {
   defenceScore Int      @default(0)
   createdAt    DateTime @default(now())
   opponentId   Int
+  result       String   @default("NaN")
   account      Account  @relation("MyMatches", fields: [accountId], references: [accountId])
   opponent     Account  @relation("OpponentMatches", fields: [opponentId], references: [accountId])
 
@@ -137,7 +138,7 @@ model GiftTransaction {
 model Auction {
   auctionId     Int           @id @default(autoincrement())
   accountId     Int
-  ownedPlayerId Int
+  ownedPlayerId Int?
   startingPrice Int
   currentPrice  Int
   status        AuctionStatus @default(open)
@@ -145,7 +146,7 @@ model Auction {
   endsAt        DateTime
   deletedAt     DateTime?
   account       Account       @relation(fields: [accountId], references: [accountId])
-  ownedPlayer   OwnedPlayers  @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
+  ownedPlayer   OwnedPlayers? @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
   bid           Bid[]
 
   @@index([accountId], map: "Auction_accountId_fkey")
