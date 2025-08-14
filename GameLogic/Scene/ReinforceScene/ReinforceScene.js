@@ -5,11 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const remainingCashDisplay = document.getElementById('remainingCash');
     const reinforceDetailsDisplay = document.getElementById('reinforceDetails');
 
-    // Get ownedPlayerId from the URL query parameter
+    /* params 로부터, 이전(보유선수)에서 받아온 보유선수아이디 가져오기 */ 
     const urlParams = new URLSearchParams(window.location.search);
     const ownedPlayerId = urlParams.get('ownedPlayerId');
 
-    // If no ID is found in the URL, display an error and disable the button
+    /* 보유선수아이디 유효성 체크 */
     if (!ownedPlayerId) {
         displayOwnedPlayerId.textContent = 'Error: Player ID not found.';
         messageDisplay.textContent = 'Please select a player to reinforce from the previous page.';
@@ -17,18 +17,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return; // Stop execution
     }
 
-    // Display the player ID on the page
+    /* 페이지에 받아온 보유선수아이디 출력 */
     displayOwnedPlayerId.textContent = ownedPlayerId;
 
     reinforceBtn.addEventListener('click', async () => {
-        // Clear previous results
+        /* 이전값 초기화 */ 
         messageDisplay.textContent = '';
         remainingCashDisplay.textContent = '';
         reinforceDetailsDisplay.innerHTML = '';
         messageDisplay.className = '';
 
         try {
-            // Making a PATCH request to the reinforcement endpoint
+            /* 강화 엔드 포인트로 부터 PATCH 메소드 받아오기 */
             const response = await fetch(`/api/reinforce/${ownedPlayerId}`, {
                 method: 'PATCH',
                 headers: {
@@ -39,15 +39,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
 
-            // Check if the response was successful
+            // 정상 응답 여부 체크
             if (response.ok) {
-                // Display the main message and remaining cash
+                // api에서 상태메시지와 잔액 호출?
                 messageDisplay.textContent = result.message;
                 const cash = result.남은금액.cashAfterPayment;
                 remainingCashDisplay.textContent = `Remaining Cash: ${cash}`;
 
-                // Display detailed results based on the outcome
+                // 결과값 시각화
                 if (result.강화결과) {
+                    
                     messageDisplay.classList.add('success');
                     const details = result.강화결과;
                     reinforceDetailsDisplay.innerHTML = `
@@ -57,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p><strong>Speed:</strong> ${details.speed}</p>
                     `;
                 } else if (result.강등결과) {
+                    
                     messageDisplay.classList.add('failure');
                     const details = result.강등결과;
                     reinforceDetailsDisplay.innerHTML = `
@@ -66,8 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p><strong>Speed:</strong> ${details.speed}</p>
                     `;
                 } else if (result.message.includes('파괴')) {
+                    
                     messageDisplay.classList.add('destruction');
                 } else {
+                    
                     messageDisplay.classList.add('failure');
                 }
             } else {
@@ -75,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(result.error || 'Something went wrong on the server.');
             }
         } catch (error) {
-            // Handle network or other errors
             console.error('Error:', error);
             messageDisplay.textContent = `Error: ${error.message}`;
             messageDisplay.classList.add('error');
