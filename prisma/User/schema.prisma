@@ -111,6 +111,7 @@ model MatchHistory {
   defenceScore Int      @default(0)
   createdAt    DateTime @default(now())
   opponentId   Int
+  result       String   @default("NaN")
   account      Account  @relation("MyMatches", fields: [accountId], references: [accountId])
   opponent     Account  @relation("OpponentMatches", fields: [opponentId], references: [accountId])
 
@@ -145,7 +146,7 @@ model Auction {
   endsAt        DateTime
   deletedAt     DateTime?
   account       Account       @relation(fields: [accountId], references: [accountId])
-  ownedPlayer   OwnedPlayers?  @relation(fields: [ownedPlayerId], references: [ownedPlayerId], onDelete: SetNull)
+  ownedPlayer   OwnedPlayers? @relation(fields: [ownedPlayerId], references: [ownedPlayerId])
   bid           Bid[]
 
   @@index([accountId], map: "Auction_accountId_fkey")
