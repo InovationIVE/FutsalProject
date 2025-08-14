@@ -138,13 +138,12 @@ export class OwnedPlayersController {
 
       /** 레어도에 따른 가격 책정 **/
       const ownedPlayerInfo = await PlayerModel.getSome(ownedPlayer.playerId);
-      const own_rarity = ownedPlayerInfo.rarity;
-      // const own_rarity_price = await gamePrisma.rarityPrice.findUnique({
-      //   where:{ rarity : ownedPlayerInfo.rarity}
-      // });
-      const gain = await PlayerModel.PriceForRarity(own_rarity);
+      const own_rarity_price = await gamePrisma.rarityPrice.findUnique({
+         where:{ rarity : ownedPlayerInfo.rarity}
+      });
+
       /** 레어도 비용 에 (보유선수레벨*10)% 만큼 가산 후, 100의 자리수에서 버림**/
-      // const gain = Math.floor( (own_rarity_price.priceForRarity * (ownedPlayer.level/10 + 1)) /100 )*100; 
+      const gain = Math.floor( (own_rarity_price.priceForRarity * (ownedPlayer.level/10 + 1)) /100 )*100; 
 
       await userPrisma.$transaction(
         async (tx) => {
