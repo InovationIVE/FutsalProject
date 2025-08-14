@@ -16,12 +16,12 @@ export class OwnedPlayersController {
         where: { accountId: +accountId },
         select: {
           ownedPlayerId: true,
-          // playerId: true,
-          // profileImage: true,
           name: true,
-          level:true,
-          rarity: true,
           level: true,
+          rarity: true,
+          attack: true,
+          defence: true,
+          speed: true,
         },
       });
 
@@ -113,11 +113,11 @@ export class OwnedPlayersController {
   //보유 선수 판매
   static async playerSale(req, res, next) {
     try {
-      const { ownedPlayerId, count = 1 } = req.body;
+      const { ownedPlayerId } = req.body;
       const { accountId } = req.user;
 
-      if (!ownedPlayerId || count <= 0) {
-        return res.status(400).json({ message: '유효한 ownedPlayerId와 count를 입력해주세요.' });
+      if (!ownedPlayerId) {
+        return res.status(400).json({ message: '유효한 ownedPlayerId를 입력해주세요.' });
       }
 
       const ownedPlayer = await userPrisma.ownedPlayers.findFirst({

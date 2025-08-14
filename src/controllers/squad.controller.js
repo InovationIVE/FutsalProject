@@ -140,7 +140,7 @@ export class SquadController {
           playerId: player.playerId,
           playerName: player.name,
           playerRarity: player.rarity,
-          playerPrifileImage: player.profileImage,
+          profileImage: player.profileImage,
         };
       });
 
