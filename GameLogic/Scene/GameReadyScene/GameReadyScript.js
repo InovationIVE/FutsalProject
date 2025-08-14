@@ -229,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <thead>
               <tr>
                 <th>상대</th>
+                <th>결과</th>
                 <th>골 점수</th>
                 <th>슛 점수</th>
                 <th>패스 점수</th>
@@ -242,6 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   (match) => `
                 <tr>
                   <td>${match.opponentId || 'N/A'}</td>
+                  <td>${match.result || 'N/A'}</td>
                   <td>${match.goalScore}</td>
                   <td>${match.shootScore}</td>
                   <td>${match.passScore}</td>
