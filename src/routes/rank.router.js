@@ -8,5 +8,7 @@ router.post('/rank', RankController.createRank);
 
 router.get('/rank', RankController.getRank);
 
+router.get('/match/history/:userId', RankController.getMatchHistory);
+
 export default router;
 

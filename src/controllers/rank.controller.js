@@ -60,6 +60,9 @@ export class RankController {
           },
           rankScore: true,
           tier: true,
+          win: true,
+          draw: true,
+          lose: true,
         },
         orderBy: {
           rankScore: 'desc',
@@ -67,6 +70,32 @@ export class RankController {
       });
 
       res.status(201).json(rankInfo);
+    } catch (error) {
+      if (error instanceof HttpError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      console.error('Error creating rank Table:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+
+  static async getMatchHistory(req, res) {
+    try {
+      const { userId } = req.params;
+      
+      if(!userId){
+        throw new HttpError(400, 'userId가 없습니다.');
+      }
+
+      const account = await userPrisma.account.findUnique({
+        where:{userId}
+      });
+
+      const matchHistory = await userPrisma.matchHistory.findMany({
+        where: { accountId : account.accountId },
+      });
+
+      res.status(201).json(matchHistory);
     } catch (error) {
       if (error instanceof HttpError) {
         return res.status(error.statusCode).json({ error: error.message });

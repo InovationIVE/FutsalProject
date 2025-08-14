@@ -108,16 +108,24 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderRankings(rankings) {
     rankingTableBody.innerHTML = ''; // Clear existing content
     if (!rankings || rankings.length === 0) {
-      rankingTableBody.innerHTML = '<tr><td colspan="3">랭킹 정보가 없습니다.</td></tr>';
+      rankingTableBody.innerHTML = '<tr><td colspan="7">랭킹 정보가 없습니다.</td></tr>';
       return;
     }
 
     rankings.forEach((rank, index) => {
       const row = document.createElement('tr');
+      // Add data-user-id attribute to the row to identify the user
+      row.dataset.userId = rank.account.userId;
+      row.style.cursor = 'pointer'; // Make it look clickable
+
       row.innerHTML = `
                 <td>${index + 1}</td>
                 <td>${rank.account.userId}</td>
+                <td>${rank.tier}</td>
                 <td>${rank.rankScore}</td>
+                <td>${rank.win}</td>
+                <td>${rank.draw}</td>
+                <td>${rank.lose}</td>
             `;
       rankingTableBody.appendChild(row);
     });
@@ -157,6 +165,97 @@ document.addEventListener('DOMContentLoaded', () => {
     loadingOverlay.classList.add('hidden');
     gameStartBtn.disabled = false;
   });
+
+  
+  // --- Modal Logic ---
+  const recordModal = document.getElementById('record-modal');
+  const closeModalBtn = recordModal.querySelector('.close-button');
+  const recordDetailsContainer = document.getElementById('record-details');
+  const recordModalTitle = document.getElementById('record-modal-title');
+
+  function openModal() {
+    recordModal.style.display = 'flex';
+  }
+
+  function closeModal() {
+    recordModal.style.display = 'none';
+  }
+
+  closeModalBtn.addEventListener('click', closeModal);
+  recordModal.addEventListener('click', (e) => {
+    // Close modal if overlay is clicked
+    if (e.target === recordModal) {
+      closeModal();
+    }
+  });
+
+  rankingTableBody.addEventListener('click', (e) => {
+    const row = e.target.closest('tr');
+    if (row && row.dataset.userId) {
+      const userId = row.dataset.userId;
+      fetchAndShowMatchHistory(userId);
+    }
+  });
+
+  async function fetchAndShowMatchHistory(userId) {
+    recordModalTitle.textContent = `${userId}님의 경기 기록`;
+    recordDetailsContainer.innerHTML = '<p>기록을 불러오는 중입니다...</p>';
+    openModal();
+
+    try {
+      // IMPORTANT: This endpoint must exist on your server.
+      // Example: GET /api/match/history/:userId
+      const response = await fetch(`/api/match/history/${userId}`);
+      if (!response.ok) {
+        throw new Error(`서버 응답 오류: ${response.statusText}`);
+      }
+      const history = await response.json();
+      renderMatchHistory(history);
+    } catch (error) {
+      console.error('Error fetching match history:', error);
+      recordDetailsContainer.innerHTML = `<p>경기 기록을 불러오는 데 실패했습니다: ${error.message}</p>`;
+    }
+  }
+
+  function renderMatchHistory(history) {
+    if (!history || history.length === 0) {
+      recordDetailsContainer.innerHTML = '<p>이 유저의 경기 기록이 없습니다.</p>';
+      return;
+    }
+
+    // Renders the fetched match history into a table
+    const table = `
+          <table>
+            <thead>
+              <tr>
+                <th>상대</th>
+                <th>골 점수</th>
+                <th>슛 점수</th>
+                <th>패스 점수</th>
+                <th>방어 점수</th>
+                <th>날짜</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${history
+                .map(
+                  (match) => `
+                <tr>
+                  <td>${match.opponentId || 'N/A'}</td>
+                  <td>${match.goalScore}</td>
+                  <td>${match.shootScore}</td>
+                  <td>${match.passScore}</td>
+                  <td>${match.defenceScore}</td>
+                  <td>${new Date(match.createdAt).toLocaleString()}</td>
+                </tr>
+              `,
+                )
+                .join('')}
+            </tbody>
+          </table>
+        `;
+    recordDetailsContainer.innerHTML = table;
+  }
 
   // --- Initial Load ---
   function initialize() {

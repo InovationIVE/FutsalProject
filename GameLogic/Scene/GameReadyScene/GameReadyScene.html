@@ -51,7 +51,11 @@
               <tr>
                 <th>순위</th>
                 <th>유저명</th>
+                <th>랭크</th>
                 <th>점수</th>
+                <th>승</th>
+                <th>무</th>
+                <th>패</th>
               </tr>
             </thead>
             <tbody>
@@ -60,6 +64,17 @@
           </table>
         </aside>
       </main>
+    </div>
+
+    <!-- 경기 기록 팝업 모달 -->
+    <div id="record-modal" class="modal-overlay">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2 id="record-modal-title">경기 기록</h2>
+        <div id="record-details">
+          <!-- 경기 기록이 여기에 동적으로 추가됩니다. -->
+        </div>
+      </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>

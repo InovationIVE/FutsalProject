@@ -1,11 +1,30 @@
-/* General Body Styles */
+html,
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f0f2f5;
-  color: #333;
-  margin: 0;
-  padding: 20px;
-  min-height: 100vh;
+  background-color: #000; /* 배경을 검정색으로 설정 */
+}
+
+body {
+  position: relative; /* 가상 요소의 기준 위치 설정 */
+  min-height: 100vh; /* body가 최소한 뷰포트 높이만큼은 차지하도록 설정 */
+  margin: 0; /* body 기본 마진 제거 */
+  padding: 0; /* body 기본 패딩 제거 */
+  z-index: 1; /* body 내용물이 가상 요소 위에 오도록 설정 */
+}
+
+body::before {
+  content: ''; /* 가상 요소를 생성하려면 필수 */
+  position: absolute; /* body를 기준으로 절대 위치 설정 */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('../../Image/LobbyImage.png'); /* 여기에 배경 이미지 경로 지정 */
+  background-size: cover; /* 이미지가 요소 전체를 덮도록 조절 */
+  background-position: center; /* 이미지를 중앙에 배치 */
+  background-repeat: no-repeat; /* 이미지 반복 방지 */
+  background-color: #000000;
+  opacity: 0.5; /* 투명도 조절 (0.0은 완전 투명, 1.0은 완전 불투명) */
+  z-index: -1; /* body 내용물 뒤에 배치 */
 }
 
 /* Main Container */
@@ -29,7 +48,7 @@ header {
 
 .main-content {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   padding: 20px;
   gap: 20px;
 }
@@ -246,5 +265,70 @@ header {
   border-radius: 25px;
   cursor: pointer;
   font-size: 14px;
+}
+
+/* --- Modal Styles --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: none; /* Initially hidden */
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #fff;
+  color: #333;
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: #333;
+}
+
+#record-modal-title {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #007bff;
+}
+
+#record-details table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#record-details th,
+#record-details td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+#record-details th {
+  background-color: #f2f2f2;
 }
 
