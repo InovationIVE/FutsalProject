@@ -34,7 +34,7 @@ export class GiftController {
           data: { cash: { decrement: cash } },
         });
 
-        //1.5 선물하기 기록 생성
+        //1.5 선물하기 기록 생성(senderId, receiverId, cash, status)
         return await tx.giftTransaction.create({
           data: {
             senderId,
@@ -57,7 +57,7 @@ export class GiftController {
     try {
       //2.1 받는 사람 확인
       const receiverId = Number(req.params.receiverId);
-      //2.2 받은 선물 조회
+      //2.2 받은 선물 조회(받는사람 accountId, 보내는 사람 accountId, userId, email)
       const gifts = await userPrisma.giftTransaction.findMany({
         where: { receiverId },
         include: {
@@ -84,7 +84,7 @@ export class GiftController {
     try {
       const gifts = await userPrisma.giftTransaction.findMany({
         include: {
-          //3.1 보낸 사람 정보
+          //3.1 보낸 사람 정보(accountId, userId, email, cash)
           sender: {
             select: {
               accountId: true,
@@ -93,7 +93,7 @@ export class GiftController {
               cash: true,
             },
           },
-          //3.2 받는 사람 정보
+          //3.2 받는 사람 정보(accountId, userId, email, cash)
           receiver: {
             select: {
               accountId: true,

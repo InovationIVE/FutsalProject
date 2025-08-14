@@ -4,7 +4,7 @@ import { authMiddleware, requireAdmin } from '../middleWares/auth.middleware.js'
 
 const router = express.Router();
 
-/**상품 선물하기 API router**/
+/**선물하기 API router**/
 router.post('/gift/send', giftTransactionController.sendGift);
 
 /**내가 받은 선물 조회하기 API routerI**/

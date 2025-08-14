@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // 1. 선물하기 API 호출
+  /** 선물하기 API 호출 **/
   async function sendGift(receiverId, cash) {
     try {
       const res = await fetch('/api/gift/send', {
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 2. 선물받기 API 호출
+  /**선물받기 API 호출**/
   async function acceptGift(giftId) {
     try {
       const res = await fetch(`/api/gift/accept/${giftId}`, {
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 3. 내가 받은 선물 조회 API 호출
+  /**내가 받은 선물 조회하기 API 호출**/
   async function fetchReceivedGifts() {
     try {
       const res = await fetch(`/api/gift/received/${accountId}`, {
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 4. 받은 선물 목록 화면 렌더링 (선물받기 버튼 포함)
+  // 4.1 받은 선물 목록 화면 렌더링
   function renderReceivedGifts(gifts) {
     receivedGiftsDiv.innerHTML = '';
     if (gifts.length === 0) {
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       giftDiv.textContent = `[${dateStr}] ${senderName} 님이 ${cashAmount}캐시를 선물함 (${statusText}) `;
 
-      // 아직 수령 안한 선물에만 버튼 추가
+      // 4.2 선물 받기 버튼
       if (gift.status !== 'success') {
         const acceptBtn = document.createElement('button');
         acceptBtn.textContent = '선물받기';
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 5. 유저 보유 캐시 갱신 함수
+  // 4.3 유저 보유 캐시 갱신 함수
   async function loadUserCash() {
     try {
       const res = await fetch(`/api/users/${accountId}`, { credentials: 'include' });
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 6. 선물하기 폼 제출 이벤트
+  /**선물하기 폼 제출 이벤트**/
   giftForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -157,13 +157,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 7. 받은 선물 불러오기
+  /**받은 선물 불러오기**/
   async function loadReceivedGifts() {
     const gifts = await fetchReceivedGifts();
     renderReceivedGifts(gifts);
   }
 
-  // 초기 로드
+  /**초기 로드**/
   loadUserCash();
   loadReceivedGifts();
 });
