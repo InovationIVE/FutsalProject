@@ -151,3 +151,27 @@ button.loading .btn-text { display: none; }
 button.loading .loader { display: block; }
 button:disabled { background-color: #a0c7ff; cursor: not-allowed; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* 회원 탈퇴 확인 모달의 액션 버튼 스타일 */
+.modal-actions {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.modal-actions button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+.modal-actions .btn-secondary {
+    background-color: #ccc;
+}
+
+.modal-actions .btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}

@@ -525,25 +525,50 @@ const resetPasswordWithToken = async (req, res) => {
 };
 
 /**
- * 회원 탈퇴 컨트롤러
+ * @description 회원 탈퇴
+ * @route DELETE /auth/delete/:accountId
+ * @access Private
  */
-const deleteAccount = async (req, res) => {
-  try {
-    const { accountId, sessionToken } = req.user;
-
-    // onDelete: Cascade 설정으로 계정 삭제 시 관련 세션도 자동 삭제됨
-    await userPrisma.account.delete({ where: { accountId } });
-
-    if (sessionToken) {
-      sessionCache.del(hashToken(sessionToken));
+const deleteAccount = async (req, res, next) => {
+    const { accountId } = req.params;
+    const sessionToken = req.cookies.sessionToken;
+    const sessionTokenHash = hashToken(sessionToken);
+    
+    // 요청을 보낸 사용자의 accountId와 탈퇴하려는 계정의 accountId가 일치하는지 확인
+    if (req.user.accountId !== parseInt(accountId, 10)) {
+        return res.status(403).json({ message: '계정을 삭제할 권한이 없습니다.' });
     }
-    clearSessionCookie(res);
 
-    res.status(200).json({ message: '회원 탈퇴가 완료되었습니다.' });
-  } catch (error) {
-    console.error('회원 탈퇴 에러:', error);
-    res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
-  }
+    try {
+        // Prisma 트랜잭션을 사용하여 모든 관련 데이터를 삭제합니다.
+        // 중간에 오류가 발생했을 때 모든 변경사항이 롤백됩니다.
+        await userPrisma.$transaction(async (prisma) => {
+            // 해당 계정과 관련된 모든 데이터를 삭제합니다. (순서 중요)
+            // 예: 보유 선수, 스쿼드, 경기 기록 등...
+            // 이 예시에서는 account 테이블의 레코드만 삭제합니다.
+            // 실제 프로젝트에서는 on-delete-cascade 옵션을 스키마에 설정하거나,
+            // 여기서 관련 테이블을 모두 직접 삭제해야 합니다.
+            await prisma.account.delete({
+                where: { accountId: parseInt(accountId, 10) },
+            });
+
+            // 세션 테이블에서도 해당 계정의 모든 세션 정보를 삭제합니다.
+            await prisma.session.deleteMany({
+                where: { accountId: parseInt(accountId, 10) },
+            });
+        });
+
+        // LRU 캐시에서 현재 세션을 삭제합니다.
+        sessionCache.del(sessionTokenHash);
+        
+        // 클라이언트의 세션 쿠키를 삭제합니다.
+        clearSessionCookie(res);
+
+        res.status(200).json({ message: '회원 탈퇴가 성공적으로 처리되었습니다.' });
+    } catch (error) {
+        console.error('회원 탈퇴 처리 중 오류 발생:', error);
+        next(error);
+    }
 };
 
 /**

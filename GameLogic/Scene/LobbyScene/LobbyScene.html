@@ -47,6 +47,19 @@
       </div>
     </div>
 
+    <!-- 회원 탈퇴 확인 모달 (숨겨져 있음음) -->
+    <div id="delete-account-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-delete-account">&times;</span>
+            <h2>회원 탈퇴</h2>
+            <p>정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없으며, 모든 데이터가 영구적으로 삭제됩니다.</p>
+            <div class="modal-actions">
+                <button id="cancel-delete-account" class="btn-secondary">취소</button>
+                <button id="confirm-delete-account" class="btn-danger">탈퇴하기</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="LobbyScript.js"></script>
   </body>
 </html>

@@ -58,7 +58,7 @@ router.patch('/:accountId/password', changePassword);
 /**
  * 회원 탈퇴 API
  */
-router.delete('/account', deleteAccount);
+router.delete('/delete/:accountId', deleteAccount);
 
 /**
  * 내 역할 조회 API (ex. 관리자 확인)
