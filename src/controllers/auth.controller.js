@@ -135,7 +135,7 @@ const verifySignupCode = async (req, res) => {
     }
 
     // DB 트랜잭션: 계정 생성 + 세션 생성
-    const result = await userPrisma.$transaction(async (tx) => {
+    const {account, sessionToken} = await userPrisma.$transaction(async (tx) => {
       const account = await tx.account.create({
         data: {
           userId: cached.userId,
@@ -175,13 +175,13 @@ const verifySignupCode = async (req, res) => {
       return { account, sessionToken };
     });
 
-    setSessionCookie(res, result.sessionToken);
+    setSessionCookie(res, sessionToken);
     verificationCache.delete(signupToken);
     clearVerificationCookie(res);
 
     return res.status(201).json({
       message: '회원가입 및 로그인 완료',
-      user: result.account,
+      user: account,
     });
   } catch (err) {
     console.error(err);

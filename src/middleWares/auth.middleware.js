@@ -19,26 +19,27 @@ const authMiddleware = async (req, res, next) => {
     return next();
   }
 
-  // 1. 토큰 추출 (Authorization 헤더 우선, 다음으로 쿠키)
+  // 1. 요청 쿠키에서 세션토큰 추출 
   let sessionToken;
   if (req.cookies.sessionToken) {
     sessionToken = req.cookies.sessionToken;
   }
 
-  // sessionToken이 없으면(로그인하지 않았으면) 더 진행하지 않고 바로 401 에러를 반환합니다.
-  if (!sessionToken) {
+  // 클라이언트가 세션토큰을 쿠키로 전달하지 않았으면 더 진행하지 않고 바로 401 에러를 반환합니다.
+  if (!sessionToken) {                
     return res.status(401).json({ message: '로그인이 필요합니다.' });
   }
 
   try {
+    // 서버 측에 저장된 헤시된 세션토큰과 비교를 위해 클라이언트가 전달한 세션토큰을 해시화
     const sessionTokenHash = hashToken(sessionToken);
 
-    // 1. 네거티브 캐시 확인
+    // 2. 네거티브 캐시 확인 (유효하지 않은 세션토큰인 경우 인지 판단)
     if (negativeSessionCache.isNegative(sessionTokenHash)) {
       return res.status(401).json({ message: '유효하지 않은 세션입니다 (캐시됨).' });
     }
 
-    // 2. 세션 캐시 확인
+    // 3. 세션 캐시 확인
     const cachedSession = sessionCache.get(sessionTokenHash);
     if (cachedSession) {
       // 캐시된 세션의 만료 시간 확인
@@ -117,9 +118,8 @@ async function handleSlidingExpiration(req, res, next, expiresAt) {
         { accountId: req.user.accountId, expiresAt: newExpiresAt },
         ttlSeconds,
       );
-
       // 쿠키 재설정
-      setSessionCookie(res, req.user.sessionToken, newExpiresAt);
+      setSessionCookie(res, req.user.sessionToken);
 
     } catch (dbError) {
         console.error('세션 갱신 중 DB 오류:', dbError);
