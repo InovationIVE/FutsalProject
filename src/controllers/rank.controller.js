@@ -11,14 +11,14 @@ export class RankController {
   static async createRank(req, res) {
     try {
       const { accountId } = req.user;
-      const { rankScore } = req.body;
+      const { rankScore = 1000 } = req.body;
 
       const isRank = await userPrisma.rank.findUnique({
         where: { accountId },
       });
 
       if (isRank) {
-        throw new HttpError(409, '이미 등록된 랭크 사용자 입니다.');
+        return;
       }
 
       let tier = '';

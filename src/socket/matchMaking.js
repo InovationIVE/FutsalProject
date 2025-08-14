@@ -1,37 +1,22 @@
-import  GameService  from "../services/game.service.js";
+import GameService from '../services/game.service.js';
 
-export default function registerMatchmakingEvents(io, socket, waitingQueue, gameRooms, socketIdToUserIdMap) {
+export default function registerMatchmakingEvents(socket, waitingQueue) {
   socket.on('find_match', async () => {
-    if (waitingQueue.find((p) => p.id === socket.id) || Array.from(socket.rooms).length > 1) {
+    // Check if the user is already in the queue
+    if (waitingQueue.find((p) => p.accountId === socket.request.user.accountId)) {
       return;
     }
 
-    console.log(`User ${socket.id} is looking for a match`);
-    waitingQueue.push(socket);
-
-    if (waitingQueue.length >= 2) {
-      const player1Socket = waitingQueue.shift();
-      const player2Socket = waitingQueue.shift();
-      const accountId1 = player1Socket.request.user.accountId;
-      const accountId2 = player2Socket.request.user.accountId;
-
-      console.log(`Match found between ${player1Socket.id} and ${player2Socket.id}`);
-
-      const roomId = `room-${player1Socket.id}-${player2Socket.id}`;
-      player1Socket.join(roomId);
-      player2Socket.join(roomId);
-
-      player1Socket.emit('match_found', { opponentId: player2Socket.id, roomId });
-      player2Socket.emit('match_found', { opponentId: player1Socket.id, roomId });
-
-      socketIdToUserIdMap.set(player1Socket.id, accountId1);
-      socketIdToUserIdMap.set(player2Socket.id, accountId2);
-
-      const gameState = await GameService.initGame(player1Socket.id, player2Socket.id, accountId1, accountId2);
-      gameRooms.set(roomId, gameState);
-      io.to(roomId).emit('game_start', { gameState: gameState.getStateForClient() });
-    } else {
-      socket.emit('waiting_for_match', { message: '상대를 기다리는 중입니다...' });
+    // Get player info and add them to the queue
+    try {
+      const matchingInfo = await GameService.getMatchInfo(socket);
+      if (matchingInfo) {
+        waitingQueue.push(matchingInfo);
+        socket.emit('waiting_for_match');
+      }
+    } catch (error) {
+      console.error(`Failed to get match info for socket ${socket.id}:`, error);
+      socket.emit('matchmaking_error', { message: '매칭 정보를 가져오는데 실패했습니다.' });
     }
   });
 }
