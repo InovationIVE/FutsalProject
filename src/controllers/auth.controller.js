@@ -1,54 +1,19 @@
+import bcrypt from 'bcrypt';
 import { mailer } from '../utils/mailer.js';
 import { verificationCache } from '../utils/verificationCache.js';
-import bcrypt from 'bcrypt';
-import crypto from 'crypto';
 import { userPrisma } from '../utils/prisma/index.js';
 import { validateInput } from '../utils/validation.js';
-import { cache } from '../utils/sessionCache.js';
-import { SESSION_DURATION_MINUTES } from '../middleWares/auth.middleware.js';
+import { sessionCache } from '../utils/sessionCache.js';
+import { SESSION_DURATION_MINUTES } from '../constants/auth.constants.js';
+import { hashToken, generateRandomToken } from '../utils/token.utils.js';
+import {
+  setSessionCookie,
+  clearSessionCookie,
+  setVerificationCookie,
+  clearVerificationCookie,
+} from '../utils/cookie.utils.js';
 
-const VERIFICATION_MINUTES = 5;
-
-/**
- * 안전한 랜덤 토큰을 생성합니다.
- * @returns {string} 16진수 형식의 토큰
- */
-
-// const sha256 = (v) => crypto.createHash('sha256').update(String(v)).digest('hex'); // 없애고 hashToken 함수 사용하기
 const generateMailCode = () => String(Math.floor(100000 + Math.random() * 900000)); // 6자리 랜덤 코드
-const generateRandomToken = () => {
-  return crypto.randomBytes(32).toString('hex');
-};
-
-const sessionCookieOptions = {
-  httpOnly: true,
-  sameSite: 'strict',
-  maxAge: SESSION_DURATION_MINUTES * 60 * 1000, // 쿠키 만료는 세션 만료와 동기화
-};
-
-const verificationCookieOptions = {
-  httpOnly: true,
-  sameSite: 'strict',
-  maxAge: VERIFICATION_MINUTES * 60 * 1000, 
-};
-
-/**
- * 토큰을 해시합니다. (SHA256)
- * @param {string} token - 해시할 원본 토큰
- * @returns {string} 16진수 형식의 해시된 토큰
- */
-const hashToken = (token) => {
-  return crypto.createHash('sha256').update(token).digest('hex');
-};
-
-/**
- * 세션 토큰을 안전한 쿠키로 클라이언트에 저장하는 함수
- * @param {object} res - Express 응답 객체
- * @param {string} token - 세션 토큰
- */
-const setSessionCookie = (res, token) => {
-  res.cookie('sessionToken', token, sessionCookieOptions);
-};
 
 /**
  * 회원가입 코드 전송
@@ -130,7 +95,7 @@ const sendSignupCode = async (req, res) => {
   `,
     });
 
-    res.cookie('signupToken', signupToken, verificationCookieOptions);
+    setVerificationCookie(res, signupToken);
 
     return res.status(200).json({ message: '인증코드를 이메일로 전송했습니다(유효 5분).' });
   } catch (err) {
@@ -159,7 +124,7 @@ const verifySignupCode = async (req, res) => {
 
     if (cached.attempts >= 5) {
       verificationCache.delete(signupToken);
-      res.clearCookie('signupToken', verificationCookieOptions);
+      clearVerificationCookie(res);
       return res.status(429).json({ message: '시도 횟수 초과. 다시 진행하세요.' });
     } 
 
@@ -205,14 +170,14 @@ const verifySignupCode = async (req, res) => {
       });
 
       const ttlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
-      cache.set(hashToken(sessionToken), { accountId: account.accountId, expiresAt }, ttlSeconds);
+      sessionCache.setWithTTL(hashToken(sessionToken), { accountId: account.accountId, expiresAt }, ttlSeconds);
 
       return { account, sessionToken };
     });
 
     setSessionCookie(res, result.sessionToken);
     verificationCache.delete(signupToken);
-    res.clearCookie('signupToken', verificationCookieOptions);
+    clearVerificationCookie(res);
 
     return res.status(201).json({
       message: '회원가입 및 로그인 완료',
@@ -330,7 +295,7 @@ const login = async (req, res) => {
 
     // LRU 캐시에 세션 저장
     const ttlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
-    cache.set(hashToken(sessionToken), { accountId: account.accountId, expiresAt }, ttlSeconds);
+    sessionCache.setWithTTL(hashToken(sessionToken), { accountId: account.accountId, expiresAt }, ttlSeconds);
 
     setSessionCookie(res, sessionToken);
 
@@ -350,18 +315,20 @@ const login = async (req, res) => {
  */
 const logout = async (req, res) => {
   try {
-    const { sessionToken, accountId } = req.user; // authMiddleware에서 주입
+    const { sessionToken } = req.user; // authMiddleware에서 주입
 
-    // DB에서 세션 삭제
+    const sessionTokenHash = hashToken(sessionToken);
+
+    // DB에서 현재 세션만 삭제 (없어도 에러를 발생시키지 않도록 deleteMany 사용)
     await userPrisma.session.deleteMany({
-      where: { accountId },
+      where: { tokenHash: sessionTokenHash },
     });
 
     // 캐시에서 세션 삭제
-    cache.del(hashToken(sessionToken));
+    sessionCache.del(sessionTokenHash);
 
     // 쿠키 삭제
-    res.clearCookie('sessionToken', sessionCookieOptions);
+    clearSessionCookie(res);
 
     res.status(200).json({ message: '로그아웃이 완료되었습니다.' });
   } catch (error) {
@@ -393,6 +360,7 @@ const changePassword = async (req, res) => {
       return res.status(401).json({ message: '현재 비밀번호가 일치하지 않습니다.' });
     }
 
+    
     const hashedNewPassword = await bcrypt.hash(newPassword, 12);
 
     // 트랜잭션으로 비밀번호 변경 및 모든 세션 무효화
@@ -402,7 +370,7 @@ const changePassword = async (req, res) => {
       
       // 2. 조회된 세션들을 기반으로 캐시에서 삭제
       for (const session of sessions) {
-        cache.del(session.tokenHash);
+        sessionCache.del(session.tokenHash);
       }
       
       // 3. 비밀번호 업데이트
@@ -416,7 +384,7 @@ const changePassword = async (req, res) => {
     });
 
     // 현재 요청의 쿠키도 정리
-    res.clearCookie('sessionToken', sessionCookieOptions);
+    clearSessionCookie(res);
 
     res
       .status(200)
@@ -522,7 +490,7 @@ const resetPasswordWithToken = async (req, res) => {
 
       // 2. 조회된 세션들을 기반으로 캐시에서 삭제
       for (const session of sessions) {
-        cache.del(session.tokenHash);
+        sessionCache.del(session.tokenHash);
       }
 
       // 3. 비밀번호 업데이트
@@ -550,15 +518,15 @@ const resetPasswordWithToken = async (req, res) => {
  */
 const deleteAccount = async (req, res) => {
   try {
-    const { accountId } = req.user;
+    const { accountId, sessionToken } = req.user;
 
     // onDelete: Cascade 설정으로 계정 삭제 시 관련 세션도 자동 삭제됨
     await userPrisma.account.delete({ where: { accountId } });
 
-    if (req.user.sessionToken) {
-      cache.del(hashToken(req.user.sessionToken));
+    if (sessionToken) {
+      sessionCache.del(hashToken(sessionToken));
     }
-    res.clearCookie('sessionToken', sessionCookieOptions);
+    clearSessionCookie(res);
 
     res.status(200).json({ message: '회원 탈퇴가 완료되었습니다.' });
   } catch (error) {
