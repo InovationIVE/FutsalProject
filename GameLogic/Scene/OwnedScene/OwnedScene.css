@@ -159,5 +159,8 @@ background: rgba( 255, 255, 255, 0.15 );}
   color: white;
   border: #ffffff;
   border-radius: 6px;
-
+}
+.saleBtn:hover {
+  background-color: #00b33c;
+  cursor: pointer;
 }

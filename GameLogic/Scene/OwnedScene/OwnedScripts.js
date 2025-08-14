@@ -75,7 +75,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // 보유 캐시 정보를 업데이트하는 함수
+    // 선수 판매 버튼 클릭 이벤트 핸들러
+    document.querySelector('.saleBtn').addEventListener('click', async () => {
+        try {
+            const selectedPlayer = document.querySelector('.card');
+            if (!selectedPlayer) {
+                alert('판매할 선수를 선택해주세요.');
+                return;
+            }       
+            // 선택된 선수의 ID 가져오기
+             const ownedPlayerId = selectedPlayer.querySelector('.profileImage').dataset.ownedPlayerId;
+             if (!ownedPlayerId) {
+            alert('유효한 선수 ID가 없습니다.');
+            return;
+           }
+
+            // 선수 판매 API 호출
+            const response = await fetch(`/api/ownedPlayers/sell/${ownedPlayerId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error('선수 판매에 실패했습니다.');
+            }
+            const result = await response.json();
+            alert(`${result.message} 판매가 완료되었습니다.`);
+            // 선수 목록과 캐시 업데이트
+            await fetchOwnedPlayers();
+            await updateCash();
+            card.style.display = 'none'; // 카드 숨기기
+        } catch (error) {
+            console.error('Error selling player:', error);
+            alert('선수 판매 중 오류가 발생했습니다.');
+        }
+    });     
+
+        
+
+         // 보유 캐시 정보를 업데이트하는 함수
     async function updateCash() {
         try {
             const response = await fetch('/api/user/me');
