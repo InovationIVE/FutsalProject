@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 보유 선수 목록을 가져와 화면에 렌더링하는 함수
     async function fetchOwnedPlayers() {
         try {
-            const response = await fetch('/api/ownedPlayers/list'); // API 엔드포인트
+            const response = await fetch('/api/ownedPlayers'); // API 엔드포인트
             if (!response.ok) {
                 if (response.status === 401) {
                     throw new Error('인증 정보가 없습니다. 로그인이 필요합니다.');

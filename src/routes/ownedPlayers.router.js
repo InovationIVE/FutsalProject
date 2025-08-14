@@ -3,7 +3,7 @@ import { OwnedPlayersController } from '../controllers/ownedPlayers.controller.j
 const router = express.Router();
 
 //내 선수 조회
-router.get('/ownedPlayers/list', OwnedPlayersController.myPlayersList);
+router.get('/ownedPlayers', OwnedPlayersController.myPlayersList);
 
 //내 선수 상세 조회
 router.get('/ownedPlayers/:ownedPlayerId', OwnedPlayersController.myPlayer);
