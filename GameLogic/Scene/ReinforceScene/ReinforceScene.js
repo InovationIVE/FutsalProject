@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 결과값 시각화
                 if (result.강화결과) {
-                    
+                    alert('강화 성공!');
                     messageDisplay.classList.add('success');
                     const details = result.강화결과;
                     reinforceDetailsDisplay.innerHTML = `
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p><strong>Speed:</strong> ${details.speed}</p>
                     `;
                 } else if (result.강등결과) {
-                    
+                    alert('강등..');
                     messageDisplay.classList.add('failure');
                     const details = result.강등결과;
                     reinforceDetailsDisplay.innerHTML = `
@@ -68,10 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p><strong>Speed:</strong> ${details.speed}</p>
                     `;
                 } else if (result.message.includes('파괴')) {
-                    
+                    alert('파괴...');
                     messageDisplay.classList.add('destruction');
                 } else {
-                    
+                    alert('강화 실패.');
                     messageDisplay.classList.add('failure');
                 }
             } else {
