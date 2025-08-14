@@ -49,6 +49,11 @@ export class GachaController {
           gachaId: true,
           cardName: true,
           price: true,
+          bronze: true,
+          silver: true,
+          gold: true,
+          platinum: true,
+          diamond: true,
         },
       });
       return res.status(200).json(gachaCards);
@@ -81,7 +86,6 @@ export class GachaController {
     try {
       const { gachaId } = req.params;
       const { cardName, price, bronze, silver, gold, platinum, diamond } = req.body;
-
       const selectedCard = await IsGachaCard(gachaId);
 
       const result = await gamePrisma.$transaction(
@@ -99,7 +103,7 @@ export class GachaController {
             },
           });
 
-          CheackColumn(
+          await CheackColumn(
             cardPack.cardName,
             cardPack.price,
             cardPack.bronze,
@@ -108,6 +112,8 @@ export class GachaController {
             cardPack.platinum,
             cardPack.diamond,
           );
+
+          return cardPack;
         },
         {
           isolationLevel: GamePrisma.TransactionIsolationLevel.ReadCommitted,
@@ -158,6 +164,7 @@ export class GachaController {
 
       if (user.cash < gachaCard.price * drawCount) {
         throw new HttpError(400, '재화가 부족합니다.');
+
       }
 
       // 가챠 뽑기 시 필요한 플레이어 데이터 조회

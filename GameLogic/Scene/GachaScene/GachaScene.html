@@ -7,19 +7,19 @@
     <link rel="stylesheet" href="GachaScene.css" />
   </head>
   <body>
-    <div class="toolbar">
-      <div><button class="topButton" id="cashShop">캐시</button></div>
-      <div><button class="topButton" id="gacha">선수뽑기</button></div>
-      <div><button class="topButton" id="mtTeam">마이팀</button></div>
-      <div><button class="topButton" id="squad">마이스쿼트</button></div>
-      <div><button class="topButton" id="gamePlay">게임플레이</button></div>
+    <div class="navbar">
+      <div class="nav-left">
+        <a href="../CashShopScene/CashShopScene.html" class="cashShopBtn">캐쉬 상점</a>
+        <a href="../GachaScene/GachaScene.html" class="gachaBtn">가챠 뽑기</a>
+        <a href="../OwnedScene/OwnedScene.html" class="MyPlayerBtn">My Player</a>
+        <a href="../SquadScene/SquadScene.html" class="MysquadBtn">My 스쿼드</a>
+      </div>
+      <div class="nav-right">
+        <div class="cash">보유 캐시 <strong>100,000,000</strong></div>
+        <a href="#" class="logout">로그아웃</a>
+        <button class="gamePlayBtn">게임시작</button>
+      </div>
     </div>
-
-    <div id="user-info">
-        <span>유저 ID: <span id="user-id-display"></span></span>
-        <span>보유 캐시: <span id="user-cash-display"></span></span>
-    </div>
-
 
     <div class="container">
       <h1>선수 카드팩 상점</h1>
@@ -31,19 +31,45 @@
       <div id="card-display-area" class="card-container">
         <!-- 뽑은 카드가 여기에 표시됩니다. -->
       </div>
-      <button id="back-to-lobby-btn">로비로 돌아가기</button>
+      <button id="back-to-lobby-btn" class="btn">로비로 돌아가기</button>
       <h2>옵션</h2>
-      <div id="gacha-option-list" class ="gacha-opthins-container">
-        <button id="gacha-delete-btn">가챠 삭제</button>
-        <button id="gacha-modify-btn">가챠 수정</button>
-        <button id="gacha-create-btn">가챠 생성</button>
-        <button id="gacha-view-btn">가챠 조회</button>
+      <div id="gacha-option-list" class="gacha-opthins-container">
+        <button id="gacha-delete-btn" class="btn">가챠 삭제</button>
+        <button id="gacha-modify-btn" class="btn">가챠 수정</button>
+        <button id="gacha-create-btn" class="btn">가챠 생성</button>
+        <button id="gacha-view-btn" class="btn">가챠 조회</button>
       </div>
       <h2>결과</h2>
       <div id="gacha-result" class="result-container">
         <!-- 가챠 수정 결과가 여기에 표시됩니다. -->
+      </div>
+    </div>
+    <div id="edit-gacha-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>가챠 카드 수정</h2>
+        <form id="edit-gacha-form">
+          <input type="hidden" id="edit-gacha-id" />
+          <label for="edit-cardName">카드 이름:</label>
+          <input type="text" id="edit-cardName" required />
+          <label for="edit-price">가격:</label>
+          <input type="number" id="edit-price" required />
+          <label for="edit-bronze">브론즈 확률:</label>
+          <input type="number" id="edit-bronze" required />
+          <label for="edit-silver">실버 확률:</label>
+          <input type="number" id="edit-silver" required />
+          <label for="edit-gold">골드 확률:</label>
+          <input type="number" id="edit-gold" required />
+          <label for="edit-platinum">플래티넘 확률:</label>
+          <input type="number" id="edit-platinum" required />
+          <label for="edit-diamond">다이아몬드 확률:</label>
+          <input type="number" id="edit-diamond" required />
+          <button type="submit" id = "edit-card">수정하기</button>
+          <button type="submit" id = "create-card" >생성하기</button>
+        </form>
+      </div>
     </div>
 
-    <script src="GachaScript.js"></script>
+    <script src="GachaScript.js" type="module"></script>
   </body>
 </html>
