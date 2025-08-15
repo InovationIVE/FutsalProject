@@ -31,17 +31,31 @@
       <div id="card-display-area" class="card-container">
         <!-- 뽑은 카드가 여기에 표시됩니다. -->
       </div>
-      <button id="back-to-lobby-btn" class="btn">로비로 돌아가기</button>
       <h2>옵션</h2>
       <div id="gacha-option-list" class="gacha-opthins-container">
-        <button id="gacha-delete-btn" class="btn">가챠 삭제</button>
-        <button id="gacha-modify-btn" class="btn">가챠 수정</button>
         <button id="gacha-create-btn" class="btn">가챠 생성</button>
         <button id="gacha-view-btn" class="btn">가챠 조회</button>
       </div>
       <h2>결과</h2>
-      <div id="gacha-result" class="result-container">
-        <!-- 가챠 수정 결과가 여기에 표시됩니다. -->
+      <div id="gacha-table-container" style="display: none">
+        <table id="gacha-table">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Card Name</th>
+              <th>Price</th>
+              <th>Bronze</th>
+              <th>Silver</th>
+              <th>Gold</th>
+              <th>Platinum</th>
+              <th>Diamond</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- JS에서 데이터 추가 -->
+          </tbody>
+        </table>
       </div>
     </div>
     <div id="edit-gacha-modal" class="modal" style="display: none">
@@ -50,22 +64,36 @@
         <h2>가챠 카드 수정</h2>
         <form id="edit-gacha-form">
           <input type="hidden" id="edit-gacha-id" />
-          <label for="edit-cardName">카드 이름:</label>
-          <input type="text" id="edit-cardName" required />
-          <label for="edit-price">가격:</label>
-          <input type="number" id="edit-price" required />
-          <label for="edit-bronze">브론즈 확률:</label>
-          <input type="number" id="edit-bronze" required />
-          <label for="edit-silver">실버 확률:</label>
-          <input type="number" id="edit-silver" required />
-          <label for="edit-gold">골드 확률:</label>
-          <input type="number" id="edit-gold" required />
-          <label for="edit-platinum">플래티넘 확률:</label>
-          <input type="number" id="edit-platinum" required />
-          <label for="edit-diamond">다이아몬드 확률:</label>
-          <input type="number" id="edit-diamond" required />
-          <button type="submit" id = "edit-card">수정하기</button>
-          <button type="submit" id = "create-card" >생성하기</button>
+          <div>
+            <label for="edit-cardName">카드 이름:</label>
+            <input type="text" id="edit-cardName" required />
+          </div>
+          <div>
+            <label for="edit-price">가격:</label>
+            <input type="number" id="edit-price" required />
+          </div>
+          <div>
+            <label for="edit-bronze">N 확률:</label>
+            <input type="number" id="edit-bronze" required />
+          </div>
+          <div>
+            <label for="edit-silver">R 확률:</label>
+            <input type="number" id="edit-silver" required />
+          </div>
+          <div>
+            <label for="edit-gold">SR 확률:</label>
+            <input type="number" id="edit-gold" required />
+          </div>
+          <div>
+            <label for="edit-platinum">SSR 확률:</label>
+            <input type="number" id="edit-platinum" required />
+          </div>
+          <div>
+            <label for="edit-diamond">UR 확률:</label>
+            <input type="number" id="edit-diamond" required />
+          </div>
+          <button type="submit" id="edit-card">수정하기</button>
+          <button type="submit" id="create-card">생성하기</button>
         </form>
       </div>
     </div>

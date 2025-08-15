@@ -23,6 +23,9 @@ export class ReinforceController{
 
             /** 결제 후 캐시 잔액 **/
             const cashAfterPayment = toReinforceOwner.cash - ReinforceLv.cost;
+            if (cashAfterPayment < 0) { /** 돈이 부족할 경우 */
+                return res.status(500).json({error: "잔액이 부족합니다"});
+            }
             await userPrisma.account.update({
                 where : { accountId : toReinforce.accountId },
                 data : {cash : cashAfterPayment}

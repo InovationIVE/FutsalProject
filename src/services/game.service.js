@@ -133,28 +133,30 @@ export default class GameService {
     }
   }
 
-  static async createMatchHistory(teamAAccountId, teamBAccountId, game) {
+  static async createMatchHistory(teamA, teamB, game, resultA, resultB) {
     try {
 
       const teamAUpdateHistoryPrisma = userPrisma.matchHistory.create({
         data: {
-          accountId: teamAAccountId,
-          opponentId: teamBAccountId,
+          accountId: teamA.accountId,
+          opponentId: teamB.accountId,
           goalScore: game.teamA.score,
           passScore: game.teamA.totalPass,
           shootScore: game.teamA.totalShoot,
           defenceScore: game.teamA.totalTackle,
+          result: resultA,
         },
       });
 
       const teamBUpdateHistoryPrisma = userPrisma.matchHistory.create({
         data: {
-          accountId: teamBAccountId,
-          opponentId: teamAAccountId,
+          accountId: teamB.accountId,
+          opponentId: teamA.accountId,
           goalScore: game.teamB.score,
           passScore: game.teamB.totalPass,
           shootScore: game.teamB.totalShoot,
           defenceScore: game.teamB.totalTackle,
+          result: resultB,
         },
       });
 

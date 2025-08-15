@@ -2,30 +2,41 @@
   box-sizing: border-box;
 }
 
+html,
 body {
-    position: relative; /* 가상 요소의 기준 위치 설정 */
-    min-height: 100vh; /* body가 최소한 뷰포트 높이만큼은 차지하도록 설정 */
-    margin: 0; /* body 기본 마진 제거 */
-    padding: 0; /* body 기본 패딩 제거 */
-    z-index: 1; /* body 내용물이 가상 요소 위에 오도록 설정 */
+  background-color: #000; /* 배경을 검정색으로 설정 */
+}
+
+body {
+  position: relative; /* 가상 요소의 기준 위치 설정 */
+  min-height: 100vh; /* body가 최소한 뷰포트 높이만큼은 차지하도록 설정 */
+  margin: 0; /* body 기본 마진 제거 */
+  padding: 0; /* body 기본 패딩 제거 */
+  z-index: 1; /* body 내용물이 가상 요소 위에 오도록 설정 */
 }
 
 body::before {
-    content: ""; /* 가상 요소를 생성하려면 필수 */
-    position: absolute; /* body를 기준으로 절대 위치 설정 */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('../../Image/LobbyImage.png'); /* 여기에 배경 이미지 경로 지정 */
-    background-size: cover; /* 이미지가 요소 전체를 덮도록 조절 */
-    background-position: center; /* 이미지를 중앙에 배치 */
-    background-repeat: no-repeat; /* 이미지 반복 방지 */
-    opacity: 0.5; /* 투명도 조절 (0.0은 완전 투명, 1.0은 완전 불투명) */
-    z-index: -1; /* body 내용물 뒤에 배치 */
+  content: ''; /* 가상 요소를 생성하려면 필수 */
+  position: absolute; /* body를 기준으로 절대 위치 설정 */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('../../Image/LobbyImage.png'); /* 여기에 배경 이미지 경로 지정 */
+  background-size: cover; /* 이미지가 요소 전체를 덮도록 조절 */
+  background-position: center; /* 이미지를 중앙에 배치 */
+  background-repeat: no-repeat; /* 이미지 반복 방지 */
+  background-color: #000000;
+  opacity: 0.5; /* 투명도 조절 (0.0은 완전 투명, 1.0은 완전 불투명) */
+  z-index: -1; /* body 내용물 뒤에 배치 */
 }
 
-
+h1 {
+  color: #ffffff;
+}
+h2 {
+  color: #ffffff;
+}
 
 /* 상단 네비게이션 */
 .navbar {
@@ -71,7 +82,7 @@ body::before {
   font-size: 14px;
 }
 
-
+/* 카드팩 */
 .pack-container {
   display: flex;
   justify-content: flex-start;
@@ -86,23 +97,39 @@ body::before {
   perspective: 1000px; /* Set the perspective for the 3D effect */
 }
 
-.gacha-pack{
+.gacha-pack {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   border: solid #000000;
   padding: 10px;
   background-image: url('../../Image/LobbyImage.png'); /* Placeholder image */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  width: 200px; /* Example width */
-  height: 250px; /* Example height */
+  width: 300px; /* Example width */
+  height: 450px; /* Example height */
+}
+
+.gacha-pack h3{
+  background-color: #000;
+  border-radius: 5px;
+  padding: 10px;
+  color: #ffffff;
+}
+
+.pack-actions {
+  display: flex;
+  justify-content: center; /* 버튼들을 가로 중앙에 정렬 */
+  gap: 5px; /* 버튼 사이 간격 */
+  width: 100%;
+  margin-top: auto; /* 버튼 영역을 하단으로 밀어냄 */
 }
 
 .card {
-  width: 150px;
-  height: 200px;
+  width: 300px;
+  height: 400px;
   perspective: 1000px;
   cursor: pointer;
 }
@@ -139,32 +166,75 @@ body::before {
 
 .card-back {
   background-color: #f0f0f0;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   color: black;
   transform: rotateY(180deg);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-end;
+  align-items: flex-start;
   padding: 5px;
   word-wrap: break-word;
+  overflow: hidden;
 }
 
-.card-back h3 {
+/* 카드 하단 정보 박스 */
+.card-info-box {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.6); /* 검은 반투명 배경 */
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.card-info-box h3 {
+  font-size: 1.5em;
+  color: #Ffffff;
+  margin: 0 0 4px 0;
+}
+
+.card-info-box h1 {
   font-size: 1.1em;
-  margin-bottom: 5px;
+  color: #Ffffff;
+  margin: 0 0 4px 0;
 }
 
-.card-back p {
-  font-size: 0.85em;
-  margin-bottom: 3px;
+/* 스탯 컨테이너 */
+.card-stats {
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+}
+
+/* 개별 스탯 */
+.card-stats p {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #Ffffff;
+  margin: 0;
 }
 
 /* Rarity styles */
-.rarity-n { border: 5px solid #cd7f32; }
-.rarity-r { border: 5px solid #c0c0c0; }
-.rarity-sr { border: 5px solid #ffd700; }
-.rarity-ssr { border: 5px solid #e5e4e2; }
-.rarity-ur { border: 5px solid #b9f2ff; }
+.rarity-n {
+  border: 5px solid #cd7f32;
+}
+.rarity-r {
+  border: 5px solid #c0c0c0;
+}
+.rarity-sr {
+  border: 5px solid #ffd700;
+}
+.rarity-ssr {
+  border: 5px solid #e5e4e2;
+}
+.rarity-ur {
+  border: 5px solid #b9f2ff;
+}
 
 /* Modal Styles */
 .modal {
@@ -175,15 +245,42 @@ body::before {
   width: 100%; /* Full width */
   height: 100%; /* Full height */
   overflow: auto; /* Enable scroll if needed */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
 }
 
 .modal-content {
-  background-color: #fefefe;
+  background-color: #000000;
   margin: 15% auto; /* 15% from the top and centered */
   padding: 20px;
   border: 1px solid #888;
-  width: 80%; /* Could be more or less, depending on screen size */
+  width: 20%; /* Could be more or less, depending on screen size */
+  color: #ffffff;
+}
+
+#edit-gacha-form {
+  display: flex;
+  flex-direction: column; /* 각 필드 세로 정렬 */
+  gap: 10px; /* 필드 간 간격 */
+  width: 100%;
+  max-width: 400px; /* 모달 안에서 넓이 제한 */
+  margin: 0 auto;
+}
+
+#edit-gacha-form > div {
+  display: flex;
+  justify-content: flex-end; /* label+input을 오른쪽 정렬 */
+  align-items: center; /* 세로 중앙 정렬 */
+  gap: 10px; /* label과 input 사이 간격 */
+}
+
+#edit-gacha-form label {
+  min-width: 120px; /* label 너비 고정, 오른쪽 정렬 시 필요 */
+  text-align: right; /* label 텍스트 오른쪽 정렬 */
+}
+
+#edit-gacha-form input {
+  flex: 1; /* input이 남은 공간을 채움 */
+  padding: 5px;
 }
 
 .close-btn {
@@ -199,7 +296,6 @@ body::before {
   text-decoration: none;
   cursor: pointer;
 }
-
 
 /* Button Styles */
 .btn {
@@ -222,7 +318,7 @@ body::before {
 }
 
 .draw-btn {
-  background-color: #00c853; /* Green */
+  background-color: #000000; /* Green */
   color: white;
   margin-right: 10px;
 }
@@ -236,4 +332,37 @@ body::before {
   background-color: #ff9800; /* Orange */
   color: white;
   margin-right: 10px;
+}
+
+/*가챠 조회 테이블 css*/
+#gacha-table-container {
+  margin-top: 20px;
+}
+
+#gacha-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  color: #ffffff;
+}
+
+#gacha-table th,
+#gacha-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+#gacha-table th {
+  background-color: #000000;
+  font-weight: bold;
+}
+
+#gacha-table tr:nth-child(even) {
+  background-color: #6e6e6e;
+}
+
+#gacha-table tbody tr:hover {
+  background-color: #ffff00;
+  color: #000000;
 }
