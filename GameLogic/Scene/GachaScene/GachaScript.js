@@ -54,10 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.style.display = 'none';
   });
 
-  gamePlayBtn.addEventListener('click', async () => {
-    window.location.href = '../GameReadyScene/GameReadyScene.html';
-    await createRank();
-  });
+  // gamePlayBtn.addEventListener('click', async () => {
+  //   window.location.href = '../GameReadyScene/GameReadyScene.html';
+  //   await createRank();
+  // });
 
   initializePage();
 
