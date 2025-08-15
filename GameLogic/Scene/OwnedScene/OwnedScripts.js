@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // 선수 목록과 캐시 업데이트
       await fetchOwnedPlayers();
-      await updateCash();
+      // await updateCash();
     } catch (error) {
       console.error('Error selling player:', error);
       alert(`선수 판매 중 오류가 발생했습니다: ${error.message}`);
@@ -148,25 +148,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (parts.length === 2) return parts.pop().split(';').shift();
   }
 
-  // 보유 캐시 정보를 업데이트하는 함수
-  async function updateCash() {
-    try {
-      const response = await fetch('/api/users/me', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!response.ok) {
-        throw new Error('캐시 정보를 가져오는 데 실패했습니다.');
-      }
-      const result = await response.json();
-      const userCash = result.data.account.cash;
-      cashElement.textContent = `${userCash.toLocaleString('ko-KR')}`;
-    } catch (error) {
-      console.error('Error updating cash:', error);
-    }
-  }
+  // // 보유 캐시 정보를 업데이트하는 함수
+  // async function updateCash() {
+  //   try {
+  //     const response = await fetch('/api/users/me', {
+  //       method: 'GET',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       credentials: 'include',
+  //     });
+  //     if (!response.ok) {
+  //       throw new Error('캐시 정보를 가져오는 데 실패했습니다.');
+  //     }
+  //     const result = await response.json();
+  //     const userCash = result.data.account.cash;
+  //     cashElement.textContent = `${userCash.toLocaleString('ko-KR')}`;
+  //   } catch (error) {
+  //     console.error('Error updating cash:', error);
+  //   }
+  // }
 
   // 페이지 로드 시 함수 호출
   fetchOwnedPlayers();
-  updateCash();
+  // updateCash();
 });

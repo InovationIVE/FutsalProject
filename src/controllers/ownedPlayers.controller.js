@@ -5,7 +5,8 @@ import { PlayerModel } from '../entity/Player.js';
 export class OwnedPlayersController {
   static async myPlayersList(req, res, next) {
     try {
-      const { accountId } = req.user;
+      // const { accountId } = req.user;
+      const accountId = Number(req.user.accountId);
 
       if (!accountId) {
         return res.status(401).json({ message: '내 계정 정보가 필요합니다.' });

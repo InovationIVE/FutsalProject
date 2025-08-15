@@ -13,7 +13,7 @@ export class ReinforceController{
 
             /** 강화할 선수의 레벨에 맞는 강화 단계 **/
             const ReinforceLv = await gamePrisma.reinforce.findUnique({
-                where: { level : toReinforce.level }
+                where: { level : toReinforce.level , reinforceId : toReinforce.reinforceId }
             });
 
             /** 강화비용 청구를 위한 계정 참조 **/
