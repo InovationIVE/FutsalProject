@@ -66,6 +66,10 @@ background: rgba( 255, 255, 255, 0.15 );}
     transition: background-color 0.3s ease;
 }
 
+.createBtn:hover {
+    background-color: #00b34d;    
+}
+
 .auction-header {
     display: flex;
     justify-content: space-between;
