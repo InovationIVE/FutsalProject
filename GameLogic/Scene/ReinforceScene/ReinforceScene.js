@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // api에서 상태메시지와 잔액 호출?
                 messageDisplay.textContent = result.message;
                 const cash = result.남은금액.cashAfterPayment;
-                remainingCashDisplay.textContent = `Remaining Cash: ${cash}`;
+                remainingCashDisplay.textContent = `남은 금액: ${cash}`;
 
                 // 결과값 시각화
                 if (result.강화결과) {
