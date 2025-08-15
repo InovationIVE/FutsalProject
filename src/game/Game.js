@@ -9,7 +9,7 @@ export class Game {
     this.goalB = goalB;
     this.currentTurnIndex = 0;
     this.turnCount = 0;
-    this.maxTurns = 20;
+    this.maxTurns = 50;
     this.isGameOver = false;
     this.initialPlayerPositions = {}; // Use a plain object to store initial positions
     this.selectedTeam = this.currentTeam;

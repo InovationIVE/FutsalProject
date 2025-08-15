@@ -328,10 +328,18 @@ h2 {
   color: white;
 }
 
+#gacha-pack-list p{
+  color: white;
+}
+
 #gacha-option-list .btn {
   background-color: #ff9800; /* Orange */
   color: white;
   margin-right: 10px;
+}
+
+#card-display-area p{
+  color: white;
 }
 
 /*가챠 조회 테이블 css*/

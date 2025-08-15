@@ -1,4 +1,4 @@
-import registerMatchmakingEvents from './matchmaking.js';
+import registerMatchmakingEvents from './matchMaking.js';
 import registerGameEvents from './gameEvents.js';
 import regiserJoinGameRoom from './joinGameRoom.js';
 import GameService from '../services/game.service.js';

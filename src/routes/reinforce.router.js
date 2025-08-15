@@ -7,7 +7,7 @@ import { requireAdmin } from '../middleWares/auth.middleware.js';
 const router = express.Router();
 
 /** 강화 **/
-router.patch('/reinforce/:ownedplayerId', ReinforceController.reinforce);
+router.patch('/reinforce/:ownedPlayerId', ReinforceController.reinforce);
 
 
 /** 강화 조회 **/

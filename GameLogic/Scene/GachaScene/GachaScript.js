@@ -9,12 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const tableContainer = document.getElementById('gacha-table-container');
   const tableBody = document.querySelector('#gacha-table tbody');
 
-  const gamePlayBtn = document.querySelector('.gamePlayBtn');
   const modal = document.getElementById('edit-gacha-modal');
   const closeBtn = document.querySelector('.close-btn');
   const editForm = document.getElementById('edit-gacha-form');
+  const adminOptionText= document.getElementById('admin-option');
+  const adminResultText = document.getElementById('admin-result');
   const editButton = editForm.querySelector('#edit-card');
   const createButton = editForm.querySelector('#create-card');
+
 
   closeBtn.addEventListener('click', () => {
     modal.style.display = 'none';
@@ -61,6 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const userRole = await getAdminCheck();
     if (userRole !== 'ADMIN') {
       optionBtnList.style.display = 'none';
+      adminOptionText.style.display = 'none';
+      adminResultText.style.display = 'none';
     }
     loadGachaPacks();
   }

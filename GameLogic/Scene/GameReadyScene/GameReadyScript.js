@@ -285,7 +285,24 @@ document.addEventListener('DOMContentLoaded', () => {
   function initialize() {
     fetchMySquad();
     fetchRankings();
+    createRank();
   }
 
   initialize();
+
+
+  async function createRank() {
+  try {
+    const response = await fetch('/api/rank', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // 인증 쿠키를 보내기 위해 필요
+    });
+  } catch (error) {
+    console.error('Error drawing cards:', error);
+    cardDisplayArea.innerHTML = '<p>서버와 통신 중 오류가 발생했습니다.</p>';
+  }
+}
 });
