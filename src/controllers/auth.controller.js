@@ -520,8 +520,36 @@ const deleteAccount = async (req, res) => {
   try {
     const { accountId, sessionToken } = req.user;
 
-    // onDelete: Cascade 설정으로 계정 삭제 시 관련 세션도 자동 삭제됨
-    await userPrisma.account.delete({ where: { accountId } });
+    await userPrisma.$transaction(async (tx) => {
+      // Bid, Auction, GiftTransaction, MatchHistory 등 계정과 관계를 맺는 레코드들을 먼저 삭제합니다.
+      await tx.bid.deleteMany({ where: { accountId } });
+      await tx.auction.deleteMany({ where: { accountId } });
+      await tx.giftTransaction.deleteMany({
+        where: { OR: [{ senderId: accountId }, { receiverId: accountId }] },
+      });
+      await tx.matchHistory.deleteMany({
+        where: { OR: [{ accountId: accountId }, { opponentId: accountId }] },
+      });
+
+      // Squad가 존재하면 관련 SquadMembers를 삭제하고 Squad를 삭제합니다.
+      const squad = await tx.squad.findUnique({ where: { accountId } });
+      if (squad) {
+        await tx.squadMembers.deleteMany({ where: { squadId: squad.squadId } });
+        await tx.squad.delete({ where: { accountId } });
+      }
+
+      // Rank 정보를 삭제합니다.
+      await tx.rank.deleteMany({ where: { accountId } });
+
+      // OwnedPlayers는 계정과의 연결을 끊습니다 (null로 설정).
+      await tx.ownedPlayers.updateMany({
+        where: { accountId },
+        data: { accountId: null },
+      });
+
+      // 마지막으로 계정을 삭제합니다. Session은 onDelete: Cascade로 자동 처리됩니다.
+      await tx.account.delete({ where: { accountId } });
+    });
 
     if (sessionToken) {
       sessionCache.del(hashToken(sessionToken));
