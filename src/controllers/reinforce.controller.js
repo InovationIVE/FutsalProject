@@ -114,7 +114,7 @@ export class ReinforceController {
         });
 
         res.status(200).json({
-          message: '강화 실패로 캐릭터가 파괴되었습니다.',
+          message: '강화 실패로 선수 카드가 파괴되었습니다.',
           남은금액: { cashAfterPayment },
         });
       }
