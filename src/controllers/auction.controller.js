@@ -137,11 +137,7 @@ export class AuctionController {
           },
         });
 
-        // 해당 선수가 없거나 이미 경매에 등록된 경우 (accountId가 null인 경우)
         if (!ownedPlayer) {
-          // 이 경우, 경매를 올릴 권한이 없거나 이미 경매에 올라간 선수입니다.
-          // ownedPlayerId를 가진 선수가 존재하지 않거나,
-          // ownedPlayerId를 가졌지만 accountId가 현재 사용자가 아닌 경우입니다.
           throw new Error('내 소유의 선수만 경매에 등록할 수 있습니다.');
         }
 
@@ -190,7 +186,6 @@ export class AuctionController {
 
       return res.status(201).json({ data: newAuction });
     } catch (err) {
-      // 커스텀 에러 메시지 처리
       if (err.message === '내 소유의 선수만 경매에 등록할 수 있습니다.') {
         return res.status(400).json({ message: err.message });
       }
@@ -199,60 +194,75 @@ export class AuctionController {
   }
 
    //경매 조회 API
-  static async getAuctions(req, res, next) {
-    try {
-      // 💡 쿼리 파라미터에서 status 값을 가져오고, 값이 없으면 'open'을 기본값으로 설정합니다.
-      const { status: filterStatus = 'open' } = req.query;
+  static async getAuctions(req, res, next) {
+    try {
+      const { status = 'open', page = 1, search = '' } = req.query;
+      const limit = 10;
+      const offset = (page - 1) * limit;
 
-      // 💡 status 값에 따라 필터링 조건을 동적으로 생성합니다.
-      const whereCondition = filterStatus === 'all' ? {} : { status: filterStatus };
+      const whereCondition = {
+        ...(status !== 'all' && { status }),
+        ownedPlayer: {
+          name: {
+            contains: search,
+          },
+        },
+      };
 
-      const auctions = await userPrisma.auction.findMany({
-        where: whereCondition,
-        orderBy: { createdAt: 'desc' },
-        select: {
-          auctionId: true,
-          startingPrice: true,
-          currentPrice: true,
-          endsAt: true,
-          status: true,
-          ownedPlayer: {
-            select: {
-              name: true,
-              rarity: true,
-              level: true,
-              playerId: true, // playerId 추가
-            },
-          },
-        },
-      });
-      
-      // Player의 profileImage를 가져오기 위한 추가 로직
-      const auctionDataWithImages = await Promise.all(
-        auctions.map(async (auction) => {
-          const ownedPlayer = auction.ownedPlayer;
-          if (ownedPlayer) {
-            const playerInfo = await gamePrisma.player.findUnique({
-              where: { playerId: ownedPlayer.playerId },
-              select: { profileImage: true },
-            });
-            return {
-              ...auction,
-              ownedPlayer: {
-                ...ownedPlayer,
-                profileImage: playerInfo?.profileImage || null,
-              },
-            };
-          }
-          return auction;
-        }),
-      );
+      const auctions = await userPrisma.auction.findMany({
+        where: whereCondition,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          auctionId: true,
+          startingPrice: true,
+          currentPrice: true,
+          endsAt: true,
+          status: true,
+          ownedPlayer: {
+            select: {
+              name: true,
+              rarity: true,
+              level: true,
+              playerId: true,
+            },
+          },
+        },
+        skip: offset,
+        take: limit,
+      });
 
-      return res.status(200).json({ message: '경매장 목록을 조회했습니다.', data: auctionDataWithImages });
-    } catch (err) {
-      next(err);
-    }
-  }
+      const totalAuctions = await userPrisma.auction.count({ where: whereCondition });
+
+      const auctionDataWithImages = await Promise.all(
+        auctions.map(async (auction) => {
+          const ownedPlayer = auction.ownedPlayer;
+          if (ownedPlayer) {
+            const playerInfo = await gamePrisma.player.findUnique({
+              where: { playerId: ownedPlayer.playerId },
+              select: { profileImage: true },
+            });
+            return {
+              ...auction,
+              ownedPlayer: {
+                ...ownedPlayer,
+                profileImage: playerInfo?.profileImage || null,
+              },
+            };
+          }
+          return auction;
+        }),
+      );
+
+      return res.status(200).json({ 
+        message: '경매장 목록을 조회했습니다.', 
+        data: auctionDataWithImages, 
+        total: totalAuctions, 
+        limit: limit 
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
 
   // 경매 상세 조회 API (추가 기능)
   static async getAuctionDetails(req, res, next) {
@@ -294,9 +304,25 @@ export class AuctionController {
   static async getMyAuctions(req, res, next) {
     try {
       const { accountId } = req.user;
+      const { page = 1, search = '' ,status} = req.query;
+      const limit = 10;
+      const offset = (page - 1) * limit;
+
+      const whereCondition = {
+        accountId: +accountId,
+        ownedPlayer: {
+          name: {
+            contains: search,
+          },
+        },
+      };
+      // status 파라미터가 존재하고 'all'이 아닐 경우에만 whereCondition에 추가합니다.
+    if (status && status !== 'all') {
+      whereCondition.status = status;
+    }
 
       const myAuctions = await userPrisma.auction.findMany({
-        where: { accountId: +accountId },
+        where: whereCondition,
         orderBy: { createdAt: 'desc' },
         select: {
           auctionId: true,
@@ -309,14 +335,44 @@ export class AuctionController {
               name: true,
               rarity: true,
               level: true,
+              playerId: true,
             },
           },
         },
+        skip: offset,
+        take: limit,
       });
+
+      const totalAuctions = await userPrisma.auction.count({ where: whereCondition });
+
+      const auctionDataWithImages = await Promise.all(
+        myAuctions.map(async (auction) => {
+          const ownedPlayer = auction.ownedPlayer;
+          if (ownedPlayer) {
+            const playerInfo = await gamePrisma.player.findUnique({
+              where: { playerId: ownedPlayer.playerId },
+              select: { profileImage: true },
+            });
+            return {
+              ...auction,
+              ownedPlayer: {
+                ...ownedPlayer,
+                profileImage: playerInfo?.profileImage || null,
+              },
+            };
+          }
+          return auction;
+        }),
+      );
 
       return res
         .status(200)
-        .json({ message: '내가 등록한 경매 목록을 조회했습니다.', data: myAuctions });
+        .json({ 
+          message: '내가 등록한 경매 목록을 조회했습니다.', 
+          data: auctionDataWithImages, 
+          total: totalAuctions, 
+          limit: limit 
+        });
     } catch (err) {
       next(err);
     }
@@ -329,12 +385,10 @@ export class AuctionController {
       const { auctionId } = req.params;
       const { bidAmount } = req.body;
 
-      // 유효성 검사
       if (!auctionId || !bidAmount) {
         return res.status(400).json({ message: '경매 ID와 입찰 금액이 필요합니다.' });
       }
 
-      // 1) 경매 존재 확인
       const auction = await userPrisma.auction.findUnique({
         where: { auctionId: +auctionId },
       });
@@ -342,22 +396,18 @@ export class AuctionController {
         return res.status(404).json({ message: '해당 경매를 찾을 수 없습니다.' });
       }
 
-      // 2) 경매 상태 확인
       if (auction.status !== 'open') {
         return res.status(400).json({ message: '현재 경매는 진행 중이 아닙니다.' });
       }
 
-      // 3) 판매자 본인 입찰 방지
       if (auction.accountId === +accountId) {
         return res.status(403).json({ message: '자신이 등록한 경매에는 입찰할 수 없습니다.' });
       }
 
-      // 4) 입찰 금액 유효성 검사
       if (bidAmount <= auction.currentPrice) {
         return res.status(400).json({ message: '입찰 금액은 현재 가격보다 높아야 합니다.' });
       }
 
-      // 5) 입찰자 계정 존재 확인
       const account = await userPrisma.account.findUnique({
         where: { accountId: +accountId },
       });
@@ -369,7 +419,6 @@ export class AuctionController {
         return res.status(400).json({ message: '잔액이 부족합니다.' });
       }
 
-      // 6) 입찰 등록
       const placeBid = await userPrisma.bid.create({
         data: {
           auctionId: +auctionId,
@@ -378,13 +427,11 @@ export class AuctionController {
         },
       });
 
-      // 7) 경매 현재 가격 업데이트
       await userPrisma.auction.update({
         where: { auctionId: +auctionId },
         data: { currentPrice: +bidAmount },
       });
 
-      //소켓을 통해 모든 클라이언트에게 입찰 업데이트를 알림
       const io = getIo();
       io.emit('auctionUpdate', { auctionId: +auctionId, newPrice: +bidAmount, bidderId: +accountId });
 
@@ -429,7 +476,6 @@ export class AuctionController {
       const { auctionId } = req.params;
       const { accountId } = req.user;
 
-      // 1. 해당 경매를 찾고, 로그인한 사용자가 경매 판매자인지 확인
       const auction = await userPrisma.auction.findUnique({
         where: {
           auctionId: +auctionId,
@@ -450,27 +496,22 @@ export class AuctionController {
         return res.status(400).json({ message: '진행 중인 경매만 취소할 수 있습니다.' });
       }
 
-      // 2. 트랜잭션을 사용하여 경매 상태 변경 및 선수 소유권 반환
       await userPrisma.$transaction(async (tx) => {
-        //경매 상태를 'cancelled'로 업데이트
         await tx.auction.update({
           where: { auctionId: +auctionId },
           data: { status: 'cancelled' },
         });
 
-        //선수의 소유권을 원래 판매자에게 반환
         await tx.ownedPlayers.update({
           where: { ownedPlayerId: auction.ownedPlayer.ownedPlayerId },
           data: { accountId: auction.accountId },
         });
 
-        //해당 경매의 모든 입찰 기록 삭제 (선택 사항: 비즈니스 로직에 따라)
         await tx.bid.deleteMany({
           where: { auctionId: +auctionId },
         });
       });
 
-      //취소 시 소켓 이벤트 전송
       const io = getIo();
       io.emit('auctionCancelled', {
         auctionId: +auctionId,

@@ -13,7 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // 보유 선수 목록을 가져와 화면에 렌더링하는 함수
   async function fetchOwnedPlayers() {
     try {
-      const response = await fetch('/api/ownedPlayers'); // API 엔드포인트
+      const response = await fetch('/api/ownedPlayers',{
+        headers: {
+          Authorization: `Bearer ${getCookie('Authorization')}`,
+        },
+      }); // API 엔드포인트
       if (!response.ok) {
         if (response.status === 401) {
           throw new Error('인증 정보가 없습니다. 로그인이 필요합니다.');
@@ -26,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
       playerList.innerHTML = ''; // 기존 목록 초기화
       if (ownedPlayers.length === 0) {
         playerList.innerHTML = '<li>보유한 선수가 없습니다.</li>';
+        card.style.display = 'none';
         return;
       }
 
@@ -54,7 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // 선수 상세 정보를 가져와 카드에 표시하는 함수
   async function showPlayerDetails(ownedPlayerId) {
     try {
-      const response = await fetch(`/api/ownedPlayers/${ownedPlayerId}`); // API 엔드포인트
+      const response = await fetch(`/api/ownedPlayers/${ownedPlayerId}`, {
+        headers: {
+          Authorization: `Bearer ${getCookie('Authorization')}`,
+        },
+      }); // API 엔드포인트
       if (!response.ok) {
         throw new Error('선수 상세 정보를 가져오는 데 실패했습니다.');
       }
@@ -72,8 +81,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('defense').textContent = `DEF: ${playerDetails.defence}`;
             document.getElementById('speed').textContent = `SPD: ${playerDetails.speed}`;
 
-            // 강화 버튼에 현재 선택된 선수의 ID를 data 속성으로 저장
+            // 강화 버튼과 판매 버튼에 현재 선택된 선수의 ID를 data 속성으로 저장
             toReinforceBtn.dataset.ownedPlayerId = playerDetails.ownedPlayerId;
+            document.querySelector('.saleBtn').dataset.ownedPlayerId = playerDetails.ownedPlayerId;
 
 
         } catch (error) {
@@ -83,39 +93,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // 선수 판매 버튼 클릭 이벤트 핸들러
-    document.querySelector('.saleBtn').addEventListener('click', async () => {
-        try {
-            const selectedPlayer = document.querySelector('.card');
-            if (!selectedPlayer) {
-                alert('판매할 선수를 선택해주세요.');
-                return;
-            }       
-            // 선택된 선수의 ID 가져오기
-             const ownedPlayerId = selectedPlayer.querySelector('.profileImage').dataset.ownedPlayerId;
-             if (!ownedPlayerId) {
-            alert('유효한 선수 ID가 없습니다.');
+    document.querySelector('.saleBtn').addEventListener('click', async (event) => {
+        const ownedPlayerId = event.currentTarget.dataset.ownedPlayerId;
+        if (!ownedPlayerId) {
+            alert('판매할 선수를 선택해주세요.');
             return;
-           }
+        }
 
-            // 선수 판매 API 호출
-            const response = await fetch(`/api/ownedPlayers/sell/${ownedPlayerId}`, {
+        if (!confirm('정말로 이 선수를 판매하시겠습니까?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/ownedPlayers/sales`,
+             {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: `Bearer ${getCookie('Authorization')}`,
                 },
+                body: JSON.stringify({ ownedPlayerId: parseInt(ownedPlayerId, 10) })
             });
+
             if (!response.ok) {
-                throw new Error('선수 판매에 실패했습니다.');
+                const errorData = await response.json();
+                throw new Error(errorData.message || '선수 판매에 실패했습니다.');
             }
+
             const result = await response.json();
-            alert(`${result.message} 판매가 완료되었습니다.`);
+            alert(`선수 판매 완료! ${result.sales.toLocaleString('ko-KR')} 캐시를 얻었습니다.`);
+            
             // 선수 목록과 캐시 업데이트
             await fetchOwnedPlayers();
             await updateCash();
-            card.style.display = 'none'; // 카드 숨기기
+
         } catch (error) {
             console.error('Error selling player:', error);
-            alert('선수 판매 중 오류가 발생했습니다.');
+            alert(`선수 판매 중 오류가 발생했습니다: ${error.message}`);
         }
     });
 
@@ -123,17 +137,30 @@ document.addEventListener('DOMContentLoaded', () => {
     toReinforceBtn.addEventListener('click', () => {
         // 버튼에 저장된 ownedPlayerId를 가져옵니다.
         const ownedPlayerId = toReinforceBtn.dataset.ownedPlayerId;
+        if (!ownedPlayerId) {
+            alert('강화할 선수를 선택해주세요.');
+            return;
+        }
         /** 강화 페이지로 이동 **/
         window.location.href = `../ReinforceScene/ReinforceScene.html?ownedPlayerId=${ownedPlayerId}`;
 
     });
 
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
         
 
   // 보유 캐시 정보를 업데이트하는 함수
   async function updateCash() {
     try {
-      const response = await fetch('/api/user/me');
+      const response = await fetch('/api/user/me', {
+        headers: {
+          Authorization: `Bearer ${getCookie('Authorization')}`,
+        },
+      });
       if (!response.ok) {
         throw new Error('캐시 정보를 가져오는 데 실패했습니다.');
       }
