@@ -1,155 +1,165 @@
 // DOMContentLoaded 이벤트는 HTML 문서가 완전히 로드되고 파싱되었을 때 발생합니다.
 // 즉, 이 이벤트 리스너 안의 코드는 HTML 요소들이 모두 준비된 후에 실행됩니다.
-document.addEventListener('DOMContentLoaded', () => {
-  // --- HTML 요소 가져오기 ---
-  // 로비 화면 우측 상단의 네비게이션 영역을 제어하기 위해 해당 요소를 찾아 변수에 저장합니다.
-  const navRight = document.querySelector('.nav-right');
-  
-  // 비밀번호 변경 모달과 관련된 요소들을 미리 찾아 변수에 저장해둡니다.
-  const changePasswordModal = document.getElementById('change-password-modal');
-  const changePasswordForm = document.getElementById('change-password-form');
-  const messageElement = document.getElementById('change-password-message');
-  const closeModalButton = changePasswordModal.querySelector('.close-button');
+// --- HTML 요소 가져오기 (전역 스코프) ---
+const navRight = document.querySelector('.nav-right');
+const changePasswordModal = document.getElementById('change-password-modal');
+const changePasswordForm = document.getElementById('change-password-form');
+const messageElement = document.getElementById('change-password-message');
+const closeModalButton = changePasswordModal ? changePasswordModal.querySelector('.close-button') : null;
+const deleteAccountModal = document.getElementById('delete-account-modal');
+const closeDeleteAccountBtn = document.getElementById('close-delete-account');
+const cancelDeleteBtn = document.getElementById('cancel-delete-account');
+const confirmDeleteBtn = document.getElementById('confirm-delete-account');
 
-  // 회원 탈퇴 모달과 관련된 요소들을 추가로 가져옵니다.
-  const deleteAccountModal = document.getElementById('delete-account-modal');
-  const closeDeleteAccountBtn = document.getElementById('close-delete-account');
-  const cancelDeleteBtn = document.getElementById('cancel-delete-account');
-  const confirmDeleteBtn = document.getElementById('confirm-delete-account');
+/**
+ * 로그인한 사용자를 위해 화면 우측 상단 UI를 동적으로 구성하는 함수입니다.
+ * @param {object} account - 서버로부터 받은 사용자 계정 정보
+ */
+const updateUIForLoggedInUser = (account) => {
+  navRight.innerHTML = `
+    <div class="user-info">
+      <span class="user-id">${account.userId}</span>님 환영합니다!
+      <!-- 마우스를 올리면 나타날 드롭다운 메뉴 -->
+      <div class="dropdown-menu">
+          <a href="#" id="change-password-btn">비밀번호 변경</a>
+          <a href="#" id="delete-account-btn" class="danger-link">회원 탈퇴</a>
+      </div>
+    </div>
+    <div class="cash">보유 캐시 <strong id = 'user-cash-display' >${account.cash.toLocaleString()}</strong></div>
+    <a href="#" id="logoutBtn" class="logout">로그아웃</a>
+    <button class="gamePlayBtn">게임시작</button>
+  `;
+  setupEventListeners(account.accountId);
+};
 
-
-  /**
-   * 로비 페이지가 처음 로드될 때 실행되는 초기화 함수입니다.
-   * 서버에 현재 로그인 상태를 확인하여, 그 결과에 따라 화면을 다르게 보여줍니다.
-   */
-  const initializeLobby = async () => {
-    try {
-      // 1. '/api/users/me' API를 호출하여 서버로부터 현재 로그인된 사용자 정보를 가져옵니다.
-      //    요청 시 브라우저는 자동으로 세션 쿠키를 함께 보내므로, 서버는 이 쿠키를 보고 로그인 여부를 판단합니다.
-      const response = await fetch('/api/users/me', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
+/**
+ * 로그인하지 않은 사용자(손님)를 위해 화면 우측 상단 UI를 구성하는 함수입니다.
+ */
+const updateUIForGuest = () => {
+  navRight.innerHTML = `
+    <div class="cash">로그인이 필요합니다.</div>
+    <a href="/Scene/LoginScene/LoginScene.html" class="login">로그인</a>
+    <a href="/Scene/LoginScene/LoginScene.html#signup" class="login" id="signupNavLink">회원가입</a>
+    <button id="gamePlayBtn">게임시작</button>
+  `;
+  const gamePlayBtn = document.querySelector('.gamePlayBtn');
+  if(gamePlayBtn){
+      gamePlayBtn.addEventListener('click', () => {
+        alert('로그인이 필요한 서비스입니다.');
+        window.location.href = '/Scene/LoginScene/LoginScene.html';
       });
+  }
+};
 
-      if (response.ok) {
-        // 2. 요청이 성공하면 (로그인 상태이면), 서버가 보내준 사용자 정보로 UI를 업데이트합니다.
-        const { account } = await response.json();
-        updateUIForLoggedInUser(account);
-      } else {
-        // 3. 요청이 실패하면 (로그인 상태가 아니면), 손님(Guest)을 위한 UI로 업데이트합니다.
-        updateUIForGuest();
+/**
+ * 버튼의 로딩 상태를 제어하는 공용 함수입니다. (loginScript.js의 것과 동일)
+ * @param {HTMLButtonElement} button - 로딩 상태를 적용할 버튼 요소
+ * @param {boolean} isLoading - 로딩 상태 여부 (true: 로딩 시작, false: 로딩 종료)
+ */
+const setLoading = (button, isLoading) => {
+  if (isLoading) {
+      button.classList.add('loading');
+      button.disabled = true;
+  } else {
+      button.classList.remove('loading');
+      button.disabled = false;
+  }
+};
+
+/**
+ * 로그인한 사용자 UI에 포함된 버튼들(로그아웃, 게임시작, 비밀번호 변경 등)에
+ * 클릭 이벤트를 연결해주는 함수입니다.
+ * @param {number} accountId - 비밀번호 변경 API 호출 시 필요한 현재 사용자의 accountId
+ */
+const setupEventListeners = (accountId) => {
+  // '로그아웃' 버튼 클릭 이벤트
+  document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+    e.preventDefault();
+    try {
+      const logoutResponse = await fetch('/auth/logout', { method: 'POST' });
+      if (logoutResponse.ok) {
+        sessionStorage.removeItem('accountId');
+        window.location.reload();
       }
     } catch (error) {
-      // 서버 연결 실패 등 네트워크 오류가 발생한 경우에도 손님 UI를 보여줍니다.
-      console.error('Lobby initialization error:', error);
-      updateUIForGuest();
+      console.error('Logout failed:', error);
     }
-  };
+  });
 
-  /**
-   * 로그인한 사용자를 위해 화면 우측 상단 UI를 동적으로 구성하는 함수입니다.
-   * @param {object} account - 서버로부터 받은 사용자 계정 정보
-   */
-  const updateUIForLoggedInUser = (account) => {
-    // innerHTML을 사용하여 nav-right 영역의 HTML 내용을 완전히 새로 구성합니다.
-    navRight.innerHTML = `
-      <div class="user-info">
-        <span class="user-id">${account.userId}</span>님 환영합니다!
-        <!-- 마우스를 올리면 나타날 드롭다운 메뉴 -->
-        <div class="dropdown-menu">
-            <a href="#" id="change-password-btn">비밀번호 변경</a>
-            <a href="#" id="delete-account-btn" class="danger-link">회원 탈퇴</a>
-        </div>
-      </div>
-      <div class="cash">보유 캐시 <strong>${account.cash.toLocaleString()}</strong></div>
-      <a href="#" id="logoutBtn" class="logout">로그아웃</a>
-      <button class="gamePlayBtn">게임시작</button>
-    `;
-
-    // --- 이렇게 동적으로 생성된 HTML 요소들에 대해서는, 생성 직후에 이벤트 리스너를 설정해주어야 합니다. ---
-    setupEventListeners(account.accountId);
-  };
-  
-  /**
-   * 로그인한 사용자 UI에 포함된 버튼들(로그아웃, 게임시작, 비밀번호 변경 등)에
-   * 클릭 이벤트를 연결해주는 함수입니다.
-   * @param {number} accountId - 비밀번호 변경 API 호출 시 필요한 현재 사용자의 accountId
-   */
-  const setupEventListeners = (accountId) => {
-    // '로그아웃' 버튼 클릭 이벤트
-    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
-      e.preventDefault(); // a 태그의 기본 동작(페이지 이동)을 막습니다.
-      try {
-        const logoutResponse = await fetch('/auth/logout', { method: 'POST' });
-        if (logoutResponse.ok) {
-          sessionStorage.removeItem('accountId'); // sessionStorage에 저장했던 정보도 삭제합니다.
-          window.location.reload(); // 페이지를 새로고침하여 손님 UI로 자연스럽게 전환합니다.
+  // '게임 시작' 버튼 클릭 이벤트
+  const gamePlayBtn = document.querySelector('.gamePlayBtn');
+  if (gamePlayBtn) {
+      gamePlayBtn.addEventListener('click', () => {
+        if (window.location.pathname.includes('LobbyScene')) {
+          window.location.href = '../GameReadyScene/GameReadyScene.html';
+        } else {
+          window.location.href = '../LobbyScene/LobbyScene.html';
         }
-      } catch (error) {
-        console.error('Logout failed:', error);
-      }
-    });
+      });
+  }
 
-    // '게임 시작' 버튼 클릭 이벤트
-    const gamePlayBtn = document.querySelector('.gamePlayBtn');
-    if (gamePlayBtn) {
-        gamePlayBtn.addEventListener('click', () => {
-          // 현재 페이지가 로비라면 게임 준비 화면으로 이동
-          if (window.location.pathname.includes('LobbyScene')) {
-            window.location.href = '../GameReadyScene/GameReadyScene.html';
-          } else {
-            // 다른 페이지라면 로비로 먼저 이동
-            window.location.href = '../LobbyScene/LobbyScene.html';
-          }
-        });
-    }
-
-    // '비밀번호 변경' 버튼 클릭 이벤트 (모달 열기)
+  // '비밀번호 변경' 버튼 클릭 이벤트 (모달 열기)
+  if (document.getElementById('change-password-btn')) { // 요소가 존재하는지 확인
     document.getElementById('change-password-btn').addEventListener('click', (e) => {
         e.preventDefault();
-        changePasswordForm.reset(); // 폼을 깨끗하게 초기화합니다.
-        messageElement.textContent = ''; // 이전 메시지를 지웁니다.
-        changePasswordModal.classList.add('visible'); // 모달을 화면에 보여줍니다.
+        changePasswordForm.reset();
+        messageElement.textContent = '';
+        changePasswordModal.classList.add('visible');
     });
+  }
 
-    // 모달의 'X' 버튼 클릭 이벤트 (모달 닫기)
+  // 모달의 'X' 버튼 클릭 이벤트 (모달 닫기)
+  if (closeModalButton) { // 요소가 존재하는지 확인
     closeModalButton.addEventListener('click', () => {
         changePasswordModal.classList.remove('visible');
     });
+  }
 
-    // 모달 외부의 어두운 배경 클릭 시 닫기
+  // 모달 외부의 어두운 배경 클릭 시 닫기
+  if (changePasswordModal) { // 요소가 존재하는지 확인
     window.addEventListener('click', (event) => {
         if (event.target === changePasswordModal) {
             changePasswordModal.classList.remove('visible');
         }
     });
+  }
 
-    // --- 회원 탈퇴 관련 이벤트 리스너 ---
+  // -- 회원 가입 관련 이벤트 리스너 ---
+  if (document.getElementById('signupNavLink')) { // 요소가 존재하는지 확인
+    document.getElementById('signupNavLink').addEventListener('click', () => {
+      window.location.href = '/Scene/LoginScene/LoginScene.html#signup';
+    });
+  }
 
-    // '회원 탈퇴' 버튼 클릭 이벤트 (모달 열기)
+  // --- 회원 탈퇴 관련 이벤트 리스너 ---
+  if (document.getElementById('delete-account-btn')) { // 요소가 존재하는지 확인
     document.getElementById('delete-account-btn').addEventListener('click', (e) => {
         e.preventDefault();
         deleteAccountModal.classList.add('visible');
     });
+  }
 
-    // 탈퇴 모달의 'X' 버튼 클릭 이벤트 (모달 닫기)
+  if (closeDeleteAccountBtn) { // 요소가 존재하는지 확인
     closeDeleteAccountBtn.addEventListener('click', () => {
         deleteAccountModal.classList.remove('visible');
     });
+  }
 
-    // 탈퇴 모달의 '취소' 버튼 클릭 이벤트 (모달 닫기)
+  if (cancelDeleteBtn) { // 요소가 존재하는지 확인
     cancelDeleteBtn.addEventListener('click', () => {
         deleteAccountModal.classList.remove('visible');
     });
+  }
 
-    // 탈퇴 모달 외부 클릭 시 닫기
+  if (deleteAccountModal) { // 요소가 존재하는지 확인
     window.addEventListener('click', (event) => {
         if (event.target === deleteAccountModal) {
             deleteAccountModal.classList.remove('visible');
         }
     });
+  }
 
-    // 최종 '탈퇴하기' 버튼 클릭 이벤트
+  if (confirmDeleteBtn) { // 요소가 존재하는지 확인
     confirmDeleteBtn.addEventListener('click', async () => {
       try {
         const response = await fetch(`/auth/delete/${accountId}`, {
@@ -159,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response.ok) {
           alert('회원 탈퇴가 완료되었습니다. 이용해주셔서 감사합니다.');
           sessionStorage.removeItem('accountId');
-          window.location.href = '/Scene/LoginScene/LoginScene.html'; // 로그인 페이지로 이동
+          window.location.href = '/Scene/LoginScene/LoginScene.html';
         } else {
           const data = await response.json();
           alert(`오류: ${data.message}`);
@@ -170,93 +180,95 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('회원 탈퇴 처리 중 오류가 발생했습니다.');
       }
     });
-  };
+  }
 
-  /**
-   * 로그인하지 않은 사용자(손님)를 위해 화면 우측 상단 UI를 구성하는 함수입니다.
-   */
-  const updateUIForGuest = () => {
-    navRight.innerHTML = `
-      <div class="cash">로그인이 필요합니다.</div>
-      <a href="/Scene/LoginScene/LoginScene.html" class="login">로그인</a>
-      <a href="/Scene/LoginScene/LoginScene.html#signup" class="login" id="signupNavLink">회원가입</a>
-      <button class="gamePlayBtn">게임시작</button>
-    `;
-    // '게임 시작' 버튼 클릭 시, 로그인이 필요하다는 알림을 띄우고 로그인 페이지로 보냅니다.
-    const gamePlayBtn = document.querySelector('.gamePlayBtn');
-    if(gamePlayBtn){
-        gamePlayBtn.addEventListener('click', () => {
-          alert('로그인이 필요한 서비스입니다.');
-          window.location.href = '/Scene/LoginScene/LoginScene.html';
-        });
-    }
-  };
-  
-  /**
-   * 버튼의 로딩 상태를 제어하는 공용 함수입니다. (loginScript.js의 것과 동일)
-   * @param {HTMLButtonElement} button - 로딩 상태를 적용할 버튼 요소
-   * @param {boolean} isLoading - 로딩 상태 여부 (true: 로딩 시작, false: 로딩 종료)
-   */
-  const setLoading = (button, isLoading) => {
-    if (isLoading) {
-        button.classList.add('loading');
-        button.disabled = true;
-    } else {
-        button.classList.remove('loading');
-        button.disabled = false;
-    }
-  };
-  
   // '비밀번호 변경' 모달의 폼 제출 이벤트
-  changePasswordForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const currentPassword = document.getElementById('current-password').value;
-    const newPassword = document.getElementById('new-password').value;
-    const confirmPassword = document.getElementById('confirm-password').value;
-    const submitButton = changePasswordForm.querySelector('button[type="submit"]');
-    
-    // 로그인 성공 시 sessionStorage에 저장해두었던 accountId를 가져와 API 경로에 사용합니다.
-    const accountId = sessionStorage.getItem('accountId');
-    
-    messageElement.textContent = '';
+  if (changePasswordForm) { // 요소가 존재하는지 확인
+    changePasswordForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const currentPassword = document.getElementById('current-password').value;
+      const newPassword = document.getElementById('new-password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      const submitButton = changePasswordForm.querySelector('button[type="submit"]');
+      
+      const accountId = sessionStorage.getItem('accountId');
+      
+      messageElement.textContent = '';
 
-    if (newPassword !== confirmPassword) {
-        messageElement.textContent = '새 비밀번호가 일치하지 않습니다.';
-        messageElement.style.color = 'red';
-        return;
+      if (newPassword !== confirmPassword) {
+          messageElement.textContent = '새 비밀번호가 일치하지 않습니다.';
+          messageElement.style.color = 'red';
+          return;
+      }
+      
+      setLoading(submitButton, true);
+
+      try {
+          const response = await fetch(`/auth/${accountId}/password`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ currentPassword, newPassword }),
+          });
+          const data = await response.json();
+          
+          if (response.ok) {
+              messageElement.textContent = data.message + ' 3초 후 로그인 페이지로 이동합니다.';
+              messageElement.style.color = 'green';
+              setTimeout(() => {
+                  sessionStorage.removeItem('accountId');
+                  window.location.href = '/Scene/LoginScene/LoginScene.html';
+              }, 3000);
+          } else {
+              messageElement.textContent = data.message || '오류가 발생했습니다.';
+              messageElement.style.color = 'red';
+          }
+      } catch (error) {
+          messageElement.textContent = '요청 중 오류가 발생했습니다.';
+          messageElement.style.color = 'red';
+      } finally {
+          setLoading(submitButton, false);
+      }
+    });
+  }
+};
+
+/**
+ * 로비 페이지가 처음 로드될 때 실행되는 초기화 함수입니다.
+ * 서버에 현재 로그인 상태를 확인하여, 그 결과에 따라 화면을 다르게 보여줍니다.
+ */
+const initializeLobby = async () => {
+  try {
+    const response = await fetch('/api/users/me', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.ok) {
+      const { account } = await response.json();
+      updateUIForLoggedInUser(account);
+    } else {
+      updateUIForGuest();
     }
-    
-    setLoading(submitButton, true);
+  } catch (error) {
+    console.error('Lobby initialization error:', error);
+    updateUIForGuest();
+  }
+};
 
-    try {
-        const response = await fetch(`/auth/${accountId}/password`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ currentPassword, newPassword }),
-        });
-        const data = await response.json();
-        
-        if (response.ok) {
-            // 비밀번호 변경 성공 시, 보안을 위해 모든 세션이 만료되므로 다시 로그인하도록 유도합니다.
-            messageElement.textContent = data.message + ' 3초 후 로그인 페이지로 이동합니다.';
-            messageElement.style.color = 'green';
-            setTimeout(() => {
-                sessionStorage.removeItem('accountId');
-                window.location.href = '/Scene/LoginScene/LoginScene.html';
-            }, 3000);
-        } else {
-            messageElement.textContent = data.message || '오류가 발생했습니다.';
-            messageElement.style.color = 'red';
-        }
-    } catch (error) {
-        messageElement.textContent = '요청 중 오류가 발생했습니다.';
-        messageElement.style.color = 'red';
-    } finally {
-        setLoading(submitButton, false);
-    }
-  });
+// --- 스크립트 실행 시작점 ---
+window.addEventListener('pageshow', (event) => {
+  // 페이지가 BFCache에서 복원될 때도 UI를 업데이트합니다.
+  if (event.persisted) {
+    initializeLobby();
+  } else {
+    // 페이지가 새로 로드될 때도 UI를 업데이트합니다.
+    initializeLobby();
+  }
+});
 
-  // --- 스크립트 실행 시작점 ---
-  // 이 페이지에서 가장 먼저 실행되어야 할 함수를 호출합니다.
-  initializeLobby();
+document.addEventListener('DOMContentLoaded', () => {
+  // DOMContentLoaded 시점에서는 pageshow에서 이미 처리했으므로 추가 로직이 필요 없습니다.
+  // 단, pageshow 이벤트가 지원되지 않는 구형 브라우저를 위해 initializeLobby()를 한 번 더 호출할 수 있습니다.
+  // 또는 nav.js의 이벤트 리스너가 중복 등록되지 않도록 다른 로직을 사용할 수도 있습니다.
+  // 여기서는 중복 호출을 피하고 pageshow를 우선시합니다.
 });
