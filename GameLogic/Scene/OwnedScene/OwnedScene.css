@@ -147,11 +147,12 @@ background: rgba( 255, 255, 255, 0.15 );}
     overflow-y: auto; /* 내용이 넘칠 경우 스크롤바 표시 */
 }
 
-
+/* 하단 버튼 */
 .Btn {
   display: flex;
   justify-content: center;
   margin-top: 20px;
+  gap: 20px;
 }
 
 .saleBtn  {
@@ -167,14 +168,10 @@ background: rgba( 255, 255, 255, 0.15 );}
 }
 
 .toReinforceBtn {
-  padding: 10px 20px;
-  margin-top: 15px;
+  padding: 6px 10px;
   background-color: #007bff;
   color: white;
-  border: none;
-  border-radius: 5px;
+  border: #ffffff;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
-  float : right;
 }
