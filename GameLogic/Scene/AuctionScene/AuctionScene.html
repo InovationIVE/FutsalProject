@@ -1,37 +1,60 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>실시간 경매장</title>
-  <link rel="stylesheet" href="AuctionScene.css">
-</head>
-<body>
-   <!-- 상단 네비게이션 -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>실시간 경매장</title>
+    <link rel="stylesheet" href="AuctionScene.css" />
+  </head>
+  <body>
+    <!-- 상단 네비게이션 -->
     <div class="navbar">
       <div class="nav-left">
-       <a href="../CashShopScene/CashShopScene.html" class="cashShopBtn">캐쉬 상점</a>
-       <a href="../GachaScene/GachaScene.html" class="gachaBtn">가챠 뽑기</a>
-       <a href="../OwnedScene/OwnedScene.html" class="MyPlayerBtn">My Player</a>
-       <a href="../SquadScene/SquadScene.html" class="MysquadBtn">My 스쿼드</a>
-       <a href="../AuctionScene/AuctionScene.html" class="AuctionBtn">경매장</a>
+        <a href="../CashShopScene/CashShopScene.html" class="cashShopBtn">캐쉬 상점</a>
+        <a href="../GachaScene/GachaScene.html" class="gachaBtn">가챠 뽑기</a>
+        <a href="../OwnedScene/OwnedScene.html" class="MyPlayerBtn">My Player</a>
+        <a href="../SquadScene/SquadScene.html" class="MysquadBtn">My 스쿼드</a>
+        <a href="../AuctionScene/AuctionScene.html" class="AuctionBtn">경매장</a>
       </div>
       <div class="nav-right">
-       <div class="cash">보유 캐시 <strong>100,000,000</strong></div>
-       <a href="#" class="logout">로그아웃</a>
-       <button class="gamePlayBtn">게임시작</button>
+        <div class="cash">보유 캐시 <strong>100,000,000</strong></div>
+        <a href="#" class="logout">로그아웃</a>
+        <button class="gamePlayBtn">게임시작</button>
       </div>
     </div>
 
-  <div class="container">
-    <h1>경매 목록</h1>
-    <ul id="auction-list">
-      <!-- 경매 아이템이 여기에 동적으로 추가됩니다. -->
-    </ul>
-  </div>
+    <div class="container">
+      <div class="auction-header">
+        <h3>경매장</h3>
+        <button class="createBtn" id="create-auction">경매 생성</button>
+      </div>
+      <div class="auction-form">
+        <div class="filter">
+          <!-- <p>경매 필터</p> -->
+          <select id="auction-filter-select">
+            <option value="open">진행중인 경매</option>
+            <option value="closed">종료된 경매</option>
+            <option value="all">모든 경매</option>
+            <option value="my">내 경매</option>
+          </select>
+        </div>
+        <div class="auction-inputs">
+          <input type="text" id="player-name" placeholder="선수 이름" />
+        </div>
 
-  <!-- Socket.IO 클라이언트 라이브러리 -->
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="AuctionScript.js"></script>
-</body>
+        
+      </div>
+      <h3>경매 목록</h3>
+      <ul id="auction-list">
+        <!-- 경매 아이템이 여기에 동적으로 추가됩니다. -->
+      </ul>
+    </div>
+
+    <!-- Socket.IO 클라이언트 라이브러리 -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const currentUserId = '<%= req.user.id %>';
+    </script>
+    <script src="AuctionScript.js"></script>
+  </body>
 </html>
