@@ -76,7 +76,7 @@ export class OwnedPlayersController {
       const ownedPlayer = await userPrisma.ownedPlayers.findUnique({
         where: {
           accountId: +accountId,
-          ownedPlayerId: +ownedPlayerId,
+          ownedPlayerId: Number(ownedPlayerId),
         },
         select: {
           playerId: true,
@@ -127,7 +127,7 @@ export class OwnedPlayersController {
       }
       const ownedPlayer = await userPrisma.ownedPlayers.findFirst({
         where: {
-          ownedPlayerId: +ownedPlayerId,
+          ownedPlayerId: Number(ownedPlayerId),
           accountId: +accountId,
         },
       });

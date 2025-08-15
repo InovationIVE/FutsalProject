@@ -154,3 +154,34 @@ h2 {
 .destruction {
     color: red;
 }
+
+@keyframes success-glow {
+  0% { box-shadow: 0 0 10px #00c853; }
+  50% { box-shadow: 0 0 30px #00c853; }
+  100% { box-shadow: 0 0 10px #00c853; }
+}
+
+@keyframes failure-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); box-shadow: 0 0 20px orange; }
+  75% { transform: translateX(5px); box-shadow: 0 0 20px orange; }
+}
+
+@keyframes destruction-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+  20%, 40%, 60%, 80% { transform: translateX(10px); }
+  50% { box-shadow: 0 0 40px red; }
+}
+
+.reinforceBox.success-effect {
+  animation: success-glow 1s ease-in-out;
+}
+
+.reinforceBox.failure-effect {
+  animation: failure-shake 0.5s ease-in-out;
+}
+
+.reinforceBox.destruction-effect {
+  animation: destruction-shake 0.8s ease-in-out;
+}
