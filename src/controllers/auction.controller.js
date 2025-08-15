@@ -198,33 +198,61 @@ export class AuctionController {
     }
   }
 
-  //경매 조회 API
-  static async getAuctions(req, res, next) {
-    try {
-      const auctions = await userPrisma.auction.findMany({
-        // where: { status: 'open' },
-        orderBy: { createdAt: 'desc' },
-        select: {
-          auctionId: true,
-          startingPrice: true,
-          currentPrice: true,
-          endsAt: true,
-          status: true,
-          ownedPlayer: {
-            select: {
-              name: true,
-              rarity: true,
-              level: true,
-            },
-          },
-        },
-      });
+   //경매 조회 API
+  static async getAuctions(req, res, next) {
+    try {
+      // 💡 쿼리 파라미터에서 status 값을 가져오고, 값이 없으면 'open'을 기본값으로 설정합니다.
+      const { status: filterStatus = 'open' } = req.query;
 
-      return res.status(200).json({ message: '경매장 목록을 조회했습니다.', data: auctions });
-    } catch (err) {
-      next(err);
-    }
-  }
+      // 💡 status 값에 따라 필터링 조건을 동적으로 생성합니다.
+      const whereCondition = filterStatus === 'all' ? {} : { status: filterStatus };
+
+      const auctions = await userPrisma.auction.findMany({
+        where: whereCondition,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          auctionId: true,
+          startingPrice: true,
+          currentPrice: true,
+          endsAt: true,
+          status: true,
+          ownedPlayer: {
+            select: {
+              name: true,
+              rarity: true,
+              level: true,
+              playerId: true, // playerId 추가
+            },
+          },
+        },
+      });
+      
+      // Player의 profileImage를 가져오기 위한 추가 로직
+      const auctionDataWithImages = await Promise.all(
+        auctions.map(async (auction) => {
+          const ownedPlayer = auction.ownedPlayer;
+          if (ownedPlayer) {
+            const playerInfo = await gamePrisma.player.findUnique({
+              where: { playerId: ownedPlayer.playerId },
+              select: { profileImage: true },
+            });
+            return {
+              ...auction,
+              ownedPlayer: {
+                ...ownedPlayer,
+                profileImage: playerInfo?.profileImage || null,
+              },
+            };
+          }
+          return auction;
+        }),
+      );
+
+      return res.status(200).json({ message: '경매장 목록을 조회했습니다.', data: auctionDataWithImages });
+    } catch (err) {
+      next(err);
+    }
+  }
 
   // 경매 상세 조회 API (추가 기능)
   static async getAuctionDetails(req, res, next) {

@@ -47,81 +47,196 @@ background: rgba( 255, 255, 255, 0.15 );}
   font-size: 14px;
 }
 
-.container { max-width: 800px; 
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #fff; 
-    border-radius: 8px; 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+/* 메인 컨테이너 */
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1rem;
+    flex-grow: 1;
 }
-h1 { 
-    text-align: start; 
-    color: #000000; 
-    font-size: large;
-    font-weight: normal;
+
+.createBtn {
+    background-color: #00c853;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
 }
+
+.auction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    
+}
+.auction-form {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-right: 10px;}
+
+h1 {
+    color: #1a1a1a;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+}
+
+.filter{
+  display : flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* 필터 드롭다운 */
+.filter-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+#auction-filter-select {
+    padding: 0.5rem 0.75rem 0.5rem 0.25rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: #fff;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* 경매 목록 */
 #auction-list {
-    list-style-type: none; 
-    max-height: 600px; /* 스크롤을 위한 최대 높이 설정 */
-    overflow-y: auto; /* 내용이 넘칠 경우 스크롤바 표시 */
-    padding: 0; 
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
 }
+
 .auction-item {
-    background-color: #f9f9f9; 
-    border: 1px solid #ddd; 
-    padding: 15px; 
-    margin-bottom: 10px; 
-    border-radius: 5px; 
-    transition: background-color 0.3s; 
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
+
 .auction-item:hover {
-    background-color: #f1f1f1; 
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
+
 .item-header {
     display: flex;
-    font-weight: bold; 
-    font-size: 1.2em; 
-    color: #333; 
-    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
 }
 
+.player-profile-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+}
 
-/* 기본 상태 (진행중) */
+.itemInfo {
+    font-size: 1.1rem;
+    font-weight: 700;
+    flex-grow: 1;
+}
+
 .itemStatus {
-    font-weight: normal;
-    padding: 4px 8px;
-    border-radius: 4px;
-    color: #ffffff;
-    background-color: #00c853; 
-    font-size: small;
-    border: #ddd;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    color: #fff;
 }
 
-/* 경매가 종료되었을 때 */
-.itemStatus.status-closed {
-    background-color: #cecece; 
-    color: #ffffff;
-
+.status-open {
+    background-color: #28a745; /* 녹색 */
 }
 
-/* 경매가 취소되었을 때 */
-.itemStatus.status-cancelled {
-    background-color: #cecece; 
-    color: #ffffff;
+.status-closed {
+    background-color: #dc3545; /* 빨간색 */
 }
 
-
-.item-body { 
-    margin-top: 10px; 
+.status-cancelled {
+    background-color: #6c757d; /* 회색 */
 }
+
+.item-body {
+    flex-grow: 1;
+}
+
 .item-body p {
-     margin: 5px 0; 
+    margin: 0.5rem 0;
 }
-.price { 
-    color: #b38403; 
-    font-weight: bold; 
+
+.price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #007bff;
 }
+
 .ends-at {
-    color: #888; 
-    font-size: 0.9em; 
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.my-auction-badge {
+    background-color: #ffc107; /* 노란색 */
+    color: #333;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .nav-left, .nav-right {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+    }
+    
+    .gamePlayBtn {
+        width: 100%;
+    }
+
+    .container {
+        padding: 0.5rem;
+        margin: 1rem auto;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+    
+    #auction-list {
+        grid-template-columns: 1fr;
+    }
+
+    .auction-item {
+        padding: 1rem;
+    }
 }
