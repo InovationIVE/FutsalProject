@@ -1,7 +1,25 @@
 body {
-  margin: 0;
-  font-family: pretendard, sans-serif;
-background: rgba( 255, 255, 255, 0.15 );}
+    position: relative; /* 가상 요소의 기준 위치 설정 */
+    min-height: 100vh; /* body가 최소한 뷰포트 높이만큼은 차지하도록 설정 */
+    margin: 0; /* body 기본 마진 제거 */
+    padding: 0; /* body 기본 패딩 제거 */
+    z-index: 1; /* body 내용물이 가상 요소 위에 오도록 설정 */
+}
+
+body::before {
+    content: ""; /* 가상 요소를 생성하려면 필수 */
+    position: absolute; /* body를 기준으로 절대 위치 설정 */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../../Image/LobbyImage.png'); /* 여기에 배경 이미지 경로 지정 */
+    background-size: cover; /* 이미지가 요소 전체를 덮도록 조절 */
+    background-position: center; /* 이미지를 중앙에 배치 */
+    background-repeat: no-repeat; /* 이미지 반복 방지 */
+    opacity: 1.0; /* 투명도 조절 (0.0은 완전 투명, 1.0은 완전 불투명) */
+    z-index: -1; /* body 내용물 뒤에 배치 */
+}
 
 /* 상단 네비게이션 */
 .navbar {
@@ -15,7 +33,8 @@ background: rgba( 255, 255, 255, 0.15 );}
   padding: 10px 20px;
   justify-content: space-between;
 }
-.nav-left, .nav-right {
+.nav-left,
+.nav-right {
   display: flex;
   align-items: center;
   gap: 20px;
@@ -35,15 +54,14 @@ background: rgba( 255, 255, 255, 0.15 );}
 
 .login {
   font-size: small;
-  color:white;
-  text-decoration:none;
+  color: white;
+  text-decoration: none;
 }
-
 
 .logout {
   font-size: small;
-  color:white;
-  text-decoration:none;
+  color: white;
+  text-decoration: none;
 }
 
 .gamePlayBtn {

@@ -84,7 +84,7 @@ background: rgba( 255, 255, 255, 0.15 );}
   height: 200px;
   background-size: cover;
   border-radius: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 20px;;
 }
 
 .stats {
@@ -115,6 +115,8 @@ background: rgba( 255, 255, 255, 0.15 );}
   padding: 10px;
   cursor: pointer;
   border-radius: 6px;
+  border: #f0f0f0 0.5px solid;
+  margin-bottom: 5px;
 }
 .player-item:hover, .player-item.active {
   background-color: #00c853;
