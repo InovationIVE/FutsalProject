@@ -2,12 +2,12 @@ import GameService from '../services/game.service.js';
 
 export default function registerMatchmakingEvents(socket, waitingQueue) {
   socket.on('find_match', async () => {
-    // Check if the user is already in the queue
+    // 해당 계정이 이미 waitingQueue에 있느닞 확인
     if (waitingQueue.find((p) => p.accountId === socket.request.user.accountId)) {
       return;
     }
 
-    // Get player info and add them to the queue
+    // 없다면 waitingQueue를 만들어서 등록 시킴
     try {
       const matchingInfo = await GameService.getMatchInfo(socket);
       if (matchingInfo) {
