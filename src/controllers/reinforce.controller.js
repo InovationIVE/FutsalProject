@@ -4,11 +4,11 @@ export class ReinforceController{
     static async reinforce(req, res, next) {
         try{
             // const { accountId } = req.user;
-            const { ownedplayerId } = req.params;
+            const { ownedPlayerId } = req.params;
 
             /** 강화할 선수 ; 보유선수에서 선택 **/
             const toReinforce = await userPrisma.ownedPlayers.findUnique({
-                where : {ownedPlayerId : +ownedplayerId }
+                where : {ownedPlayerId : +ownedPlayerId }
             });
 
             /** 강화할 선수의 레벨에 맞는 강화 단계 **/
@@ -45,7 +45,7 @@ export class ReinforceController{
 
                 //const ReinforceSuccess = 
                 await userPrisma.ownedPlayers.update({
-                    where: {ownedPlayerId : +ownedplayerId },
+                    where: {ownedPlayerId : +ownedPlayerId },
                     data: {
                     level: level, 
                     attack: attack,
@@ -85,7 +85,7 @@ export class ReinforceController{
 
                 //const ReinforceReglation = 
                 await userPrisma.ownedPlayers.update({
-                    where: {ownedPlayerId : +ownedplayerId },
+                    where: {ownedPlayerId : +ownedPlayerId },
                     data: {
                     level: level, 
                     attack: attack,
@@ -108,7 +108,7 @@ export class ReinforceController{
             /** 선수 카드 파괴 **/
             else{
                 await userPrisma.ownedPlayers.delete({
-                    where: { ownedplayerId }
+                    where: { ownedPlayerId }
                 });
 
                 res.status(200).json({
