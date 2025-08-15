@@ -1,5 +1,8 @@
 import GameService from '../services/game.service.js';
 
+/* 이제 게임 준비 화면에서 매칭이 완료되면 여기서 게임 플레이 화면에서 다시 플레이할 게임 방을 만들고
+  클라이언트에게 게임 시작을 요청함   
+*/
 export default function regiserJoinGameRoom(io, socket, gameRooms, battleQueue) {
   socket.on('join_game_room', async () => {
     if (battleQueue.find((p) => p.id === socket.id)) {
@@ -28,6 +31,7 @@ export default function regiserJoinGameRoom(io, socket, gameRooms, battleQueue) 
       const accountId1 = player1.accountId;
       const accountId2 = player2.accountId;
 
+      // 게임 설정을 초기화
       const game = await GameService.initGame(
         player1.socket.id,
         player2.socket.id,

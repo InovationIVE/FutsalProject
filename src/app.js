@@ -90,7 +90,7 @@ const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, ne
 
 io.use(wrap(cookieParser()));
 io.use(wrap(authMiddleware));
-initSocketEvents(io);
+initSocketEvents(io); // 게임 초기화
 
 app.use(ErrorHandlingMiddleware);
 
