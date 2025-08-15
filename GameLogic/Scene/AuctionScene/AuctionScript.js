@@ -29,9 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const response = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${getCookie('Authorization')}`,
         },
-        cache: 'no-cache',
       });
 
       if (!response.ok) {

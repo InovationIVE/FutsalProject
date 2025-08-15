@@ -5,43 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Game Scene</title>
     <link rel="stylesheet" href="OwnedScene.css" />
+    <link rel="stylesheet" href="../../Shared/nav.css" />
   </head>
   <body>
-    <!-- 상단 네비게이션 -->
-    <div class="navbar">
-      <div class="nav-left">
-       <a href="../CashShopScene/CashShopScene.html" class="cashShopBtn">캐쉬 상점</a>
-              <a href="../LobbyScene/LobbyScene.html" class="lobbyBtn">로비</a>
-
-       <a href="../GachaScene/GachaScene.html" class="gachaBtn">가챠 뽑기</a>
-       <a href="../OwnedScene/OwnedScene.html" class="MyPlayerBtn">My Player</a>
-       <a href="../SquadScene/SquadScene.html" class="MysquadBtn">My 스쿼드</a>
-       <a href="../AuctionScene/AuctionScene.html" class="AuctionBtn">경매장</a>
-      </div>
-      <div class="nav-right">
-       <div class="cash">보유 캐시 <strong>100,000,000</strong></div>
-       <a href="#" class="logout">로그아웃</a>
-       <button class="gamePlayBtn">게임시작</button>
-      </div>
+      <!-- 상단 네비게이션 -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <a href="../CashShopScene/CashShopScene.html" class="cashShopBtn">캐쉬 상점</a>
+      <a href="../LobbyScene/LobbyScene.html" class="cashShopBtn">로비</a>
+      <a href="../GachaScene/GachaScene.html" class="gachaBtn">가챠 뽑기</a>
+      <a href="../OwnedScene/OwnedScene.html" class="MyPlayerBtn">My Player</a>
+      <a href="../SquadScene/SquadScene.html" class="MysquadBtn">My 스쿼드</a>
+      <a href="../AuctionScene/AuctionScene.html" class="AuctionBtn">경매장</a>
     </div>
+    <div class="nav-right">
+      <!-- 이 부분은 nav.js에 의해 동적으로 채워집니다. -->
+    </div>
+  </nav>
 
     <!-- 메인 컨텐츠 -->
     <div class="container">
       <div class="card">
         <div class="profileImage"></div>
-          <div class="profile">
-            <div class="name" id="name"></div>
-            <div class="rarity" id="rarity">등급</div>
-          </div>
-          <div class="stats">
+        <div class="profile">
+          <div class="name" id="name"></div>
+          <div class="rarity" id="rarity">등급</div>
+        </div>
+        <div class="stats">
           <div class="attack" id="attack">ATK</div>
           <div class="defense" id="defense">DEF</div>
           <div class="speed" id="speed">SPD</div>
         </div>
-        <div class = "Btn">
-      <button class="saleBtn">선수 판매</button>
-      <button class ="toReinforceBtn"> 강화 하기 </button>
-    </div>
+        <div class="Btn">
+          <button class="saleBtn">선수 판매</button>
+          <button class="toReinforceBtn">강화 하기</button>
+        </div>
       </div>
       <div class="player-list">
         <h1>선수 목록</h1>
@@ -51,8 +49,7 @@
       </div>
     </div>
 
-    
-
     <script src="OwnedScripts.js"></script>
+    <script type="module" src="../../Shared/nav.js"></script>
   </body>
 </html>
