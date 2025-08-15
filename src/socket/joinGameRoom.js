@@ -16,6 +16,11 @@ export default function regiserJoinGameRoom(io, socket, gameRooms, battleQueue) 
       const player1 = battleQueue.shift();
       const player2 = battleQueue.shift();
 
+      if(player1.accountId === player2.accountId){
+        player2.socket.emit('matchmaking_error',{ message: '잘못된 접속입니다.'});    
+        return;
+      }
+
       const roomId = `room-${player1.socket.id}-${player2.socket.id}`;
       player1.socket.join(roomId);
       player2.socket.join(roomId);

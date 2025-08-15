@@ -55,7 +55,7 @@ async function registerGameEndEvents(game) {
     await GameService.updateDraw(teamA.accountId, teamB.accountId);
   }
 
-  if (!winner && !loser) {
+  if (winner && loser) {
     game.log.push(`승리팀: ${winner.name}, 패배팀: ${loser.name}`);
     await GameService.updateRank(winner.accountId, loser.accountId);
   }

@@ -250,4 +250,16 @@ document.addEventListener('DOMContentLoaded', () => {
   socket.on('action_error', (data) => {
     log(`Error: ${data.message}`);
   });
+
+  socket.on('matchmaking_error', (data) => {
+    alert(`매칭 오류: ${data.message}`);
+  });
+
+  socket.on('opponent_left', (data) => { 
+    console.log('Opponent left:', data.message);
+    alert(data.message);
+    // 게임 준비 화면으로 리다이렉트
+    window.location.href =  '../GameReadyScene/GameReadyScene.html';
+  });
+
 });
