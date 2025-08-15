@@ -142,24 +142,7 @@
     <a href="../GameReadyScene/GameReadyScene.html" class="btn primary large">게임 시작</a>
   </section>
 
-  <script>
-    // 접근성: 클릭/Enter 키로 확장 토글
-    document.addEventListener('DOMContentLoaded', () => {
-      const toggles = document.querySelectorAll('.collapsible');
-      toggles.forEach((el) => {
-        const set = (v) => el.setAttribute('aria-expanded', String(v));
-        set(false);
-        const handler = (e) => {
-          if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
-          e.preventDefault();
-          const expanded = el.getAttribute('aria-expanded') === 'true';
-          set(!expanded);
-        };
-        el.addEventListener('click', handler);
-        el.addEventListener('keydown', handler);
-      });
-    });
-  </script>
+  
 
   <!-- 비밀번호 변경 Modal (초기 비표시: CSS로 제어) -->
   <div id="change-password-modal" class="modal">
@@ -204,6 +187,24 @@
   <script type="module" src="LobbyScript.js"></script>
   <!-- 공용 네비게이션 스크립트 추가 (경로 수정) -->
   <script type="module" src="../../Shared/nav.js"></script>
+  <script>
+    // 접근성: 클릭/Enter 키로 확장 토글
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggles = document.querySelectorAll('.collapsible');
+      toggles.forEach((el) => {
+        const set = (v) => el.setAttribute('aria-expanded', String(v));
+        set(false);
+        const handler = (e) => {
+          if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+          e.preventDefault();
+          const expanded = el.getAttribute('aria-expanded') === 'true';
+          set(!expanded);
+        };
+        el.addEventListener('click', handler);
+        el.addEventListener('keydown', handler);
+      });
+    });
+  </script>
 </body>
 
 </html>
