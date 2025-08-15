@@ -1,6 +1,26 @@
 // DOMContentLoaded 이벤트는 HTML 문서가 완전히 로드되고 파싱되었을 때 발생합니다.
 // 즉, 이 이벤트 리스너 안의 코드는 HTML 요소들이 모두 준비된 후에 실행됩니다.
 document.addEventListener('DOMContentLoaded', async () => {
+  // 해시가 #signup일 경우 자동으로 회원가입 모달 열기 (nav 우측 '회원가입' 링크 지원)
+  try {
+    if (window.location.hash === '#signup') {
+      // 약간의 지연으로 DOM 요소 준비 보장
+      setTimeout(() => {
+        const signupModal = document.getElementById('signup-modal');
+        const signupStep1 = document.getElementById('signup-step-1');
+        const signupStep2 = document.getElementById('signup-step-2');
+        const signupMessage = document.getElementById('signup-message');
+        const verifyMessage = document.getElementById('verify-message');
+        if (signupModal && signupStep1 && signupStep2) {
+          signupStep1.style.display = 'block';
+          signupStep2.style.display = 'none';
+          if (signupMessage) signupMessage.textContent = '';
+          if (verifyMessage) verifyMessage.textContent = '';
+          signupModal.classList.add('visible');
+        }
+      }, 0);
+    }
+  } catch (e) {}
   // --- 로그인 상태 확인 ---
   // 페이지가 로드되자마자, 사용자가 이미 유효한 로그인 쿠키를 가지고 있는지 확인합니다.
   try {

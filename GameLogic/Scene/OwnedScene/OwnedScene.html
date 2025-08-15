@@ -12,10 +12,12 @@
 <!-- 상단 네비게이션 -->
 <nav class="navbar">
   <div class="nav-left">
+    <a href="../CashShopScene/CashShopScene.html" class="cashShopBtn">캐쉬 상점</a>
     <a href="../LobbyScene/LobbyScene.html" class="cashShopBtn">로비</a>
     <a href="../GachaScene/GachaScene.html" class="gachaBtn">가챠 뽑기</a>
     <a href="../OwnedScene/OwnedScene.html" class="MyPlayerBtn">My Player</a>
     <a href="../SquadScene/SquadScene.html" class="MysquadBtn">My 스쿼드</a>
+    <a href="../AuctionScene/AuctionScene.html" class="AuctionBtn">경매장</a>
   </div>
   <div class="nav-right">
     <!-- 이 부분은 nav.js에 의해 동적으로 채워집니다. -->
@@ -43,7 +45,7 @@
 </div>
 
 <!-- 공용 모달 창들 추가 -->
-<!-- 비밀번호 변경 모달 -->
+<!-- 비밀번호 변경 모달 (초기 비표시: CSS로 제어) -->
 <div id="change-password-modal" class="modal">
     <div class="modal-content">
         <span class="close-button">&times;</span>
@@ -70,7 +72,7 @@
     </div>
 </div>
 
-<!-- 회원 탈퇴 확인 모달 -->
+<!-- 회원 탈퇴 확인 모달 (초기 비표시: CSS로 제어) -->
 <div id="delete-account-modal" class="modal">
     <div class="modal-content">
         <span class="close-button" id="close-delete-account">&times;</span>

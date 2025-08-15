@@ -14,16 +14,155 @@
     <nav class="navbar">
       <div class="nav-left">
         <a href="../CashShopScene/CashShopScene.html" class="cashShopBtn">캐쉬 상점</a>
+        <a href="../LobbyScene/LobbyScene.html" class="cashShopBtn">로비</a>
         <a href="../GachaScene/GachaScene.html" class="gachaBtn">가챠 뽑기</a>
         <a href="../OwnedScene/OwnedScene.html" class="MyPlayerBtn">My Player</a>
         <a href="../SquadScene/SquadScene.html" class="MysquadBtn">My 스쿼드</a>
+        <a href="../AuctionScene/AuctionScene.html" class="AuctionBtn">경매장</a>
       </div>
       <div class="nav-right">
         <!-- 이 부분은 nav.js에 의해 동적으로 채워집니다. -->
       </div>
     </nav>
 
-    <!-- 비밀번호 변경 Modal (숨겨져 있음) -->
+    <!-- 프로젝트 소개 섹션 -->
+    <header
+      class="hero"
+      style="
+        background-image: url('https://t4.ftcdn.net/jpg/08/45/17/51/360_F_845175183_z5kkmasFOGAdSBCUkpbLEac2vhBqeU5g.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 340px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+        position: relative;
+      "
+    >
+      <div style="
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 1;
+        border-radius: inherit;
+      "></div>
+      <div class="hero-inner" style="position: relative; z-index: 2;">
+      <div class="hero-inner">
+        <h1>텍틱스 풋살</h1>
+        <p class="subtitle">전략과 전술, 스쿼드 빌딩의 즐거움을 결합한 실시간 풋살 매니지먼트 게임</p>
+        <div class="hero-actions">
+          <a href="../GameReadyScene/GameReadyScene.html" class="btn primary">바로 플레이</a>
+          <a href="../GachaScene/GachaScene.html" class="btn">선수 뽑기</a>
+        </div>
+      </div>
+    </header>
+
+    <section class="section">
+      <h2 class="section-title">게임 특징</h2>
+      <div class="grid">
+        <article class="card collapsible" tabindex="0" aria-expanded="false">
+          <h3>전술 기반 플레이</h3>
+          <p>턴마다 패스/슈팅/태클 등 다양한 선택을 통해 상대를 공략하세요. 팀의 강점을 살린 전략이 승리를 만듭니다.</p>
+          <div class="details">
+            <ul>
+              <li>턴 기반 의사결정: 위험-보상(Risk-Reward) 균형을 고려</li>
+              <li>선수 능력치와 시너지를 활용한 전술 콤보</li>
+              <li>상대 전술 예측, 카운터 전략 설계</li>
+            </ul>
+          </div>
+        </article>
+        <article class="card collapsible" tabindex="0" aria-expanded="false">
+          <h3>스쿼드 빌딩</h3>
+          <p>가챠와 거래를 통해 선수단을 강화하고, 최적의 포메이션으로 나만의 전술을 완성하세요.</p>
+          <div class="details">
+            <ul>
+              <li>희귀도/포지션/특성 조합으로 메타 분석</li>
+              <li>팀 케미스트리 보너스 및 포메이션 적합도</li>
+              <li>성장/강화 시스템으로 장기적인 육성</li>
+            </ul>
+          </div>
+        </article>
+        <article class="card collapsible" tabindex="0" aria-expanded="false">
+          <h3>실시간 매칭</h3>
+          <p>매칭을 통해 상대와 실시간으로 대결하고 랭킹을 올려 보상을 획득하세요.</p>
+          <div class="details">
+            <ul>
+              <li>공정한 매칭을 위한 기본 레이팅 시스템</li>
+              <li>랭킹 보상 및 시즌제 목표</li>
+              <li>관전/하이라이트(향후) 확장 가능</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <h2 class="section-title">플레이 방법</h2>
+      <ol class="steps">
+        <li class="" tabindex="0" aria-expanded="false">
+          <span>1</span> 가챠로 팀을 보강합니다.
+          <!-- <div class="details">
+            <p>
+              li class에 collapsible 넣고 사용 가능합니다 
+            </p>
+          </div> -->
+        </li>
+        <li class="" tabindex="0" aria-expanded="false">
+          <span>2</span> My 스쿼드에서 전술에 맞게 배치합니다.
+          <!-- <div class="details">
+            <p></p>
+          </div> -->
+        </li>
+        <li class="" tabindex="0" aria-expanded="false">
+          <span>3</span> 게임 시작으로 매칭하고 전술을 실행합니다.
+          <!-- <div class="details">
+                      <p>
+                        li class에 collapsible 넣고 사용 가능합니다 
+                      </p>
+          </div> -->
+        </li>
+      </ol>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">기술 스택</h2>
+      <ul class="badges">
+        <li>Node.js</li>
+        <li>Express</li>
+        <li>Prisma (MySQL)</li>
+        <li>JWT / 세션</li>
+        <li>Socket.IO</li>
+      </ul>
+    </section>
+
+    <section class="section cta">
+      <h2>지금, 전술로 증명하세요</h2>
+      <a href="../GameReadyScene/GameReadyScene.html" class="btn primary large">게임 시작</a>
+    </section>
+
+    <script>
+      // 접근성: 클릭/Enter 키로 확장 토글
+      document.addEventListener('DOMContentLoaded', () => {
+        const toggles = document.querySelectorAll('.collapsible');
+        toggles.forEach((el) => {
+          const set = (v) => el.setAttribute('aria-expanded', String(v));
+          set(false);
+          const handler = (e) => {
+            if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+            e.preventDefault();
+            const expanded = el.getAttribute('aria-expanded') === 'true';
+            set(!expanded);
+          };
+          el.addEventListener('click', handler);
+          el.addEventListener('keydown', handler);
+        });
+      });
+    </script>
+
+    <!-- 비밀번호 변경 Modal (초기 비표시: CSS로 제어) -->
     <div id="change-password-modal" class="modal">
       <div class="modal-content">
         <span class="close-button">&times;</span>
@@ -50,7 +189,7 @@
       </div>
     </div>
 
-    <!-- 회원 탈퇴 확인 모달 (숨겨져 있음음) -->
+    <!-- 회원 탈퇴 확인 모달 (초기 비표시: CSS로 제어) -->
     <div id="delete-account-modal" class="modal">
         <div class="modal-content">
             <span class="close-button" id="close-delete-account">&times;</span>

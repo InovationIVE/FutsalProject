@@ -4,3 +4,48 @@ body {
   background: rgba( 255, 255, 255, 0.15 );
 }
 
+/* Hero */
+.hero {
+  background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+  color: #fff;
+  padding: 80px 20px;
+  text-align: center;
+}
+.hero-inner { max-width: 1000px; margin: 0 auto; }
+.hero h1 { font-size: 48px; margin: 0 0 10px; letter-spacing: 1px; }
+.subtitle { color: #c9d1d9; margin: 0 auto 24px; max-width: 680px; line-height: 1.6; }
+.hero .btn { margin: 0 8px; }
+
+/* Sections */
+.section { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+.section.alt { background: rgba(255,255,255,0.5); border-radius: 12px; padding: 30px 20px; }
+.section-title { font-size: 24px; margin: 0 0 20px; color: #111; }
+
+/* Grid cards */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.card h3 { margin: 0 0 8px; font-size: 18px; }
+.card p { margin: 0; color: #444; line-height: 1.6; }
+
+/* Collapsible */
+.collapsible { cursor: pointer; position: relative; }
+.collapsible::after { content: '열기'; position: absolute; right: 12px; top: 12px; font-size: 12px; color: #666; }
+.collapsible[aria-expanded="true"]::after { content: '닫기'; }
+.collapsible .details { display: none; margin-top: 10px; color: #333; }
+.collapsible[aria-expanded="true"] .details { display: block; }
+
+/* Steps */
+.steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.steps li { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+.steps li span { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #111; color: #fff; font-weight: 700; }
+
+/* Badges */
+.badges { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.badges li { background: #111; color: #fff; padding: 8px 12px; border-radius: 999px; font-size: 13px; }
+
+/* CTA */
+.cta { text-align: center; padding: 40px 20px; }
+.btn { display: inline-block; padding: 10px 18px; border-radius: 10px; text-decoration: none; font-weight: 700; color: #111; background: #e5e7eb; }
+.btn.primary { background: #00c853; color: #fff; }
+.btn.large { padding: 14px 22px; font-size: 18px; }
+

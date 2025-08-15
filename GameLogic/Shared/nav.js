@@ -179,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     navRight.innerHTML = `
       <div class="cash">로그인이 필요합니다.</div>
       <a href="/Scene/LoginScene/LoginScene.html" class="login">로그인</a>
+      <a href="/Scene/LoginScene/LoginScene.html#signup" class="login" id="signupNavLink">회원가입</a>
       <button class="gamePlayBtn">게임시작</button>
     `;
     // '게임 시작' 버튼 클릭 시, 로그인이 필요하다는 알림을 띄우고 로그인 페이지로 보냅니다.
