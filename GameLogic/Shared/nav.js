@@ -25,7 +25,7 @@ const updateUIForLoggedInUser = (account) => {
           <a href="#" id="delete-account-btn" class="danger-link">회원 탈퇴</a>
       </div>
     </div>
-    <div class="cash">보유 캐시 <strong>${account.cash.toLocaleString()}</strong></div>
+    <div class="cash">보유 캐시 <strong id = 'user-cash-display' >${account.cash.toLocaleString()}</strong></div>
     <a href="#" id="logoutBtn" class="logout">로그아웃</a>
     <button class="gamePlayBtn">게임시작</button>
   `;
@@ -40,7 +40,7 @@ const updateUIForGuest = () => {
     <div class="cash">로그인이 필요합니다.</div>
     <a href="/Scene/LoginScene/LoginScene.html" class="login">로그인</a>
     <a href="/Scene/LoginScene/LoginScene.html#signup" class="login" id="signupNavLink">회원가입</a>
-    <button class="gamePlayBtn">게임시작</button>
+    <button id="gamePlayBtn">게임시작</button>
   `;
   const gamePlayBtn = document.querySelector('.gamePlayBtn');
   if(gamePlayBtn){

@@ -32,12 +32,12 @@
       <div id="card-display-area" class="card-container">
         <!-- 뽑은 카드가 여기에 표시됩니다. -->
       </div>
-      <h2>옵션</h2>
+      <h2 id = "admin-option">옵션</h2>
       <div id="gacha-option-list" class="gacha-opthins-container">
         <button id="gacha-create-btn" class="btn">가챠 생성</button>
         <button id="gacha-view-btn" class="btn">가챠 조회</button>
       </div>
-      <h2>결과</h2>
+      <h2 id = "admin-result">결과</h2>
       <div id="gacha-table-container" style="display: none">
         <table id="gacha-table">
           <thead>
@@ -405,6 +405,6 @@
   </script>
     <script src="GachaScript.js" type="module"></script>
       <!-- 공용 네비게이션 스크립트 추가 (경로 수정) -->
-    <script type="module" src="GameLogic/Shared/nav.js"></script>
+    <script type="module" src="../../Shared/nav.js"></script>
   </body>
 </html>

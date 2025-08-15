@@ -248,7 +248,7 @@ h2 {
   background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
 }
 
-.modal-content {
+#edit-gacha-modal .modal-content {
   background-color: #000000;
   margin: 15% auto; /* 15% from the top and centered */
   padding: 20px;
@@ -328,10 +328,18 @@ h2 {
   color: white;
 }
 
+#gacha-pack-list p{
+  color: white;
+}
+
 #gacha-option-list .btn {
   background-color: #ff9800; /* Orange */
   color: white;
   margin-right: 10px;
+}
+
+#card-display-area p{
+  color: white;
 }
 
 /*가챠 조회 테이블 css*/

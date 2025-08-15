@@ -308,7 +308,7 @@ header {
   z-index: 1000;
 }
 
-.modal-content {
+#matchhistory-modal.modal-content {
   background-color: #fff;
   color: #333;
   padding: 30px;

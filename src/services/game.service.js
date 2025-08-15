@@ -166,6 +166,7 @@ export default class GameService {
     }
   }
 
+  // waitigQueue 객체를 만드는 함수
   static async getMatchInfo(socket) {
     const accountInfo = await userPrisma.account.findUnique({
       where: { accountId: socket.request.user.accountId },
@@ -179,6 +180,7 @@ export default class GameService {
       },
     });
 
+    // 이렇게 만듬으로써 클라이언트와 서버가 서로 데이터를 주고 받음
     const waitingQueue = {
       socket: socket,
       accountId: accountInfo.accountId,
@@ -190,35 +192,38 @@ export default class GameService {
   }
 
   static tryMatch(waitingQueue) {
+    // 웨잍팅이 2보다 작으면 빈배별 반환
     if (waitingQueue.length < 2) return [];
 
+    // 매칭 들어온 시간 순서대로 정렬
     waitingQueue.sort((a, b) => a.joinedAt - b.joinedAt);
 
+
+    // waitingQueue 배열을 돌면서 비슷한 점수의 선수를 찾아서 매칭 시킴
     for (let i = 0; i < waitingQueue.length; i++) {
       const player = waitingQueue[i];
 
-      const waitTime = Date.now() - player.joinedAt;
-      const scoreRange = 50 + Math.floor(waitTime / 5000) * 50;
+      const waitTime = Date.now() - player.joinedAt; // 기다린 시간
+      const scoreRange = 50 + Math.floor(waitTime / 5000) * 50; // 매칭 할 플레이어가 없으면 5초 단위로 점수를 50씩 증가해서 찾음
 
-      // Find an opponent for the current player
+      // 비슷한 점수 차이에 선수가 있는지 찾음
       const opponentIndex = waitingQueue.findIndex(
         (p, idx) => idx !== i && Math.abs(p.rankScore - player.rankScore) <= scoreRange,
       );
 
+      // 있다면 matchePair에 2명의 플레이어를 배열에 등록 시킴
       if (opponentIndex !== -1) {
         const opponent = waitingQueue[opponentIndex];
         const matchedPair = [player, opponent];
 
-        // IMPORTANT: Remove players from the original waitingQueue array.
-        // Remove the opponent first. If it has a higher index, it won't affect the player's index.
-        // If it has a lower index, the player's index will shift, so we find it again.
+        // waitingQueue에서 빼기 위해 해당 waitingQueue에 해당 인덱스를 찾음
         const playerIndex = waitingQueue.findIndex((p) => p.accountId === player.accountId);
 
-        // Remove by index, making sure to remove the one with the larger index first
-        // to avoid messing up the index of the other one.
+        
         const index1 = playerIndex;
         const index2 = opponentIndex;
 
+        //배열에서 여러 요소를 제거할 때 발생하는 '인덱스 시프트' 문제를 방지하기 위해 큰 순서로 waitingQueue에서 제거
         if (index1 > index2) {
           waitingQueue.splice(index1, 1);
           waitingQueue.splice(index2, 1);
@@ -231,7 +236,7 @@ export default class GameService {
       }
     }
 
-    return []; // No match found
+    return []; // 매치 할 선수가 없음
   }
 }
 
