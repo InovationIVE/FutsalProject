@@ -97,8 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
           giftResult.style.color = success ? 'green' : 'red';
 
           if (success) {
-            loadReceivedGifts();
-            loadUserCash();
+            await loadReceivedGifts();
+            await loadUserCash();
           } else {
             acceptBtn.disabled = false;
           }
@@ -112,6 +112,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 4.3 유저 보유 캐시 갱신 함수
   async function loadUserCash() {
+    // 함수가 호출될 때마다 요소를 새로 찾습니다.
+    const userCashDisplay = document.getElementById('user-cash-display');
+    // 만약 요소를 찾지 못했다면 (로그아웃 상태 등) 그냥 함수를 종료합니다.
+    if (!userCashDisplay) return;
+
     try {
       const res = await fetch(`/api/users/${accountId}`, { credentials: 'include' });
       const data = await res.json();

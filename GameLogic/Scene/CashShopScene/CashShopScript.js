@@ -1,34 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const cashShopBtn = document.getElementById('cashShop');
-  const gachaBtn = document.getElementById('gacha');
-  const mtTeamBtn = document.getElementById('mtTeam');
-  const squadBtn = document.getElementById('squad');
-  const gamePlayBtn = document.getElementById('gamePlay');
   //const userIdDisplay = document.getElementById('user-id-display');
   const userCashDisplay = document.getElementById('user-cash-display');
   const cashGoodsList = document.getElementById('cash-item-list');
   const purchaseForm = document.getElementById('purchase-item-form');
   const cashShopResult = document.getElementById('cash-shop-result');
-
-  cashShopBtn.addEventListener('click', () => {
-    window.location.href = '../CashShopScene/CashSHopScene.html';
-  });
-
-  gachaBtn.addEventListener('click', () => {
-    window.location.href = '../GachaScene/GachaScene.html';
-  });
-
-  mtTeamBtn.addEventListener('click', () => {
-    window.location.href = '../OwnedScene/OwnedScene.html';
-  });
-
-  squadBtn.addEventListener('click', () => {
-    window.location.href = '../SquadScene/SquadScene.html';
-  });
-
-  gamePlayBtn.addEventListener('click', () => {
-    window.location.href = '../GamePlayScene/GamePlayScene.html';
-  });
 
   /**로그인 시 sessionStorage에 저장된 accountId 불러오기**/
   const accountId = sessionStorage.getItem('accountId');
@@ -109,10 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (res.ok) {
         // 구매 성공 시 유저 캐시 갱신
-        if (result.newCash !== undefined) {
+        const userCashDisplay = document.getElementById('user-cash-display');
+        if (userCashDisplay && result.newCash !== undefined) {
           userCashDisplay.textContent = result.newCash.toLocaleString();
-        } else {
-          userCashDisplay.textContent = '-';
         }
         cashShopResult.textContent = result.message || '구매가 완료되었습니다.';
         cashShopResult.style.color = 'green';
