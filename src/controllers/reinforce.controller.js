@@ -108,7 +108,7 @@ export class ReinforceController{
             /** 선수 카드 파괴 **/
             else{
                 await userPrisma.ownedPlayers.delete({
-                    where: { ownedplayerId }
+                    where: { ownedPlayerId: +ownedplayerId }
                 });
 
                 res.status(200).json({
