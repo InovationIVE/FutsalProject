@@ -132,7 +132,7 @@ export class AuctionController {
         // 1) OwnedPlayer가 account 소유인지 확인
         const ownedPlayer = await tx.ownedPlayers.findUnique({
           where: {
-            ownedPlayerId: +ownedPlayerId,
+            ownedPlayerId: Number(ownedPlayerId),
             accountId: +accountId,
           },
         });
@@ -144,7 +144,7 @@ export class AuctionController {
         // 2) 경매 등록
         const auction = await tx.auction.create({
           data: {
-            ownedPlayerId: +ownedPlayerId,
+            ownedPlayerId: Number(ownedPlayerId),
             startingPrice: +startingPrice,
             accountId: +accountId,
             currentPrice: +startingPrice,
@@ -155,7 +155,7 @@ export class AuctionController {
 
         // 3) OwnedPlayers에서 해당 선수의 accountId를 null로 업데이트
         await tx.ownedPlayers.update({
-          where: { ownedPlayerId: +ownedPlayerId },
+          where: { ownedPlayerId: Number(ownedPlayerId) },
           data: { accountId: null },
         });
 

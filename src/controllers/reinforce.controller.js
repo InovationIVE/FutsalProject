@@ -8,7 +8,7 @@ export class ReinforceController{
 
             /** 강화할 선수 ; 보유선수에서 선택 **/
             const toReinforce = await userPrisma.ownedPlayers.findUnique({
-                where : {ownedPlayerId : +ownedPlayerId }
+                where : {ownedPlayerId : Number(ownedPlayerId) }
             });
 
             /** 강화할 선수의 레벨에 맞는 강화 단계 **/
@@ -45,7 +45,7 @@ export class ReinforceController{
 
                 //const ReinforceSuccess = 
                 await userPrisma.ownedPlayers.update({
-                    where: {ownedPlayerId : +ownedPlayerId },
+                    where: {ownedPlayerId : Number(ownedPlayerId) },
                     data: {
                     level: level, 
                     attack: attack,
@@ -85,7 +85,7 @@ export class ReinforceController{
 
                 //const ReinforceReglation = 
                 await userPrisma.ownedPlayers.update({
-                    where: {ownedPlayerId : +ownedPlayerId },
+                    where: {ownedPlayerId : Number(ownedPlayerId) },
                     data: {
                     level: level, 
                     attack: attack,
