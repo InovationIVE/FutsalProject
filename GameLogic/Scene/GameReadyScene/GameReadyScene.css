@@ -29,10 +29,9 @@ body::before {
 
 /* Main Container */
 .container {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  background: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -60,16 +59,25 @@ header {
   flex-direction: column;
 }
 
+
 .squad-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 15px;
   margin-bottom: 20px;
+
+  place-items: center;
 }
 
 .player-card {
-  background: #f9f9f9;
-  border: 1px solid #ddd;
+  background-color: #ffffff;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 300px;
+  height: 400px;
+  border: 1px solid #000000;
   border-radius: 8px;
   padding: 15px;
   text-align: center;
@@ -83,33 +91,47 @@ header {
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
-.player-card img {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background-color: #ccc; /* Placeholder background */
-  object-fit: cover;
-  margin-bottom: 10px;
-  border: 3px solid #fff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+/* 카드 하단 정보 박스 */
+.player-info-box {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.6); /* 검은 반투명 배경 */
+  padding: 8px;
+  box-sizing: border-box;
 }
 
-.player-card h3 {
-  margin: 10px 0 5px;
+.player-info-box h3 {
+  font-size: 1.5em;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.player-info-box h1 {
   font-size: 1.1em;
-  color: #0056b3;
+  color: #ffffff;
+  margin: 0 0 4px 0;
 }
 
-.player-card .stats p {
-  margin: 3px 0;
-  font-size: 0.9em;
-  color: #555;
+/* 스탯 컨테이너 */
+.player-stats {
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+}
+
+/* 개별 스탯 */
+.player-stats p {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #ffffff;
+  margin: 0;
 }
 
 /* Right Panel: Ranking */
 .ranking-panel {
   flex: 1;
-  background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
   border: 1px solid #e7e7e7;
@@ -120,7 +142,7 @@ header {
   text-align: center;
   margin-top: 0;
   margin-bottom: 20px;
-  color: #333;
+  color: #ffffff;
   border-bottom: 2px solid #007bff;
   padding-bottom: 10px;
 }
@@ -133,21 +155,26 @@ header {
 #ranking-table th,
 #ranking-table td {
   padding: 12px;
+  color: #ffffff;
   text-align: left;
   border-bottom: 1px solid #ddd;
 }
 
 #ranking-table th {
-  background-color: #e9ecef;
+  background-color: #000000;
   font-weight: 600;
 }
 
 #ranking-table tbody tr:nth-child(even) {
-  background-color: #f8f9fa;
+  background-color: #525252;
 }
 
 #ranking-table tbody tr:hover {
-  background-color: #e2e6ea;
+  background-color: #e1ff00;
+}
+
+#ranking-table tbody tr:hover td {
+  color:  #000000;
 }
 
 /* Game Start Button */
@@ -331,4 +358,3 @@ header {
 #record-details th {
   background-color: #f2f2f2;
 }
-

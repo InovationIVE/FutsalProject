@@ -69,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadGachaPacks();
   }
 
-
   optionBtnList.addEventListener('click', async (event) => {
     const clickedBtn = event.target;
     // 클릭된 요소가 button일 때만 처리
@@ -110,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /*모듈 불러오기 */
   async function createGacha() {
-
     document.getElementById('edit-gacha-id').value = '';
     document.getElementById('edit-cardName').value = '';
     document.getElementById('edit-price').value = 0;
@@ -223,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log(createdCard.message);
       alert('카드팩이 성공적으로 수정되었습니다.');
       await loadGachaPacks(); // 수정 후 카드팩 목록을 다시 불러옵니다
-      await viewGacha()
+      await viewGacha();
     } catch (error) {
       console.error('Error updating gacha card:', error);
       alert(`카드팩 수정 실패: ${error}`);
@@ -241,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const packElement = document.createElement('div');
       packElement.className = 'gacha-pack';
       const pack1 = formatPrice(pack.price);
-      const pack10 = formatPrice(pack.price*10);
+      const pack10 = formatPrice(pack.price * 10);
       packElement.innerHTML = `
         <h3>${pack.cardName}</h3>
         <div class="pack-actions">
@@ -322,16 +320,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const cardBack = document.createElement('div');
       cardBack.className = `card-back rarity-${card.rarity.toLowerCase()}`;
-      cardBack.innerHTML = `
-        <h3>${card.name}</h3>
-        <p>희귀도: ${card.rarity}</p>
-        <p>공격: ${card.attack}</p>
-        <p>수비: ${card.defence}</p>
-        <p>속도: ${card.speed}</p>
+
+      cardBack.style.backgroundImage = `url('${card.profileImage}')`;
+      const infoBox = document.createElement('div');
+      infoBox.className = 'card-info-box';
+
+      const nameEl = document.createElement('h3');
+      nameEl.textContent = card.name;
+
+      const rankText = document.createElement('h1');
+      rankText.textContent = card.rarity;
+
+      // 스탯 가로 정렬 영역
+      const statsContainer = document.createElement('div');
+      statsContainer.className = 'card-stats';
+      statsContainer.innerHTML = `
+      <p>공격: ${card.attack}</p>
+      <p>수비: ${card.defence}</p>
+      <p>속도: ${card.speed}</p>
       `;
 
       cardInner.appendChild(cardFront);
       cardInner.appendChild(cardBack);
+      infoBox.appendChild(nameEl);
+      infoBox.appendChild(rankText);
+      infoBox.appendChild(statsContainer);
+      cardBack.appendChild(infoBox);
       cardElement.appendChild(cardInner);
 
       cardElement.addEventListener('click', () => {
@@ -468,7 +482,6 @@ async function createRank() {
     cardDisplayArea.innerHTML = '<p>서버와 통신 중 오류가 발생했습니다.</p>';
   }
 }
-
 
 function formatPrice(price) {
   // 입력된 price가 숫자인지 확인

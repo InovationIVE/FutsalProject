@@ -2,6 +2,7 @@ import { gamePrisma } from '../utils/prisma/index.js';
 import { userPrisma } from '../utils/prisma/index.js';
 import { Prisma as UserPrisma } from '../../prisma/User/generated/user/index.js';
 import { Prisma as GamePrisma } from '../../prisma/Game/generated/prisma/index.js';
+import { triggerAsyncId } from 'async_hooks';
 
 class HttpError extends Error {
   constructor(statusCode, message) {
@@ -171,6 +172,7 @@ export class GachaController {
         select: {
           playerId: true,
           name: true,
+          profileImage: true,
           rarity: true,
           attack: true,
           defence: true,
@@ -192,11 +194,11 @@ export class GachaController {
       for (let i = 0; i < drawCount; i++) {
         const random = Math.random() * 100;
         let rarity;
-        if (random < gachaCard.diamond) rarity = 'UR';
-        else if (random < gachaCard.platinum) rarity = 'SSR';
-        else if (random < gachaCard.gold) rarity = 'SR';
-        else if (random < gachaCard.silver) rarity = 'R';
-        else rarity = 'N';
+        if(random < gachaCard.bronze) rarity = 'N'; 
+        else if(random < gachaCard.silver + gachaCard.bronze)  rarity = 'R';
+        else if(random < gachaCard.gold + gachaCard.silver + gachaCard.bronze) rarity = 'SR';
+        else if(random < gachaCard.platinum + gachaCard.gold + gachaCard.silver + gachaCard.bronze) rarity = 'SSR';
+        else rarity = 'UR';
 
         // 해당 희귀도에 맞는 플레이어들 중에서 랜덤으로 선택
         const potentialPlayers = players.filter((p) => p.rarity === rarity);

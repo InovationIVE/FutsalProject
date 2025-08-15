@@ -128,8 +128,8 @@ h2 {
 }
 
 .card {
-  width: 150px;
-  height: 200px;
+  width: 300px;
+  height: 400px;
   perspective: 1000px;
   cursor: pointer;
 }
@@ -166,24 +166,57 @@ h2 {
 
 .card-back {
   background-color: #f0f0f0;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   color: black;
   transform: rotateY(180deg);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-end;
+  align-items: flex-start;
   padding: 5px;
   word-wrap: break-word;
+  overflow: hidden;
 }
 
-.card-back h3 {
+/* 카드 하단 정보 박스 */
+.card-info-box {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.6); /* 검은 반투명 배경 */
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.card-info-box h3 {
+  font-size: 1.5em;
+  color: #Ffffff;
+  margin: 0 0 4px 0;
+}
+
+.card-info-box h1 {
   font-size: 1.1em;
-  margin-bottom: 5px;
+  color: #Ffffff;
+  margin: 0 0 4px 0;
 }
 
-.card-back p {
-  font-size: 0.85em;
-  margin-bottom: 3px;
+/* 스탯 컨테이너 */
+.card-stats {
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+}
+
+/* 개별 스탯 */
+.card-stats p {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #Ffffff;
+  margin: 0;
 }
 
 /* Rarity styles */

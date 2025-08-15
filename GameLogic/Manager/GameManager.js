@@ -5,7 +5,7 @@ export default class GameManager {
       '../GachaScene/GachaScene.html': document.querySelector('.gachaBtn'),
       '../OwnedScene/OwnedScene.html': document.querySelector('.MyPlayerBtn'),
       '../SquadScene/SquadScene.html': document.querySelector('.MysquadBtn'),
-      '../GamePlayScene/GamePlayScene.html': document.querySelector('.gamePlayBtn'),
+      '../GameReadyScene/GameReadyScene.html': document.querySelector('.gamePlayBtn'),
     };
 
     for (const url in navLinks) {

@@ -1,4 +1,4 @@
-import GameManager from "../../Manager/GameManager.js";
+import GameManager from '../../Manager/GameManager.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   GameManager.setupNavigation();
@@ -35,7 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const squad = await response.json();
-      renderSquad(squad);
+
+      const squadMembersInfo = squad.squadMembers;
+      const playerImages = squad.plyerProfileImages;
+      renderSquad(squadMembersInfo, playerImages);
     } catch (error) {
       console.error('Error fetching squad:', error);
       squadList.innerHTML = '<p>스쿼드 정보를 불러오는 데 실패했습니다.</p>';
@@ -74,29 +77,49 @@ document.addEventListener('DOMContentLoaded', () => {
    * Renders the player cards for the squad.
    * @param {Array} squadMembers - Array of player objects.
    */
-  function renderSquad(squadMembers) {
+  function renderSquad(squadMembers, playerImages) {
     squadList.innerHTML = ''; // Clear existing content
     if (!squadMembers || squadMembers.length === 0) {
       squadList.innerHTML = '<p>스쿼드에 선수가 없습니다. 선수를 추가해주세요.</p>';
       gameStartBtn.disabled = true;
       return;
     }
+    const playerImageMap = {};
+    playerImages.forEach((img) => {
+      playerImageMap[img.playerId] = img.profileImage;
+    });
 
     squadMembers.forEach((member) => {
       const player = member.ownedPlayer;
       const card = document.createElement('div');
       card.className = 'player-card';
-      card.innerHTML = `
-                <img src="/path/to/player/images/${player.name}.png" alt="${player.name}" onerror="this.style.display='none'" />
-                <h3>${player.name}</h3>
-                <div class="stats">
+
+      const infoBox = document.createElement('div');
+      infoBox.className = 'player-info-box';
+
+      const nameEl = document.createElement('h3');
+      nameEl.textContent = player.name;
+
+      const rankText = document.createElement('h1');
+      rankText.textContent = player.rarity;
+
+      const statsContainer = document.createElement('div');
+      statsContainer.className = 'player-stats';
+
+      statsContainer.innerHTML = `
                     <p>Lv: ${player.level} </p>
-                    <p>등급: ${player.rarity} </p>
                     <p>공격: ${player.attack}</p>
                     <p>수비: ${player.defence}</p>
                     <p>속도: ${player.speed}</p>
-                </div>
             `;
+
+      
+
+      card.style.backgroundImage = `url('${playerImageMap[player.playerId]}')`;
+      infoBox.appendChild(nameEl);
+      infoBox.appendChild(rankText);
+      infoBox.appendChild(statsContainer);
+      card.appendChild(infoBox);
       squadList.appendChild(card);
     });
   }
@@ -166,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
     gameStartBtn.disabled = false;
   });
 
-  
   // --- Modal Logic ---
   const recordModal = document.getElementById('record-modal');
   const closeModalBtn = recordModal.querySelector('.close-button');
@@ -267,4 +289,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initialize();
 });
-
