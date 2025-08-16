@@ -2,9 +2,7 @@
 
 **Futsal Online**은 사용자가 자신만의 팀을 구성하여 다른 플레이어와 실시간으로 풋살 경기를 즐길 수 있는 웹 기반 멀티플레이어 게임입니다. 선수 카드를 수집하고 강화하며, 경매장을 통해 다른 유저와 선수를 거래하고, 나만의 스쿼드를 관리하여 최고의 팀을 만들어 보세요!
 
-## 🖼️ 와이어프레임
 
-![Futsal Online Wireframe](./GameLogic/Image/wireframe_resize.png)
 
 ## ✨ 주요 기능
 
@@ -16,6 +14,15 @@
 - **🏆 랭킹 시스템**: 경기 결과에 따라 랭킹 포인트가 변동되며, 자신의 순위를 확인할 수 있습니다.
 - **🔐 유저 인증**: JWT (JSON Web Token)을 사용한 안전한 유저 로그인 및 인증 시스템을 제공합니다.
 - **🎁 재화 상점 및 선물하기**: 게임 내 재화를 구매하거나 다른 유저에게 선물할 수 있습니다.
+
+## 🖼️ 와이어프레임
+
+![Futsal Online Wireframe](./GameLogic/Image/wireframe_resize.png)
+
+
+## 🔀 ERD
+
+![Futsal Online ERD](./GameLogic//Image//ERD.png)
 
 ## 🚀 기술 스택
 
