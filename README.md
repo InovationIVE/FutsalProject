@@ -4,7 +4,7 @@
 
 ## 🖼️ 와이어프레임
 
-![Futsal Online Wireframe](./GameLogic/Image/wireframe.png)
+![Futsal Online Wireframe](./GameLogic/Image/wireframe_resize.png)
 
 ## ✨ 주요 기능
 
