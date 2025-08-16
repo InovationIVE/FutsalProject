@@ -2,7 +2,9 @@
 
 **Futsal Online**은 사용자가 자신만의 팀을 구성하여 다른 플레이어와 실시간으로 풋살 경기를 즐길 수 있는 웹 기반 멀티플레이어 게임입니다. 선수 카드를 수집하고 강화하며, 경매장을 통해 다른 유저와 선수를 거래하고, 나만의 스쿼드를 관리하여 최고의 팀을 만들어 보세요!
 
-## 와이어 프레임: (./GameLogic/Image/WireFrame.png)
+## 🖼️ 와이어프레임
+
+![Futsal Online Wireframe](./GameLogic/Image/WIreFrame.png)
 
 ## ✨ 주요 기능
 
