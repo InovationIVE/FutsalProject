@@ -85,7 +85,7 @@
       ```
 
 6.  **게임 접속**
-    - 웹 브라우저를 열고 `http://localhost:3000` (또는 설정된 포트)으로 접속합니다.
+    - 웹 브라우저를 열고 `http://localhost:3018` (또는 설정된 포트)으로 접속합니다.
     - 첫 화면은 `GameLogic/Scene/LoginScene/LoginScene.html` 입니다.
 
 ## 📁 프로젝트 구조
