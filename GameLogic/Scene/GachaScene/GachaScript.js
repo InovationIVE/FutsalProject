@@ -1,7 +1,6 @@
-import GameManager from '../../Manager/GameManager.js';
+
 
 document.addEventListener('DOMContentLoaded', () => {
-  GameManager.setupNavigation();
 
   const gachaPackList = document.getElementById('gacha-pack-list');
   const cardDisplayArea = document.getElementById('card-display-area');
