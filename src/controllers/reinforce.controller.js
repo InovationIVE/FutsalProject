@@ -13,17 +13,19 @@ export class ReinforceController {
       });
 
       /** 강화할 선수의 레벨에 맞는 강화 단계 **/
-      const ReinforceLv = await gamePrisma.reinforce.findUnique({
+      const getReinforceLv = gamePrisma.reinforce.findUnique({
         where: { level: toReinforce.level },
       });
 
       /** 강화비용 청구를 위한 계정 참조 **/
-      const toReinforceOwner = await userPrisma.account.findUnique({
+      const getToReinforceOwner = userPrisma.account.findUnique({
         where: { accountId: toReinforce.accountId },
       });
 
+      const [reinforceLv, toReinforceOwner] = await Promise.all([getReinforceLv, getToReinforceOwner]);  
+
       /** 결제 후 캐시 잔액 **/
-      const cashAfterPayment = toReinforceOwner.cash - ReinforceLv.cost;
+      const cashAfterPayment = toReinforceOwner.cash - reinforceLv.cost;
       if (cashAfterPayment < 0) {
         /** 돈이 부족할 경우 */
         return res.status(500).json({ error: '잔액이 부족합니다' });
@@ -34,17 +36,17 @@ export class ReinforceController {
       });
 
       const stay_cutline =
-        ReinforceLv.prob_success + ReinforceLv.prob_stay; /** 유지 확률 커트라인 **/
-      const regl_cutline = stay_cutline + ReinforceLv.prob_reglation; /** 강등 확률 커트라인 **/
+        reinforceLv.prob_success + reinforceLv.prob_stay; /** 유지 확률 커트라인 **/
+      const regl_cutline = stay_cutline + reinforceLv.prob_reglation; /** 강등 확률 커트라인 **/
 
       /** 강화 실행시 결정되는 확률 **/
       const your_prob = Math.random() * 100;
       /** 강화 성공 시 **/
-      if (your_prob < ReinforceLv.prob_success) {
+      if (your_prob < reinforceLv.prob_success) {
         const level = toReinforce.level + 1;
-        const attack = toReinforce.attack + ReinforceLv.attackIncrement;
-        const defence = toReinforce.defence + ReinforceLv.defenceIncrement;
-        const speed = toReinforce.speed + ReinforceLv.speedIncrement;
+        const attack = toReinforce.attack + reinforceLv.attackIncrement;
+        const defence = toReinforce.defence + reinforceLv.defenceIncrement;
+        const speed = toReinforce.speed + reinforceLv.speedIncrement;
 
         //const ReinforceSuccess =
         await userPrisma.ownedPlayers.update({
@@ -108,7 +110,7 @@ export class ReinforceController {
           },
         });
       } else {
-      /** 선수 카드 파괴 **/
+        /** 선수 카드 파괴 **/
         await userPrisma.ownedPlayers.delete({
           where: { ownedPlayerId },
         });
